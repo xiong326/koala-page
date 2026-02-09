@@ -1,11 +1,14 @@
 import { useEffect, useRef, useState } from 'react';
 import cytoscape from 'cytoscape';
 import dagre from 'cytoscape-dagre';
+import { useLanguage } from '../i18n/LanguageContext';
+import { t } from '../i18n/translations';
 
 // Register dagre layout
 cytoscape.use(dagre);
 
-export default function KoalaGraph({ elements, onNodeClick, highlightedNodes = [], selectedKoalaId = null }) {
+export default function KoalaGraph({ elements, onNodeClick, highlightedNodes = [], selectedKoalaId = null, relationshipPath = [], ancestorLineage = [] }) {
+  const { language } = useLanguage();
   const containerRef = useRef(null);
   const cyRef = useRef(null);
   const defaultViewportRef = useRef(null);
@@ -97,9 +100,16 @@ export default function KoalaGraph({ elements, onNodeClick, highlightedNodes = [
         {
           selector: 'node.selected',
           style: {
-            'background-color': '#10b981',
-            'border-color': '#059669',
-            'border-width': '4px',
+            'border-color': '#f59e0b',
+            'border-width': '6px',
+            'border-style': 'solid',
+          }
+        },
+        {
+          selector: 'node.selected[photo]',
+          style: {
+            'border-color': '#f59e0b',
+            'border-width': '6px',
           }
         },
         {
@@ -157,7 +167,9 @@ export default function KoalaGraph({ elements, onNodeClick, highlightedNodes = [
         complete: () => {
           // Get position after centering and show card
           const position = node.renderedPosition();
-          onNodeClickRef.current?.(koalaData, position);
+          if (onNodeClickRef.current) {
+            onNodeClickRef.current(koalaData, position);
+          }
         }
       });
     });
@@ -177,19 +189,79 @@ export default function KoalaGraph({ elements, onNodeClick, highlightedNodes = [
     if (!cyRef.current || !isReady) return;
 
     // Remove all previous highlighting
-    cyRef.current.elements().removeClass('highlighted');
+    cyRef.current.elements().removeClass('highlighted selected');
 
     if (highlightedNodes.length > 0) {
+      // Check if this is a relationship path (ordered) or family network (unordered)
+      const isRelationshipPath = relationshipPath.length > 0;
+
       // Highlight specified nodes
       highlightedNodes.forEach(nodeId => {
         const node = cyRef.current.getElementById(nodeId);
-        node.addClass('highlighted');
 
-        // Highlight connected edges
-        node.connectedEdges().addClass('highlighted');
+        if (node.length > 0) {
+          // If this is the selected koala, use 'selected' class, otherwise 'highlighted'
+          if (nodeId === selectedKoalaId) {
+            node.addClass('selected');
+          } else {
+            node.addClass('highlighted');
+          }
+        }
       });
+
+      // Highlight edges
+      if (isRelationshipPath) {
+        // Only highlight edges in the specific relationship path
+        for (let i = 0; i < relationshipPath.length - 1; i++) {
+          const sourceId = relationshipPath[i];
+          const targetId = relationshipPath[i + 1];
+
+          // Find the edge between these two nodes (could be either direction)
+          const edge1 = cyRef.current.getElementById(`${sourceId}-${targetId}`);
+          const edge2 = cyRef.current.getElementById(`${targetId}-${sourceId}`);
+
+          if (edge1.length > 0) edge1.addClass('highlighted');
+          if (edge2.length > 0) edge2.addClass('highlighted');
+        }
+      } else if (ancestorLineage.length > 0) {
+        // Highlight edges in ancestor lineage + all descendant edges
+        // 1. Highlight ancestor path edges
+        for (let i = 0; i < ancestorLineage.length - 1; i++) {
+          const sourceId = ancestorLineage[i];
+          const targetId = ancestorLineage[i + 1];
+
+          const edge1 = cyRef.current.getElementById(`${sourceId}-${targetId}`);
+          const edge2 = cyRef.current.getElementById(`${targetId}-${sourceId}`);
+
+          if (edge1.length > 0) edge1.addClass('highlighted');
+          if (edge2.length > 0) edge2.addClass('highlighted');
+        }
+
+        // 2. Highlight all edges from the selected koala to its descendants
+        const selectedId = ancestorLineage[0]; // First in path is the selected koala
+        highlightedNodes.forEach(nodeId => {
+          // Only highlight outgoing edges from selected and descendants (not ancestors)
+          // Descendants are nodes in highlightedNodes but not in ancestorLineage (except selected)
+          const isDescendant = !ancestorLineage.includes(nodeId) || nodeId === selectedId;
+          if (isDescendant) {
+            const node = cyRef.current.getElementById(nodeId);
+            if (node.length > 0) {
+              // Highlight edges where this node is the source (parent → child)
+              node.connectedEdges('[source = "' + nodeId + '"]').addClass('highlighted');
+            }
+          }
+        });
+      } else {
+        // Highlight all connected edges (family network)
+        highlightedNodes.forEach(nodeId => {
+          const node = cyRef.current.getElementById(nodeId);
+          if (node.length > 0) {
+            node.connectedEdges().addClass('highlighted');
+          }
+        });
+      }
     }
-  }, [highlightedNodes, isReady]);
+  }, [highlightedNodes, selectedKoalaId, relationshipPath, ancestorLineage, isReady]);
 
   // Programmatically center on selected node (from search dropdown)
   useEffect(() => {
@@ -222,9 +294,9 @@ export default function KoalaGraph({ elements, onNodeClick, highlightedNodes = [
       <button
         type="button"
         onClick={handleResetView}
-        className="absolute top-3 right-3 z-10 px-3 py-1.5 text-sm rounded-md bg-white/90 border border-gray-300 shadow hover:bg-white"
+        className="absolute top-3 right-3 z-20 px-3 py-1.5 text-sm rounded-md bg-white/90 border border-gray-300 shadow hover:bg-white"
       >
-        Reset view
+        {t('resetView', language)}
       </button>
       <div ref={containerRef} className="w-full h-full" />
     </div>

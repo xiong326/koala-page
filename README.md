@@ -12,10 +12,29 @@ An interactive web application for visualizing and managing koala family relatio
   - Smooth animations when centering on nodes
   - Reset view button to restore default zoom and pan
 
-- **Relationship Highlighting**: Click on any koala to highlight their entire family network
-  - Selected koala gets bold border highlighting
-  - Connected family members highlighted with thicker borders
-  - Related edges highlighted in orange
+- **Lineage Highlighting**: Click on any koala to highlight their direct lineage
+  - Selected koala gets orange border (6px)
+  - All ancestors highlighted (mother → grandmother → etc.)
+  - All descendants highlighted (children → grandchildren → etc.)
+  - Only ancestor path edges and descendant edges highlighted (not siblings)
+
+- **Advanced Filter Sidebar**: Filter koalas by multiple criteria
+  - Filter by sex (male/female)
+  - Filter by age range (infant, young, adult, senior)
+  - Filter by generation (1, 2, 3, 4, etc.)
+  - Live-updating results list with photos
+  - Click any result to jump to that koala in the graph
+  - Collapsible sidebar on the left
+
+- **Relationship Calculator**: Calculate relationships between any two koalas
+  - Select two koalas using autocomplete search
+  - Automatically calculates relationship type
+  - Shows detailed relationship description
+  - Visualizes exact path between the two koalas
+  - Supports: parent-child, siblings, grandparent, aunt-niece, cousins, ancestors, and more
+  - Only highlights specific path edges (not entire family)
+  - Collapsible sidebar on the right
+  - Bilingual relationship descriptions
 
 - **Search with Autocomplete**: Find koalas by name, nickname, or ID
   - Live filtering as you type
@@ -84,10 +103,11 @@ npm run dev
 - **Click** on a koala node to:
   - View their detail card with full information
   - Automatically center and smooth scroll to the node
-  - Highlight their entire family network
+  - Highlight their direct lineage (ancestors + descendants only)
+  - Show orange path edges tracing their maternal lineage
 - **Scroll** or use pinch gesture to zoom in/out
 - **Drag** to pan around the graph
-- **Click "Reset view"** button to restore the default zoom and pan
+- **Click "Reset view"** (重置视图) button to restore the default zoom and pan
 
 ### Detail Card Navigation
 
@@ -105,7 +125,40 @@ Use the search dropdown to find koalas by:
 As you type:
 - Matching results appear in a dropdown
 - Click any result to select and center on that koala
-- The graph will highlight their family network
+- The graph will highlight their lineage
+
+### Using the Filter Sidebar
+
+Click the "Filters" (筛选) button in the top-left to open the filter panel:
+
+1. **Filter by Sex**: Select male, female, or all
+2. **Filter by Age**: Choose infant (<1yr), young (1-3yr), adult (3-10yr), senior (10+yr), or all
+3. **Filter by Generation**: Select generation 1, 2, 3, 4, etc.
+4. **View Results**: Filtered koalas appear in a scrollable list with photos
+5. **Jump to Koala**: Click any koala in the list to center on them in the graph
+6. **Clear Filters**: Click "Clear All" to reset all filters
+7. **Active Filter Badge**: The filter button shows a count of active filters
+
+### Using the Relationship Calculator
+
+Click the "Relationship" (关系计算) button in the top-right to open the calculator:
+
+1. **Select First Koala**: Type name/ID in the first search box
+2. **Select Second Koala**: Type name/ID in the second search box
+3. **View Relationship**: The relationship is automatically calculated and displayed
+4. **See Visual Path**: The graph highlights the exact path connecting the two koalas
+5. **Jump to Koala**: Click either koala name in the "Jump to" section to center on them
+6. **Swap Koalas**: Click the swap button to switch the two selections
+
+**Supported Relationships:**
+- Parent-Child (母子/母女)
+- Siblings (姐妹/兄弟)
+- Grandparent-Grandchild (祖孙关系)
+- Great-grandparent / Ancestor (祖先和后代)
+- Aunt-Niece/Nephew (姨妈和侄女/侄子)
+- Cousins (表姐妹/表兄弟)
+- Extended family (through common ancestor)
+- Unrelated (no common maternal ancestor)
 
 ### Language Toggle
 
@@ -176,28 +229,33 @@ For persistent data storage and multi-user editing, you can add a backend:
 koala-page/
 ├── src/
 │   ├── components/
-│   │   ├── KoalaGraph.jsx      # Main graph visualization with Cytoscape
-│   │   ├── KoalaCard.jsx       # Compact detail card with popover
-│   │   ├── SearchDropdown.jsx  # Search with autocomplete dropdown
-│   │   ├── SearchBar.jsx       # Basic search input (legacy)
-│   │   ├── LanguageToggle.jsx  # Language switcher button
-│   │   └── ErrorBoundary.jsx   # Error handling wrapper
+│   │   ├── KoalaGraph.jsx         # Main graph visualization with Cytoscape
+│   │   ├── KoalaCard.jsx          # Compact detail card with popover (128px photos)
+│   │   ├── FilterSidebar.jsx      # Advanced filter by age/sex/generation
+│   │   ├── RelationshipSidebar.jsx # Relationship calculator between two koalas
+│   │   ├── SearchDropdown.jsx     # Search with autocomplete dropdown
+│   │   ├── SearchBar.jsx          # Basic search input (legacy)
+│   │   ├── LanguageToggle.jsx     # Language switcher button
+│   │   └── ErrorBoundary.jsx      # Error handling wrapper
 │   ├── i18n/
-│   │   ├── translations.js     # English and Chinese translations
-│   │   └── LanguageContext.jsx # Language state management
+│   │   ├── translations.js        # English and Chinese translations
+│   │   └── LanguageContext.jsx    # Language state management
 │   ├── data/
-│   │   └── koalas.json         # Koala data with deceased support
+│   │   └── koalas.json            # Koala data (4 generations, deceased support)
 │   ├── utils/
-│   │   └── graphHelpers.js     # Graph utility functions
-│   ├── App.jsx                 # Main app component with layout
-│   ├── App.css                 # Component styles
-│   ├── index.css               # Global styles with Tailwind
-│   └── main.jsx                # App entry point
+│   │   ├── graphHelpers.js        # Graph utility functions (lineage, descendants, etc.)
+│   │   └── relationshipCalculator.js # Relationship calculation logic
+│   ├── App.jsx                    # Main app component with layout
+│   ├── App.css                    # Component styles
+│   ├── index.css                  # Global styles with Tailwind
+│   └── main.jsx                   # App entry point
 ├── public/
-│   └── images/koalas/          # Koala photos
+│   └── images/koalas/             # Koala photos
 ├── package.json
 ├── vite.config.js
 ├── tailwind.config.js
+├── postcss.config.js
+├── eslint.config.js
 ├── README.md
 └── TRANSLATION_GUIDE.md
 ```
@@ -220,28 +278,38 @@ The app can be deployed to:
 ## Future Enhancements
 
 ### Completed Features
-- [x] Bilingual support (English/Chinese)
-- [x] Deceased koala tracking
-- [x] Photo support in nodes and cards
-- [x] Compact detail cards with popover
-- [x] Parent navigation links
-- [x] Search with autocomplete
-- [x] Color-coded sex indicators
-- [x] Family highlighting
+- [x] Bilingual support (English/Chinese) with localStorage persistence
+- [x] Deceased koala tracking with special visual styling
+- [x] Photo support in nodes and cards (128px in cards)
+- [x] Compact detail cards with popover positioning
+- [x] Parent navigation links (clickable mother/father)
+- [x] Search with autocomplete dropdown
+- [x] Color-coded sex indicators (pink/blue borders)
+- [x] Lineage highlighting (ancestors + descendants)
+- [x] Smart edge highlighting (only lineage paths, not siblings)
 - [x] Flexible date formats (year, year-month, full date)
+- [x] **Advanced filtering** (by age range, sex, generation)
+- [x] **Relationship calculator** (calculate relationship between any two koalas)
+- [x] **Path visualization** (highlight exact path between related koalas)
+- [x] Generation calculation (automatic generation numbers starting from 1)
+- [x] Age calculation with partial date support
+- [x] Multiple generations (4 generations in sample data)
 
 ### Planned Features
 - [ ] Add/edit koala form in the UI
 - [ ] Photo upload functionality
-- [ ] Export family tree as image
-- [ ] Advanced filtering (by age, sex, generation, deceased status)
-- [ ] Timeline view
+- [ ] Export family tree as image/PDF
+- [ ] Filter by deceased status
+- [ ] Timeline view (show births/deaths chronologically)
 - [ ] Backend API for data persistence
-- [ ] User authentication
-- [ ] Multiple family tree support
+- [ ] User authentication and permissions
+- [ ] Multiple family tree support (different koala populations)
 - [ ] Statistics and analytics dashboard
 - [ ] Siblings display in detail cards
-- [ ] Children/offspring tracking
+- [ ] Children/offspring count and display
+- [ ] Birthday/anniversary notifications
+- [ ] Import/export data (CSV, JSON)
+- [ ] Print-friendly family tree layout
 
 ## License
 

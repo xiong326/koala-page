@@ -76,6 +76,45 @@ export function getAncestors(koalaId, koalas) {
 }
 
 /**
+ * Get ancestor path (direct lineage to earliest ancestor)
+ */
+export function getAncestorPath(koalaId, koalas) {
+  const path = [koalaId];
+  let currentId = koalaId;
+
+  while (currentId) {
+    const koala = koalas.find(k => k.id === currentId);
+    if (koala && koala.mother) {
+      path.push(koala.mother);
+      currentId = koala.mother;
+    } else {
+      break;
+    }
+  }
+
+  return path;
+}
+
+/**
+ * Get ancestors and descendants for highlighting lineage
+ */
+export function getLineageHighlight(koalaId, koalas) {
+  // Get ancestor path (ordered)
+  const ancestorPath = getAncestorPath(koalaId, koalas);
+
+  // Get all descendants
+  const descendants = getDescendants(koalaId, koalas);
+
+  // Combine all nodes to highlight (remove duplicates)
+  const allNodes = [...new Set([...ancestorPath, ...descendants])];
+
+  return {
+    nodes: allNodes,
+    ancestorPath: ancestorPath  // Keep ordered path for edge highlighting
+  };
+}
+
+/**
  * Get connected component (family) of a koala
  */
 export function getConnectedFamily(koalaId, koalas) {
@@ -116,4 +155,56 @@ export function searchKoalas(koalas, searchTerm) {
 
     return nameMatch || nicknameMatch || idMatch;
   });
+}
+
+/**
+ * Calculate the generation of a koala (1 = founder, 2 = second generation, etc.)
+ */
+export function calculateGeneration(koalaId, koalas) {
+  const koala = koalas.find(k => k.id === koalaId);
+  if (!koala) return 1;
+
+  // If no mother, this is a founder (generation 1)
+  if (!koala.mother) return 1;
+
+  // Otherwise, generation is 1 + mother's generation
+  return 1 + calculateGeneration(koala.mother, koalas);
+}
+
+/**
+ * Calculate age in years (integer)
+ */
+export function calculateAgeInYears(birthDate, endDate = null) {
+  if (!birthDate) return 0;
+
+  const birth = new Date(birthDate);
+  let end;
+
+  if (endDate) {
+    // Handle partial dates for endDate
+    const parts = endDate.split('-');
+    if (parts.length === 1) {
+      // Year only: use end of year
+      end = new Date(parts[0] + '-12-31');
+    } else if (parts.length === 2) {
+      // Year-Month: use end of month
+      const [year, month] = parts;
+      end = new Date(year, month, 0); // Day 0 = last day of previous month
+    } else {
+      end = new Date(endDate);
+    }
+  } else {
+    end = new Date();
+  }
+
+  const years = end.getFullYear() - birth.getFullYear();
+  const monthDiff = end.getMonth() - birth.getMonth();
+  const dayDiff = end.getDate() - birth.getDate();
+
+  // Adjust if birthday hasn't occurred this year
+  if (monthDiff < 0 || (monthDiff === 0 && dayDiff < 0)) {
+    return Math.max(0, years - 1);
+  }
+
+  return Math.max(0, years);
 }
