@@ -1,0 +1,90 @@
+{
+  "koalas": [
+    {
+      "id": "k001",
+      "name": "茉莉",
+      "nicknames": ["茉莉妈妈"],
+      "birthDate": "2015",
+      "sex": "female",
+      "photo": null,
+      "mother": null,
+      "father": null,
+      "deceased": true,
+      "dateOfDeath": "2025"
+    },
+    {
+      "id": "k002",
+      "name": "梧桐",
+      "nicknames": ["梧桐爸爸"],
+      "birthDate": "2014",
+      "sex": "male",
+      "photo": "/images/koalas/wutong.jpg",
+      "mother": null,
+      "father": null
+    },
+    {
+      "id": "k003",
+      "name": "柠檬",
+      "nicknames": ["柠檬公主", "11"],
+      "birthDate": "2018-02-01",
+      "sex": "female",
+      "photo": "/images/koalas/ningmeng.jpg",
+      "mother": "k001",
+      "father": "k002"
+    },
+    {
+      "id": "k004",
+      "name": "柚子",
+      "nicknames": ["小柚子"],
+      "birthDate": "2019",
+      "sex": "male",
+      "photo": null,
+      "mother": "k001",
+      "father": "k002",
+      "deceased": true,
+      "dateOfDeath": "2024"
+    },
+    {
+      "id": "k005",
+      "name": "金桔",
+      "nicknames": [],
+      "birthDate": "2020",
+      "sex": "female",
+      "photo": null,
+      "mother": "k001",
+      "father": "k002",
+      "deceased": true,
+      "dateOfDeath": "2024"
+    },
+    {
+      "id": "k006",
+      "name": "橙子",
+      "nicknames": ["小橙子"],
+      "birthDate": "2021",
+      "sex": "male",
+      "photo": "/images/koalas/chengzi.jpg",
+      "mother": "k001",
+      "father": "k002"
+    },
+    {
+      "id": "k007",
+      "name": "青柑",
+      "nicknames": ["五宝", "55"],
+      "birthDate": "2022",
+      "sex": "female",
+      "photo": "/images/koalas/qinggan.jpg",
+      "mother": "k001",
+      "father": "k002"
+    },
+    {
+      "id": "k008",
+      "name": "青柠",
+      "nicknames": ["六宝", "66"],
+      "birthDate": "2024",
+      "sex": "female",
+      "photo": "/images/koalas/liubao.jpg",
+      "mother": "k001",
+      "father": "k002"
+    }
+  ]
+}
