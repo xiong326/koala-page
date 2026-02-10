@@ -20,6 +20,23 @@ export default function KoalaGraph({ elements, onNodeClick, highlightedNodes = [
     onNodeClickRef.current = onNodeClick;
   }, [onNodeClick]);
 
+  // Listen for reset view event
+  useEffect(() => {
+    const handleReset = () => {
+      if (!cyRef.current || !defaultViewportRef.current) return;
+      cyRef.current.animate(
+        {
+          zoom: defaultViewportRef.current.zoom,
+          pan: defaultViewportRef.current.pan,
+        },
+        { duration: 400 }
+      );
+    };
+
+    window.addEventListener('resetGraphView', handleReset);
+    return () => window.removeEventListener('resetGraphView', handleReset);
+  }, []);
+
   useEffect(() => {
     if (!containerRef.current || elements.length === 0) return;
 
@@ -165,10 +182,9 @@ export default function KoalaGraph({ elements, onNodeClick, highlightedNodes = [
       }, {
         duration: 500,
         complete: () => {
-          // Get position after centering and show card
-          const position = node.renderedPosition();
+          // Show card in fixed position
           if (onNodeClickRef.current) {
-            onNodeClickRef.current(koalaData, position);
+            onNodeClickRef.current(koalaData);
           }
         }
       });
@@ -200,10 +216,16 @@ export default function KoalaGraph({ elements, onNodeClick, highlightedNodes = [
         const node = cyRef.current.getElementById(nodeId);
 
         if (node.length > 0) {
-          // If this is the selected koala, use 'selected' class, otherwise 'highlighted'
-          if (nodeId === selectedKoalaId) {
+          // For relationship paths, highlight both endpoints in orange
+          if (isRelationshipPath && (nodeId === relationshipPath[0] || nodeId === relationshipPath[relationshipPath.length - 1])) {
             node.addClass('selected');
-          } else {
+          }
+          // For single clicked node, highlight only that one
+          else if (nodeId === selectedKoalaId) {
+            node.addClass('selected');
+          }
+          // All others get regular highlighting
+          else {
             node.addClass('highlighted');
           }
         }
@@ -225,20 +247,24 @@ export default function KoalaGraph({ elements, onNodeClick, highlightedNodes = [
         }
       } else if (ancestorLineage.length > 0) {
         // Highlight edges in ancestor lineage + all descendant edges
-        // 1. Highlight ancestor path edges
-        for (let i = 0; i < ancestorLineage.length - 1; i++) {
-          const sourceId = ancestorLineage[i];
-          const targetId = ancestorLineage[i + 1];
+        const selectedId = ancestorLineage[0]; // First in lineage is the selected koala
 
-          const edge1 = cyRef.current.getElementById(`${sourceId}-${targetId}`);
-          const edge2 = cyRef.current.getElementById(`${targetId}-${sourceId}`);
-
-          if (edge1.length > 0) edge1.addClass('highlighted');
-          if (edge2.length > 0) edge2.addClass('highlighted');
-        }
+        // 1. Highlight all edges between ancestors
+        // For each ancestor, highlight edges connecting to its parents (if they're also in the ancestor list)
+        ancestorLineage.forEach(ancestorId => {
+          const node = cyRef.current.getElementById(ancestorId);
+          if (node.length > 0) {
+            // Highlight incoming edges (from parents) if the parent is in ancestorLineage
+            node.connectedEdges('[target = "' + ancestorId + '"]').forEach(edge => {
+              const sourceId = edge.data('source');
+              if (ancestorLineage.includes(sourceId)) {
+                edge.addClass('highlighted');
+              }
+            });
+          }
+        });
 
         // 2. Highlight all edges from the selected koala to its descendants
-        const selectedId = ancestorLineage[0]; // First in path is the selected koala
         highlightedNodes.forEach(nodeId => {
           // Only highlight outgoing edges from selected and descendants (not ancestors)
           // Descendants are nodes in highlightedNodes but not in ancestorLineage (except selected)
@@ -260,12 +286,38 @@ export default function KoalaGraph({ elements, onNodeClick, highlightedNodes = [
           }
         });
       }
+
+      // Fit relationship path in viewport
+      if (isRelationshipPath && relationshipPath.length > 0) {
+        const pathNodes = cyRef.current.collection();
+        relationshipPath.forEach(nodeId => {
+          const node = cyRef.current.getElementById(nodeId);
+          if (node.length > 0) {
+            pathNodes.merge(node);
+          }
+        });
+
+        if (pathNodes.length > 0) {
+          cyRef.current.animate({
+            fit: {
+              eles: pathNodes,
+              padding: 50
+            }
+          }, {
+            duration: 500
+          });
+        }
+      }
     }
   }, [highlightedNodes, selectedKoalaId, relationshipPath, ancestorLineage, isReady]);
 
   // Programmatically center on selected node (from search dropdown)
+  // Skip if we're showing a relationship path (already fitted above)
   useEffect(() => {
     if (!cyRef.current || !isReady || !selectedKoalaId) return;
+
+    // Don't center if we're showing a relationship path
+    if (relationshipPath.length > 0) return;
 
     const node = cyRef.current.getElementById(selectedKoalaId);
     if (node && node.length > 0) {
@@ -275,29 +327,10 @@ export default function KoalaGraph({ elements, onNodeClick, highlightedNodes = [
         duration: 500
       });
     }
-  }, [selectedKoalaId, isReady]);
-
-  const handleResetView = () => {
-    if (!cyRef.current || !defaultViewportRef.current) return;
-
-    cyRef.current.animate(
-      {
-        zoom: defaultViewportRef.current.zoom,
-        pan: defaultViewportRef.current.pan,
-      },
-      { duration: 400 }
-    );
-  };
+  }, [selectedKoalaId, isReady, relationshipPath]);
 
   return (
     <div className="w-full h-full border border-gray-300 rounded-lg bg-white relative">
-      <button
-        type="button"
-        onClick={handleResetView}
-        className="absolute top-3 right-3 z-20 px-3 py-1.5 text-sm rounded-md bg-white/90 border border-gray-300 shadow hover:bg-white"
-      >
-        {t('resetView', language)}
-      </button>
       <div ref={containerRef} className="w-full h-full" />
     </div>
   );

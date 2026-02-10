@@ -78,7 +78,7 @@ export default function SearchDropdown({ koalas, onSelectKoala }) {
 
       {/* Dropdown results */}
       {isOpen && filteredKoalas.length > 0 && (
-        <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-64 overflow-y-auto">
+        <div className="absolute z-40 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-64 overflow-y-auto">
           {filteredKoalas.map(koala => (
             <button
               key={koala.id}
@@ -99,7 +99,7 @@ export default function SearchDropdown({ koalas, onSelectKoala }) {
 
       {/* No results message */}
       {isOpen && searchTerm && filteredKoalas.length === 0 && (
-        <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg p-4 text-center text-gray-500">
+        <div className="absolute z-40 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg p-4 text-center text-gray-500">
           {t('noResults', language)}
         </div>
       )}

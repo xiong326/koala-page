@@ -23,12 +23,22 @@ export function koalasToGraphElements(koalas) {
 
   const edges = [];
   koalas.forEach(koala => {
-    // Matriarchal society: only show mother -> child relationships in the graph
+    // Add mother -> child relationships
     if (koala.mother) {
       edges.push({
         data: {
           id: `${koala.mother}-${koala.id}`,
           source: koala.mother,
+          target: koala.id
+        }
+      });
+    }
+    // Add father -> child relationships
+    if (koala.father) {
+      edges.push({
+        data: {
+          id: `${koala.father}-${koala.id}`,
+          source: koala.father,
           target: koala.id
         }
       });
@@ -46,7 +56,7 @@ export function getDescendants(koalaId, koalas) {
 
   function findChildren(id) {
     koalas.forEach(koala => {
-      if (koala.mother === id) {
+      if (koala.mother === id || koala.father === id) {
         descendants.add(koala.id);
         findChildren(koala.id);
       }
@@ -65,9 +75,15 @@ export function getAncestors(koalaId, koalas) {
 
   function findParents(id) {
     const koala = koalas.find(k => k.id === id);
-    if (koala && koala.mother) {
-      ancestors.add(koala.mother);
-      findParents(koala.mother);
+    if (koala) {
+      if (koala.mother) {
+        ancestors.add(koala.mother);
+        findParents(koala.mother);
+      }
+      if (koala.father) {
+        ancestors.add(koala.father);
+        findParents(koala.father);
+      }
     }
   }
 
@@ -76,23 +92,29 @@ export function getAncestors(koalaId, koalas) {
 }
 
 /**
- * Get ancestor path (direct lineage to earliest ancestor)
+ * Get ancestor path (all direct ancestors including both maternal and paternal lines)
  */
 export function getAncestorPath(koalaId, koalas) {
-  const path = [koalaId];
-  let currentId = koalaId;
+  const ancestors = new Set([koalaId]);
+  const toProcess = [koalaId];
 
-  while (currentId) {
+  while (toProcess.length > 0) {
+    const currentId = toProcess.shift();
     const koala = koalas.find(k => k.id === currentId);
-    if (koala && koala.mother) {
-      path.push(koala.mother);
-      currentId = koala.mother;
-    } else {
-      break;
+
+    if (koala) {
+      if (koala.mother && !ancestors.has(koala.mother)) {
+        ancestors.add(koala.mother);
+        toProcess.push(koala.mother);
+      }
+      if (koala.father && !ancestors.has(koala.father)) {
+        ancestors.add(koala.father);
+        toProcess.push(koala.father);
+      }
     }
   }
 
-  return path;
+  return Array.from(ancestors);
 }
 
 /**

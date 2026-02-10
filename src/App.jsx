@@ -22,7 +22,6 @@ function App() {
   const [highlightedNodes, setHighlightedNodes] = useState([]);
   const [graphElements, setGraphElements] = useState([]);
   const [selectedKoalaId, setSelectedKoalaId] = useState(null);
-  const [cardPosition, setCardPosition] = useState(null);
   const [filterSidebarOpen, setFilterSidebarOpen] = useState(false);
   const [relationshipSidebarOpen, setRelationshipSidebarOpen] = useState(false);
   const [relationshipPath, setRelationshipPath] = useState([]);
@@ -35,7 +34,7 @@ function App() {
   }, [koalas]);
 
 
-  const handleNodeClick = (koalaData, position) => {
+  const handleNodeClick = (koalaData) => {
     // Clear relationship path first when clicking a node
     setRelationshipPath([]);
 
@@ -49,7 +48,6 @@ function App() {
 
     setSelectedKoala(koala);
     setSelectedKoalaId(koala.id);
-    setCardPosition(position);
 
     // Highlight ancestors and descendants
     const lineage = getLineageHighlight(koala.id, koalas);
@@ -67,7 +65,6 @@ function App() {
     setSelectedKoala(null);
     setHighlightedNodes([]);
     setSelectedKoalaId(null);
-    setCardPosition(null);
     setRelationshipPath([]);
     setAncestorLineage([]);
   };
@@ -94,14 +91,11 @@ function App() {
     setHighlightedNodes(path);
     setRelationshipPath(path);
     setAncestorLineage([]); // Clear ancestor lineage when showing relationship
-    // If path has koalas, select the first one
-    if (path.length > 0) {
-      setSelectedKoalaId(path[0]);
-    } else {
-      setSelectedKoalaId(null);
-      setSelectedKoala(null);
-      setCardPosition(null);
-    }
+
+    // Clear card and selection when showing relationship path
+    // Both endpoints will be highlighted in orange, but no card shown
+    setSelectedKoalaId(null);
+    setSelectedKoala(null);
   }, []);
 
   return (
@@ -123,11 +117,25 @@ function App() {
       <div className="flex-1 container mx-auto p-4 flex gap-4" style={{ overflow: 'visible' }}>
         {/* Left Panel - Graph */}
         <div className="flex-1 min-w-0 flex flex-col gap-4">
-          <div className="bg-white p-4 rounded-lg shadow">
-            <SearchDropdown
-              koalas={koalas}
-              onSelectKoala={handleSearchSelect}
-            />
+          <div className="bg-white p-4 rounded-lg shadow flex items-center gap-3">
+            <div className="flex-1">
+              <SearchDropdown
+                koalas={koalas}
+                onSelectKoala={handleSearchSelect}
+              />
+            </div>
+            <button
+              type="button"
+              onClick={() => {
+                // Reset graph view
+                const event = new CustomEvent('resetGraphView');
+                window.dispatchEvent(event);
+              }}
+              className="px-3 py-2 text-sm rounded-md bg-white border border-gray-300 shadow-sm hover:bg-gray-50 whitespace-nowrap"
+            >
+              <span className="hidden sm:inline">{t('resetView', language)}</span>
+              <span className="sm:hidden">↺</span>
+            </button>
           </div>
 
           <div className="flex-1 min-h-0 relative">
@@ -157,43 +165,17 @@ function App() {
               onRelationshipCalculated={handleRelationshipPath}
             />
 
-            {/* Koala Detail Card Popover - appears next to clicked node */}
-            {selectedKoala && cardPosition && (
-              <div
-                className="absolute z-30 w-52"
-                style={{
-                  left: `${cardPosition.x + 50}px`, // Offset to the right of node
-                  top: `${cardPosition.y}px`,
-                  transform: 'translateY(-50%)',
-                }}
-              >
-                {/* Arrow pointing to the node */}
-                <div
-                  className="absolute left-0 top-1/2 -translate-x-2 -translate-y-1/2 w-0 h-0 border-t-8 border-t-transparent border-b-8 border-b-transparent border-r-8 border-r-white"
-                  style={{ filter: 'drop-shadow(-2px 0 2px rgba(0,0,0,0.1))' }}
+            {/* Koala Detail Card - fixed at top center */}
+            {selectedKoala && (
+              <div className="absolute top-2 left-1/2 -translate-x-1/2 sm:top-3 z-30 shadow-2xl">
+                <KoalaCard
+                  koala={selectedKoala}
+                  onClose={handleCloseCard}
+                  allKoalas={koalas}
+                  onKoalaClick={handleParentClick}
                 />
-
-                <div className="shadow-2xl">
-                  <KoalaCard
-                    koala={selectedKoala}
-                    onClose={handleCloseCard}
-                    allKoalas={koalas}
-                    onKoalaClick={handleParentClick}
-                  />
-                </div>
               </div>
             )}
-          </div>
-
-          <div className="bg-white p-4 rounded-lg shadow">
-            <h3 className="font-semibold text-gray-700 mb-2">{t('instructionsTitle', language)}</h3>
-            <ul className="text-sm text-gray-600 space-y-1">
-              <li>• {t('instructionClick', language)}</li>
-              <li>• {t('instructionZoom', language)}</li>
-              <li>• {t('instructionPan', language)}</li>
-              <li>• {t('instructionSearch', language)}</li>
-              <li>• {t('instructionFilter', language)}</li>
-            </ul>
           </div>
         </div>
       </div>

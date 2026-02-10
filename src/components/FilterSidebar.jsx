@@ -75,39 +75,48 @@ export default function FilterSidebar({ koalas, onKoalaClick, isOpen, onToggle }
 
   return (
     <>
-      {/* Toggle Button */}
-      <button
-        onClick={onToggle}
-        className="absolute top-3 left-3 z-20 px-3 py-1.5 text-sm rounded-md bg-white/90 border border-gray-300 shadow hover:bg-white flex items-center gap-2"
-      >
-        <svg
-          className={`w-4 h-4 transition-transform ${isOpen ? 'rotate-180' : ''}`}
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
+      {/* Toggle Button - only show when closed */}
+      {!isOpen && (
+        <button
+          onClick={onToggle}
+          className="absolute top-2 left-2 z-20 px-2 py-1 sm:px-3 sm:py-1.5 text-xs sm:text-sm rounded-md bg-white/90 border border-gray-300 shadow hover:bg-white flex items-center gap-1 sm:gap-2"
         >
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
-        </svg>
-        {t('filterTitle', language)}
-        {hasActiveFilters && (
-          <span className="bg-blue-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-            {[filters.sex !== 'all', filters.ageRange !== 'all', filters.generation !== 'all'].filter(Boolean).length}
-          </span>
-        )}
-      </button>
+          <svg
+            className="w-3 h-3 sm:w-4 sm:h-4"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+          </svg>
+          <span className="hidden sm:inline">{t('filterTitle', language)}</span>
+          {hasActiveFilters && (
+            <span className="bg-blue-500 text-white text-xs rounded-full w-4 h-4 sm:w-5 sm:h-5 flex items-center justify-center">
+              {[filters.sex !== 'all', filters.ageRange !== 'all', filters.generation !== 'all'].filter(Boolean).length}
+            </span>
+          )}
+        </button>
+      )}
 
       {/* Sidebar */}
       <div
         className={`absolute top-0 left-0 h-full bg-white border-r border-gray-300 shadow-lg transition-all duration-300 z-10 flex flex-col ${
-          isOpen ? 'w-64' : 'w-0'
+          isOpen ? 'w-48 sm:w-56 md:w-64' : 'w-0'
         } overflow-hidden`}
       >
-        <div className="p-4 border-b border-gray-200 flex justify-between items-center">
-          <h3 className="font-semibold text-gray-800">{t('filterTitle', language)}</h3>
+        <div className="p-2 sm:p-3 md:p-4 border-b border-gray-200 flex justify-between items-center gap-2">
+          <button
+            onClick={onToggle}
+            className="text-gray-600 hover:text-gray-800 font-bold text-lg leading-none"
+            title="Collapse"
+          >
+            ‹‹
+          </button>
+          <h3 className="font-semibold text-sm sm:text-base text-gray-800 flex-1">{t('filterTitle', language)}</h3>
           {hasActiveFilters && (
             <button
               onClick={clearFilters}
-              className="text-xs text-blue-600 hover:text-blue-800 underline"
+              className="text-xs text-blue-600 hover:text-blue-800 underline whitespace-nowrap"
             >
               {t('clearFilters', language)}
             </button>
@@ -115,16 +124,16 @@ export default function FilterSidebar({ koalas, onKoalaClick, isOpen, onToggle }
         </div>
 
         {/* Filters */}
-        <div className="p-4 space-y-4 overflow-y-auto flex-1">
+        <div className="p-2 sm:p-3 md:p-4 space-y-3 sm:space-y-4 overflow-y-auto flex-1">
           {/* Sex Filter */}
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">
+            <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-1 sm:mb-2">
               {t('filterBySex', language)}
             </label>
             <select
               value={filters.sex}
               onChange={(e) => handleFilterChange('sex', e.target.value)}
-              className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-2 py-1.5 sm:px-3 sm:py-2 text-xs sm:text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             >
               <option value="all">{t('all', language)}</option>
               <option value="male">{t('male', language)}</option>
@@ -134,13 +143,13 @@ export default function FilterSidebar({ koalas, onKoalaClick, isOpen, onToggle }
 
           {/* Age Range Filter */}
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">
+            <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-1 sm:mb-2">
               {t('filterByAge', language)}
             </label>
             <select
               value={filters.ageRange}
               onChange={(e) => handleFilterChange('ageRange', e.target.value)}
-              className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-2 py-1.5 sm:px-3 sm:py-2 text-xs sm:text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             >
               <option value="all">{t('all', language)}</option>
               <option value="infant">{t('ageInfant', language)} (&lt; 1 {t('years', language)})</option>
@@ -152,13 +161,13 @@ export default function FilterSidebar({ koalas, onKoalaClick, isOpen, onToggle }
 
           {/* Generation Filter */}
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">
+            <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-1 sm:mb-2">
               {t('filterByGeneration', language)}
             </label>
             <select
               value={filters.generation}
               onChange={(e) => handleFilterChange('generation', e.target.value)}
-              className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-2 py-1.5 sm:px-3 sm:py-2 text-xs sm:text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             >
               <option value="all">{t('all', language)}</option>
               {generations.map(gen => (
@@ -171,7 +180,7 @@ export default function FilterSidebar({ koalas, onKoalaClick, isOpen, onToggle }
 
           {/* Results Count */}
           <div className="pt-2 border-t border-gray-200">
-            <p className="text-sm text-gray-600">
+            <p className="text-xs sm:text-sm text-gray-600">
               {t('showingCount', language, { filtered: filteredKoalas.length, total: koalas.length })}
             </p>
           </div>

@@ -74,20 +74,11 @@ export default function KoalaCard({ koala, onClose, allKoalas = [], onKoalaClick
   };
 
   return (
-    <div className="bg-white rounded shadow-lg p-3 text-xs">
-      <div className="flex justify-between items-start mb-2">
-        <h2 className="text-sm font-bold text-gray-800">{koala.name}</h2>
-        <button
-          onClick={onClose}
-          className="text-gray-500 hover:text-gray-700 text-base font-bold ml-2 -mt-1"
-        >
-          ×
-        </button>
-      </div>
-
-      <div className="space-y-1">
+    <div className="bg-white rounded shadow-lg p-1.5 sm:p-3 flex flex-row gap-1.5 sm:gap-3 w-full max-w-[240px] sm:max-w-lg md:max-w-2xl">
+      {/* Photo - left side on all screens */}
+      <div className="flex-shrink-0">
         {koala.photo ? (
-          <div className="w-full h-32 bg-gray-100 rounded overflow-hidden mb-1 flex items-center justify-center">
+          <div className="w-12 h-12 sm:w-20 sm:h-20 md:w-24 md:h-24 bg-gray-100 rounded overflow-hidden flex items-center justify-center">
             <img
               src={koala.photo}
               alt={koala.name}
@@ -95,50 +86,64 @@ export default function KoalaCard({ koala, onClose, allKoalas = [], onKoalaClick
             />
           </div>
         ) : (
-          <div className="w-full h-32 bg-gray-200 rounded flex items-center justify-center mb-1">
-            <span className="text-gray-400 text-2xl">🐨</span>
+          <div className="w-12 h-12 sm:w-20 sm:h-20 md:w-24 md:h-24 bg-gray-200 rounded flex items-center justify-center">
+            <span className="text-gray-400 text-base sm:text-2xl md:text-3xl">🐨</span>
           </div>
         )}
+      </div>
 
-        {koala.nicknames && koala.nicknames.length > 0 && (
-          <div>
-            <span className="font-semibold text-gray-700">{t('nicknames', language)}:</span>
-            <span className="ml-1 text-gray-600">{koala.nicknames.join(', ')}</span>
-          </div>
-        )}
-
-        <div>
-          <span className="font-semibold text-gray-700">{t('sex', language)}:</span>
-          <span className="ml-1 text-gray-600 capitalize">{t(koala.sex, language)}</span>
+      {/* Information - below photo on mobile, right on larger screens */}
+      <div className="flex-1 min-w-0">
+        <div className="flex justify-between items-start mb-1 sm:mb-1.5">
+          <h2 className="text-[11px] sm:text-sm md:text-base font-bold text-gray-800 leading-tight">{koala.name}</h2>
+          <button
+            onClick={onClose}
+            className="text-gray-500 hover:text-gray-700 text-base sm:text-base md:text-lg font-bold leading-none"
+          >
+            ×
+          </button>
         </div>
 
-        <div>
+        <div className="space-y-0.5 sm:space-y-1">
+        {koala.nicknames && koala.nicknames.length > 0 && (
+          <div className="text-[9px] sm:text-xs leading-tight">
+            <span className="font-semibold text-gray-700">{t('nicknames', language)}:</span>
+            <span className="ml-0.5 text-gray-600">{koala.nicknames.join(', ')}</span>
+          </div>
+        )}
+
+        <div className="text-[9px] sm:text-xs leading-tight">
+          <span className="font-semibold text-gray-700">{t('sex', language)}:</span>
+          <span className="ml-0.5 text-gray-600 capitalize">{t(koala.sex, language)}</span>
+        </div>
+
+        <div className="text-[9px] sm:text-xs leading-tight">
           <span className="font-semibold text-gray-700">{t('birthDate', language)}:</span>
-          <span className="ml-1 text-gray-600">{formatDate(koala.birthDate)}</span>
+          <span className="ml-0.5 text-gray-600">{formatDate(koala.birthDate)}</span>
         </div>
 
         {!koala.deceased && (
-          <div>
+          <div className="text-[9px] sm:text-xs leading-tight">
             <span className="font-semibold text-gray-700">{t('age', language)}:</span>
-            <span className="ml-1 text-gray-600">{calculateAge(koala.birthDate)}</span>
+            <span className="ml-0.5 text-gray-600">{calculateAge(koala.birthDate)}</span>
           </div>
         )}
 
         {koala.deceased && (
-          <div className="bg-gray-100 p-1.5 rounded border-l-2 border-gray-500">
+          <div className="bg-gray-100 p-1 sm:p-1.5 rounded border-l-2 border-gray-500 text-[9px] sm:text-xs leading-tight space-y-0.5">
             <div>
               <span className="font-semibold text-gray-700">{t('deceased', language)}</span>
-              <span className="ml-1 text-gray-600">†</span>
+              <span className="ml-0.5 text-gray-600">†</span>
             </div>
             {koala.dateOfDeath && (
               <div>
                 <span className="font-semibold text-gray-700">{t('dateOfDeath', language)}:</span>
-                <span className="ml-1 text-gray-600">{formatDate(koala.dateOfDeath)}</span>
+                <span className="ml-0.5 text-gray-600">{formatDate(koala.dateOfDeath)}</span>
               </div>
             )}
             <div>
               <span className="font-semibold text-gray-700">{t('age', language)}:</span>
-              <span className="ml-1 text-gray-600">
+              <span className="ml-0.5 text-gray-600">
                 {koala.dateOfDeath
                   ? calculateAge(koala.birthDate, koala.dateOfDeath)
                   : t('unknown', language)}
@@ -148,33 +153,36 @@ export default function KoalaCard({ koala, onClose, allKoalas = [], onKoalaClick
         )}
 
         {(koala.mother || koala.father) && (
-          <div>
-            <span className="font-semibold text-gray-700">{t('mother', language)}:</span>
-            {koala.mother ? (
-              <button
-                onClick={() => onKoalaClick && onKoalaClick(koala.mother)}
-                className="ml-1 text-blue-600 hover:text-blue-800 hover:underline cursor-pointer"
-              >
-                {getKoalaName(koala.mother)}
-              </button>
-            ) : (
-              <span className="ml-1 text-gray-600">{t('unknown', language)}</span>
-            )}
+          <div className="text-[9px] sm:text-xs leading-tight space-y-0.5">
+            <div>
+              <span className="font-semibold text-gray-700">{t('mother', language)}:</span>
+              {koala.mother ? (
+                <button
+                  onClick={() => onKoalaClick && onKoalaClick(koala.mother)}
+                  className="ml-0.5 text-blue-600 hover:text-blue-800 hover:underline cursor-pointer"
+                >
+                  {getKoalaName(koala.mother)}
+                </button>
+              ) : (
+                <span className="ml-0.5 text-gray-600">{t('unknown', language)}</span>
+              )}
+            </div>
             <div>
               <span className="font-semibold text-gray-700">{t('father', language)}:</span>
               {koala.father ? (
                 <button
                   onClick={() => onKoalaClick && onKoalaClick(koala.father)}
-                  className="ml-1 text-blue-600 hover:text-blue-800 hover:underline cursor-pointer"
+                  className="ml-0.5 text-blue-600 hover:text-blue-800 hover:underline cursor-pointer"
                 >
                   {getKoalaName(koala.father)}
                 </button>
               ) : (
-                <span className="ml-1 text-gray-600">{t('unknown', language)}</span>
+                <span className="ml-0.5 text-gray-600">{t('unknown', language)}</span>
               )}
             </div>
           </div>
         )}
+        </div>
       </div>
     </div>
   );
