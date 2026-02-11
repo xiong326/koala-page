@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useLanguage } from '../i18n/LanguageContext';
 import { t } from '../i18n/translations';
-import { calculateGeneration, calculateAgeInYears } from '../utils/graphHelpers';
+import { calculateGeneration } from '../utils/graphHelpers';
+import { calculateAgeInYears } from '../utils/ageUtils';
 
 export default function FilterSidebar({ koalas, onKoalaClick, isOpen, onToggle }) {
   const { language } = useLanguage();
@@ -9,6 +10,10 @@ export default function FilterSidebar({ koalas, onKoalaClick, isOpen, onToggle }
     sex: 'all',
     ageRange: 'all',
     generation: 'all',
+  });
+  const [customAgeRange, setCustomAgeRange] = useState({
+    minAge: '',
+    maxAge: '',
   });
   const [filteredKoalas, setFilteredKoalas] = useState([]);
 
@@ -42,6 +47,11 @@ export default function FilterSidebar({ koalas, onKoalaClick, isOpen, onToggle }
           case 'young': return age >= 1 && age < 3;
           case 'adult': return age >= 3 && age < 10;
           case 'senior': return age >= 10;
+          case 'custom': {
+            const minAge = customAgeRange.minAge === '' ? 0 : parseInt(customAgeRange.minAge);
+            const maxAge = customAgeRange.maxAge === '' ? Infinity : parseInt(customAgeRange.maxAge);
+            return age >= minAge && age <= maxAge;
+          }
           default: return true;
         }
       });
@@ -52,8 +62,11 @@ export default function FilterSidebar({ koalas, onKoalaClick, isOpen, onToggle }
       result = result.filter(k => k.generation === parseInt(filters.generation));
     }
 
+    // Sort by age from oldest to youngest
+    result.sort((a, b) => b.ageInYears - a.ageInYears);
+
     setFilteredKoalas(result);
-  }, [filters, koalas]);
+  }, [filters, koalas, customAgeRange]);
 
   const handleFilterChange = (filterType, value) => {
     setFilters(prev => ({ ...prev, [filterType]: value }));
@@ -69,6 +82,21 @@ export default function FilterSidebar({ koalas, onKoalaClick, isOpen, onToggle }
       ageRange: 'all',
       generation: 'all',
     });
+    setCustomAgeRange({
+      minAge: '',
+      maxAge: '',
+    });
+  };
+
+  const handleCustomAgeChange = (field, value) => {
+    // Only allow positive integers
+    if (value === '' || /^\d+$/.test(value)) {
+      setCustomAgeRange(prev => ({ ...prev, [field]: value }));
+      // Auto-select custom when user enters values
+      if (filters.ageRange !== 'custom') {
+        handleFilterChange('ageRange', 'custom');
+      }
+    }
   };
 
   const hasActiveFilters = filters.sex !== 'all' || filters.ageRange !== 'all' || filters.generation !== 'all';
@@ -156,7 +184,38 @@ export default function FilterSidebar({ koalas, onKoalaClick, isOpen, onToggle }
               <option value="young">{t('ageYoung', language)} (1-3 {t('years', language)})</option>
               <option value="adult">{t('ageAdult', language)} (3-10 {t('years', language)})</option>
               <option value="senior">{t('ageSenior', language)} (10+ {t('years', language)})</option>
+              <option value="custom">{t('ageCustom', language)}</option>
             </select>
+
+            {/* Custom Age Range Inputs */}
+            {filters.ageRange === 'custom' && (
+              <div className="mt-2 space-y-2">
+                <div className="flex items-center gap-2">
+                  <input
+                    type="text"
+                    inputMode="numeric"
+                    placeholder={t('minAge', language)}
+                    value={customAgeRange.minAge}
+                    onChange={(e) => handleCustomAgeChange('minAge', e.target.value)}
+                    className="w-12 px-2 py-1.5 text-xs sm:text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent text-center"
+                    maxLength="2"
+                  />
+                  <span className="text-gray-500 text-xs">-</span>
+                  <input
+                    type="text"
+                    inputMode="numeric"
+                    placeholder={t('maxAge', language)}
+                    value={customAgeRange.maxAge}
+                    onChange={(e) => handleCustomAgeChange('maxAge', e.target.value)}
+                    className="w-12 px-2 py-1.5 text-xs sm:text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent text-center"
+                    maxLength="2"
+                  />
+                </div>
+                <p className="text-xs text-gray-500">
+                  {t('customAgeHint', language)}
+                </p>
+              </div>
+            )}
           </div>
 
           {/* Generation Filter */}

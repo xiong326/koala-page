@@ -3,21 +3,32 @@ import KoalaGraph from './components/KoalaGraph';
 import KoalaCard from './components/KoalaCard';
 import SearchDropdown from './components/SearchDropdown';
 import LanguageToggle from './components/LanguageToggle';
+import BoardSelector from './components/BoardSelector';
 import FilterSidebar from './components/FilterSidebar';
 import RelationshipSidebar from './components/RelationshipSidebar';
-import koalasData from './data/koalas.json';
+import koalasDataBoard1 from './data/koalas.json';
+import koalasDataBoard2 from './data/koalas-board2.json';
 import {
   koalasToGraphElements,
   getConnectedFamily,
   getAncestorPath,
   getLineageHighlight,
+  getUpcomingBirthdays,
 } from './utils/graphHelpers';
 import { useLanguage } from './i18n/LanguageContext';
 import { t } from './i18n/translations';
 
+const boardData = {
+  'board1': koalasDataBoard1,
+  'board2': koalasDataBoard2
+};
+
+const availableBoards = ['board2', 'board1'];
+
 function App() {
   const { language } = useLanguage();
-  const [koalas, setKoalas] = useState(koalasData.koalas);
+  const [currentBoard, setCurrentBoard] = useState('board2');
+  const [koalas, setKoalas] = useState(boardData['board2'].koalas);
   const [selectedKoala, setSelectedKoala] = useState(null);
   const [highlightedNodes, setHighlightedNodes] = useState([]);
   const [graphElements, setGraphElements] = useState([]);
@@ -26,11 +37,37 @@ function App() {
   const [relationshipSidebarOpen, setRelationshipSidebarOpen] = useState(false);
   const [relationshipPath, setRelationshipPath] = useState([]);
   const [ancestorLineage, setAncestorLineage] = useState([]);
+  const [upcomingBirthdays, setUpcomingBirthdays] = useState([]);
+
+  // Handle board change
+  const handleBoardChange = (newBoard) => {
+    setCurrentBoard(newBoard);
+    setKoalas(boardData[newBoard].koalas);
+
+    // Reset all UI state when switching boards
+    setSelectedKoala(null);
+    setHighlightedNodes([]);
+    setSelectedKoalaId(null);
+    setRelationshipPath([]);
+    setAncestorLineage([]);
+    setFilterSidebarOpen(false);
+    setRelationshipSidebarOpen(false);
+
+    // Reset graph view
+    setTimeout(() => {
+      const event = new CustomEvent('resetGraphView');
+      window.dispatchEvent(event);
+    }, 100);
+  };
 
   // Initialize graph elements (always show full graph)
   useEffect(() => {
     const elements = koalasToGraphElements(koalas);
     setGraphElements(elements);
+
+    // Update upcoming birthdays
+    const birthdays = getUpcomingBirthdays(koalas);
+    setUpcomingBirthdays(birthdays);
   }, [koalas]);
 
 
@@ -102,14 +139,26 @@ function App() {
     <div className="h-screen flex flex-col bg-gray-50">
       {/* Header */}
       <header className="bg-blue-600 text-white p-4 shadow-lg">
-        <div className="container mx-auto flex justify-between items-start">
-          <div>
+        <div className="container mx-auto flex justify-between items-start gap-4">
+          <div className="flex-1 min-w-0">
             <h1 className="text-3xl font-bold mb-2">{t('title', language)}</h1>
-            <p className="text-blue-100">
-              {t('subtitle', language)}
-            </p>
+            {upcomingBirthdays.length > 0 && (() => {
+              const nearest = upcomingBirthdays[0];
+              return (
+                <p className="text-blue-100 text-sm">
+                  {t('birthdayForecast', language)}: {nearest.koala.name} {language === 'zh' ? `${nearest.upcomingAge}岁` : `(${nearest.upcomingAge})`} - {nearest.monthDay}
+                </p>
+              );
+            })()}
           </div>
-          <LanguageToggle />
+          <div className="flex items-center gap-4">
+            <BoardSelector
+              currentBoard={currentBoard}
+              onBoardChange={handleBoardChange}
+              boards={availableBoards}
+            />
+            <LanguageToggle />
+          </div>
         </div>
       </header>
 

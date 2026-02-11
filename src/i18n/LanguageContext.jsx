@@ -4,8 +4,8 @@ const LanguageContext = createContext();
 
 export function LanguageProvider({ children }) {
   const [language, setLanguage] = useState(() => {
-    // Load saved language from localStorage or default to 'en'
-    return localStorage.getItem('language') || 'en';
+    // Load saved language from localStorage or default to 'zh'
+    return localStorage.getItem('language') || 'zh';
   });
 
   useEffect(() => {

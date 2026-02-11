@@ -1,5 +1,7 @@
 import { useLanguage } from '../i18n/LanguageContext';
 import { t } from '../i18n/translations';
+import { parseKoalaDateString } from '../utils/dateUtils';
+import { getAgeForDisplay } from '../utils/ageUtils';
 
 export default function KoalaCard({ koala, onClose, allKoalas = [], onKoalaClick }) {
   const { language } = useLanguage();
@@ -24,14 +26,16 @@ export default function KoalaCard({ koala, onClose, allKoalas = [], onKoalaClick
       return parts[0];
     } else if (parts.length === 2) {
       // Year-Month: "2023-05"
-      const date = new Date(dateString + '-01');
+      const date = parseKoalaDateString(dateString);
+      if (!date) return t('unknown', language);
       return date.toLocaleDateString(locale, {
         year: 'numeric',
         month: 'long'
       });
     } else {
       // Full date: "2023-05-10"
-      const date = new Date(dateString);
+      const date = parseKoalaDateString(dateString);
+      if (!date) return t('unknown', language);
       return date.toLocaleDateString(locale, {
         year: 'numeric',
         month: 'long',
@@ -40,37 +44,10 @@ export default function KoalaCard({ koala, onClose, allKoalas = [], onKoalaClick
     }
   };
 
-  const calculateAge = (birthDate, endDate = null) => {
-    if (!birthDate) return t('unknown', language);
-
-    const birth = new Date(birthDate);
-    let end;
-
-    if (endDate) {
-      // Handle partial dates for endDate
-      const parts = endDate.split('-');
-      if (parts.length === 1) {
-        // Year only: use end of year
-        end = new Date(parts[0] + '-12-31');
-      } else if (parts.length === 2) {
-        // Year-Month: use end of month
-        const [year, month] = parts;
-        end = new Date(year, month, 0); // Day 0 = last day of previous month
-      } else {
-        end = new Date(endDate);
-      }
-    } else {
-      end = new Date();
-    }
-
-    const years = end.getFullYear() - birth.getFullYear() - 1;
-    const months = end.getMonth() - birth.getMonth();
-
-    if (years === 0) {
-      const monthCount = months + (end.getMonth() < birth.getMonth() ? 12 : 0);
-      return `${monthCount} ${t('months', language)}`;
-    }
-    return `${years} ${t('years', language)}`;
+  const formatAge = (birthDate, endDate = null) => {
+    const age = getAgeForDisplay(birthDate, endDate);
+    if (!age) return t('unknown', language);
+    return `${age.value} ${t(age.unit, language)}`;
   };
 
   return (
@@ -125,7 +102,7 @@ export default function KoalaCard({ koala, onClose, allKoalas = [], onKoalaClick
         {!koala.deceased && (
           <div className="text-[9px] sm:text-xs leading-tight">
             <span className="font-semibold text-gray-700">{t('age', language)}:</span>
-            <span className="ml-0.5 text-gray-600">{calculateAge(koala.birthDate)}</span>
+            <span className="ml-0.5 text-gray-600">{formatAge(koala.birthDate)}</span>
           </div>
         )}
 
@@ -145,7 +122,7 @@ export default function KoalaCard({ koala, onClose, allKoalas = [], onKoalaClick
               <span className="font-semibold text-gray-700">{t('age', language)}:</span>
               <span className="ml-0.5 text-gray-600">
                 {koala.dateOfDeath
-                  ? calculateAge(koala.birthDate, koala.dateOfDeath)
+                  ? formatAge(koala.birthDate, koala.dateOfDeath)
                   : t('unknown', language)}
               </span>
             </div>

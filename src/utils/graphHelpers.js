@@ -1,3 +1,9 @@
+import { localDateToISODateString } from './dateUtils';
+import { calculateAgeInYears } from './ageUtils';
+
+// Backwards-compatible re-export (older callers may import from graphHelpers)
+export { calculateAgeInYears } from './ageUtils';
+
 /**
  * Convert koala data to Cytoscape graph elements
  */
@@ -194,39 +200,50 @@ export function calculateGeneration(koalaId, koalas) {
 }
 
 /**
- * Calculate age in years (integer)
+ * Get upcoming birthdays within the next N days
  */
-export function calculateAgeInYears(birthDate, endDate = null) {
-  if (!birthDate) return 0;
+export function getUpcomingBirthdays(koalas, daysAhead = 60) {
+  const today = new Date();
+  const upcomingBirthdays = [];
 
-  const birth = new Date(birthDate);
-  let end;
+  koalas.forEach(koala => {
+    // Skip deceased koalas
+    if (koala.deceased) return;
 
-  if (endDate) {
-    // Handle partial dates for endDate
-    const parts = endDate.split('-');
-    if (parts.length === 1) {
-      // Year only: use end of year
-      end = new Date(parts[0] + '-12-31');
-    } else if (parts.length === 2) {
-      // Year-Month: use end of month
-      const [year, month] = parts;
-      end = new Date(year, month, 0); // Day 0 = last day of previous month
-    } else {
-      end = new Date(endDate);
+    // Only process koalas with full birth dates (YYYY-MM-DD)
+    if (!koala.birthDate || koala.birthDate.split('-').length !== 3) return;
+
+    const [year, month, day] = koala.birthDate.split('-').map(Number);
+
+    // Calculate next birthday
+    const currentYear = today.getFullYear();
+    let nextBirthday = new Date(currentYear, month - 1, day);
+
+    // If birthday already passed this year, use next year
+    if (nextBirthday < today) {
+      nextBirthday = new Date(currentYear + 1, month - 1, day);
     }
-  } else {
-    end = new Date();
-  }
 
-  const years = end.getFullYear() - birth.getFullYear();
-  const monthDiff = end.getMonth() - birth.getMonth();
-  const dayDiff = end.getDate() - birth.getDate();
+    // Calculate days until birthday
+    const daysUntil = Math.floor((nextBirthday - today) / (1000 * 60 * 60 * 24));
 
-  // Adjust if birthday hasn't occurred this year
-  if (monthDiff < 0 || (monthDiff === 0 && dayDiff < 0)) {
-    return Math.max(0, years - 1);
-  }
+    // Only include birthdays within the specified range
+    if (daysUntil >= 0 && daysUntil <= daysAhead) {
+      // Avoid `toISOString().split('T')[0]` here: it converts to UTC and can shift the date by 1 day.
+      const upcomingAge = calculateAgeInYears(koala.birthDate, localDateToISODateString(nextBirthday));
 
-  return Math.max(0, years);
+      upcomingBirthdays.push({
+        koala,
+        date: nextBirthday,
+        daysUntil,
+        upcomingAge,
+        monthDay: `${String(month).padStart(2, '0')}/${String(day).padStart(2, '0')}`
+      });
+    }
+  });
+
+  // Sort by date (closest first)
+  upcomingBirthdays.sort((a, b) => a.daysUntil - b.daysUntil);
+
+  return upcomingBirthdays;
 }

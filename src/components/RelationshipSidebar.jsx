@@ -272,7 +272,11 @@ export default function RelationshipSidebar({ koalas, onKoalaClick, isOpen, onTo
                     className="w-full px-2 py-1.5 sm:px-3 sm:py-2 text-left hover:bg-blue-50 text-xs sm:text-sm"
                   >
                     <div className="font-semibold">{koala.name}</div>
-                    <div className="text-xs text-gray-500">{koala.id}</div>
+                    {koala.nicknames && koala.nicknames.length > 0 && (
+                      <div className="text-xs text-gray-500">
+                        {koala.nicknames.join(', ')}
+                      </div>
+                    )}
                   </button>
                 ))}
               </div>
@@ -320,7 +324,11 @@ export default function RelationshipSidebar({ koalas, onKoalaClick, isOpen, onTo
                     className="w-full px-2 py-1.5 sm:px-3 sm:py-2 text-left hover:bg-blue-50 text-xs sm:text-sm"
                   >
                     <div className="font-semibold">{koala.name}</div>
-                    <div className="text-xs text-gray-500">{koala.id}</div>
+                    {koala.nicknames && koala.nicknames.length > 0 && (
+                      <div className="text-xs text-gray-500">
+                        {koala.nicknames.join(', ')}
+                      </div>
+                    )}
                   </button>
                 ))}
               </div>

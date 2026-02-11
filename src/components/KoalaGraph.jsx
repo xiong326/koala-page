@@ -136,7 +136,10 @@ export default function KoalaGraph({ elements, onNodeClick, highlightedNodes = [
             'line-color': '#94a3b8',
             'target-arrow-color': '#94a3b8',
             'target-arrow-shape': 'triangle',
-            'curve-style': 'bezier',
+            'curve-style': 'taxi',
+            'taxi-direction': 'downward',
+            'taxi-turn': 20,
+            'taxi-turn-min-distance': 5,
             'arrow-scale': 1.5,
           }
         },
@@ -145,7 +148,8 @@ export default function KoalaGraph({ elements, onNodeClick, highlightedNodes = [
           style: {
             'line-color': '#f59e0b',
             'target-arrow-color': '#f59e0b',
-            'width': 3,
+            'width': 5,
+            'z-index': 999,
           }
         }
       ],

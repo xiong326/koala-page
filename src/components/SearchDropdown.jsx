@@ -91,7 +91,6 @@ export default function SearchDropdown({ koalas, onSelectKoala }) {
                   {koala.nicknames.join(', ')}
                 </div>
               )}
-              <div className="text-xs text-gray-400">{koala.id}</div>
             </button>
           ))}
         </div>

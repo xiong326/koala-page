@@ -3,6 +3,7 @@ export const translations = {
     // Header
     title: "Koala Family Tree",
     subtitle: "Explore koala relationships and family connections",
+    birthdayForecast: "Birthday forecast",
 
     // Search
     searchPlaceholder: "Search by name, nickname, or ID...",
@@ -48,6 +49,10 @@ export const translations = {
     ageYoung: "Young",
     ageAdult: "Adult",
     ageSenior: "Senior",
+    ageCustom: "Custom Range",
+    minAge: "Min",
+    maxAge: "Max",
+    customAgeHint: "Leave blank for no limit. Results ordered by age (oldest first)",
     generation: "Generation",
     gen: "Gen",
 
@@ -105,6 +110,7 @@ export const translations = {
     // Header - ADD CHINESE HERE
     title: "考拉家族树",  // REPLACE WITH CHINESE
     subtitle: "探索考拉关系和家族联系",  // REPLACE WITH CHINESE
+    birthdayForecast: "生日预告",
 
     // Search - ADD CHINESE HERE
     searchPlaceholder: "按名字、昵称或ID搜索...",  // REPLACE WITH CHINESE
@@ -150,6 +156,10 @@ export const translations = {
     ageYoung: "少年",
     ageAdult: "成年",
     ageSenior: "老年",
+    ageCustom: "自定义范围",
+    minAge: "最小",
+    maxAge: "最大",
+    customAgeHint: "留空表示无限制。结果按年龄排序（最年长优先）",
     generation: "第",
     gen: "代",
 
