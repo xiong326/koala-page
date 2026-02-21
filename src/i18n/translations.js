@@ -55,6 +55,8 @@ export const translations = {
     customAgeHint: "Leave blank for no limit. Results ordered by age (oldest first)",
     generation: "Generation",
     gen: "Gen",
+    filterByDeceased: "Status",
+    alive: "Alive",
 
     // Relationship Calculator
     relationshipTitle: "Relationship",
@@ -162,6 +164,8 @@ export const translations = {
     customAgeHint: "留空表示无限制。结果按年龄排序（最年长优先）",
     generation: "第",
     gen: "代",
+    filterByDeceased: "状态",
+    alive: "在世",
 
     // Relationship Calculator
     relationshipTitle: "关系计算",

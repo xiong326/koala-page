@@ -155,6 +155,7 @@ export default function KoalaGraph({ elements, onNodeClick, highlightedNodes = [
       ],
       minZoom: 0.3,
       maxZoom: 3,
+      autoungrabify: true,
     });
 
     // Run layout and capture the initial "default" viewport (zoom + pan)

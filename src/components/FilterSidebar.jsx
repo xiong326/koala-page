@@ -10,6 +10,7 @@ export default function FilterSidebar({ koalas, onKoalaClick, isOpen, onToggle }
     sex: 'all',
     ageRange: 'all',
     generation: 'all',
+    deceased: 'all',
   });
   const [customAgeRange, setCustomAgeRange] = useState({
     minAge: '',
@@ -62,6 +63,12 @@ export default function FilterSidebar({ koalas, onKoalaClick, isOpen, onToggle }
       result = result.filter(k => k.generation === parseInt(filters.generation));
     }
 
+    // Filter by deceased status
+    if (filters.deceased !== 'all') {
+      const isDeceased = filters.deceased === 'yes';
+      result = result.filter(k => !!k.deceased === isDeceased);
+    }
+
     // Sort by age from oldest to youngest
     result.sort((a, b) => b.ageInYears - a.ageInYears);
 
@@ -81,6 +88,7 @@ export default function FilterSidebar({ koalas, onKoalaClick, isOpen, onToggle }
       sex: 'all',
       ageRange: 'all',
       generation: 'all',
+      deceased: 'all',
     });
     setCustomAgeRange({
       minAge: '',
@@ -99,7 +107,7 @@ export default function FilterSidebar({ koalas, onKoalaClick, isOpen, onToggle }
     }
   };
 
-  const hasActiveFilters = filters.sex !== 'all' || filters.ageRange !== 'all' || filters.generation !== 'all';
+  const hasActiveFilters = filters.sex !== 'all' || filters.ageRange !== 'all' || filters.generation !== 'all' || filters.deceased !== 'all';
 
   return (
     <>
@@ -120,7 +128,7 @@ export default function FilterSidebar({ koalas, onKoalaClick, isOpen, onToggle }
           <span className="hidden sm:inline">{t('filterTitle', language)}</span>
           {hasActiveFilters && (
             <span className="bg-blue-500 text-white text-xs rounded-full w-4 h-4 sm:w-5 sm:h-5 flex items-center justify-center">
-              {[filters.sex !== 'all', filters.ageRange !== 'all', filters.generation !== 'all'].filter(Boolean).length}
+              {[filters.sex !== 'all', filters.ageRange !== 'all', filters.generation !== 'all', filters.deceased !== 'all'].filter(Boolean).length}
             </span>
           )}
         </button>
@@ -234,6 +242,22 @@ export default function FilterSidebar({ koalas, onKoalaClick, isOpen, onToggle }
                   {language === 'zh' ? `第${gen}代` : `${t('generation', language)} ${gen}`}
                 </option>
               ))}
+            </select>
+          </div>
+
+          {/* Deceased Filter */}
+          <div>
+            <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-1 sm:mb-2">
+              {t('filterByDeceased', language)}
+            </label>
+            <select
+              value={filters.deceased}
+              onChange={(e) => handleFilterChange('deceased', e.target.value)}
+              className="w-full px-2 py-1.5 sm:px-3 sm:py-2 text-xs sm:text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            >
+              <option value="all">{t('all', language)}</option>
+              <option value="no">{t('alive', language)}</option>
+              <option value="yes">{t('deceased', language)}</option>
             </select>
           </div>
 
