@@ -7,6 +7,7 @@ import BoardSelector from './components/BoardSelector';
 import FilterSidebar from './components/FilterSidebar';
 import RelationshipSidebar from './components/RelationshipSidebar';
 import DataBoard from './components/DataBoard';
+import KoalaDetailModal from './components/KoalaDetailModal';
 import koalasDataBoard1 from './data/koalas.json';
 import koalasDataBoard2 from './data/koalas-board2.json';
 import {
@@ -40,6 +41,7 @@ function App() {
   const [ancestorLineage, setAncestorLineage] = useState([]);
   const [upcomingBirthdays, setUpcomingBirthdays] = useState([]);
   const [dataBoardOpen, setDataBoardOpen] = useState(false);
+  const [detailModalKoala, setDetailModalKoala] = useState(null);
 
   // Handle board change
   const handleBoardChange = (newBoard) => {
@@ -54,6 +56,7 @@ function App() {
     setAncestorLineage([]);
     setFilterSidebarOpen(false);
     setRelationshipSidebarOpen(false);
+    setDetailModalKoala(null);
 
     // Reset graph view
     setTimeout(() => {
@@ -123,6 +126,27 @@ function App() {
     // For simplicity, we can trigger handleNodeClick without position first
     // The card will appear after the graph centers
     handleNodeClick(koala);
+  };
+
+  const handleOpenDetail = (koala) => {
+    setDetailModalKoala(koala);
+  };
+
+  const handleDetailKoalaClick = (koalaId) => {
+    const koala = koalas.find(k => k.id === koalaId);
+    if (koala) {
+      setDetailModalKoala(koala);
+      setSelectedKoalaId(koala.id);
+      setSelectedKoala(koala);
+      setRelationshipPath([]);
+      const lineage = getLineageHighlight(koala.id, koalas);
+      setHighlightedNodes(lineage.nodes);
+      setAncestorLineage(lineage.ancestorPath);
+    }
+  };
+
+  const handleCloseDetail = () => {
+    setDetailModalKoala(null);
   };
 
   const handleRelationshipPath = useCallback((path) => {
@@ -235,6 +259,7 @@ function App() {
                   onClose={handleCloseCard}
                   allKoalas={koalas}
                   onKoalaClick={handleParentClick}
+                  onOpenDetail={handleOpenDetail}
                 />
               </div>
             )}
@@ -249,6 +274,16 @@ function App() {
         onClose={() => setDataBoardOpen(false)}
         onKoalaClick={handleFilterKoalaClick}
       />
+
+      {/* Koala Detail Modal */}
+      {detailModalKoala && (
+        <KoalaDetailModal
+          koala={detailModalKoala}
+          allKoalas={koalas}
+          onClose={handleCloseDetail}
+          onKoalaClick={handleDetailKoalaClick}
+        />
+      )}
     </div>
   );
 }
