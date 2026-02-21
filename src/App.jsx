@@ -6,6 +6,7 @@ import LanguageToggle from './components/LanguageToggle';
 import BoardSelector from './components/BoardSelector';
 import FilterSidebar from './components/FilterSidebar';
 import RelationshipSidebar from './components/RelationshipSidebar';
+import DataBoard from './components/DataBoard';
 import koalasDataBoard1 from './data/koalas.json';
 import koalasDataBoard2 from './data/koalas-board2.json';
 import {
@@ -38,6 +39,7 @@ function App() {
   const [relationshipPath, setRelationshipPath] = useState([]);
   const [ancestorLineage, setAncestorLineage] = useState([]);
   const [upcomingBirthdays, setUpcomingBirthdays] = useState([]);
+  const [dataBoardOpen, setDataBoardOpen] = useState(false);
 
   // Handle board change
   const handleBoardChange = (newBoard) => {
@@ -175,8 +177,19 @@ function App() {
             </div>
             <button
               type="button"
+              onClick={() => setDataBoardOpen(true)}
+              className="px-3 py-2 text-sm rounded-md bg-white border border-gray-300 shadow-sm hover:bg-gray-50 whitespace-nowrap"
+            >
+              <span className="hidden sm:inline">{t('dataBoard', language)}</span>
+              <span className="sm:hidden">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                </svg>
+              </span>
+            </button>
+            <button
+              type="button"
               onClick={() => {
-                // Reset graph view
                 const event = new CustomEvent('resetGraphView');
                 window.dispatchEvent(event);
               }}
@@ -228,6 +241,14 @@ function App() {
           </div>
         </div>
       </div>
+
+      {/* Data Board Modal */}
+      <DataBoard
+        koalas={koalas}
+        isOpen={dataBoardOpen}
+        onClose={() => setDataBoardOpen(false)}
+        onKoalaClick={handleFilterKoalaClick}
+      />
     </div>
   );
 }
