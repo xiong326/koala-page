@@ -8,6 +8,7 @@ import FilterSidebar from './components/FilterSidebar';
 import RelationshipSidebar from './components/RelationshipSidebar';
 import koalasDataBoard1 from './data/koalas.json';
 import koalasDataBoard2 from './data/koalas-board2.json';
+import contributionData from './data/contribution.json';
 import {
   koalasToGraphElements,
   getConnectedFamily,
@@ -25,6 +26,17 @@ const boardData = {
 
 const availableBoards = ['board2', 'board1'];
 
+const boardToContributionName = {
+  'board1': 'Hongshan',
+  'board2': 'Chimelong'
+};
+
+const contributionTypeKeys = {
+  'Koala Photo': 'contributionKoalaPhoto',
+  'Family Tree': 'contributionFamilyTree',
+  'Web Design & Development': 'contributionWebDesign',
+};
+
 function App() {
   const { language } = useLanguage();
   const [currentBoard, setCurrentBoard] = useState('board2');
@@ -38,6 +50,7 @@ function App() {
   const [relationshipPath, setRelationshipPath] = useState([]);
   const [ancestorLineage, setAncestorLineage] = useState([]);
   const [upcomingBirthdays, setUpcomingBirthdays] = useState([]);
+  const [contributionsOpen, setContributionsOpen] = useState(false);
 
   // Handle board change
   const handleBoardChange = (newBoard) => {
@@ -146,7 +159,7 @@ function App() {
               const nearest = upcomingBirthdays[0];
               return (
                 <p className="text-blue-100 text-sm">
-                  {t('birthdayForecast', language)}: {nearest.koala.name} {language === 'zh' ? `${nearest.upcomingAge}岁` : `(${nearest.upcomingAge})`} - {nearest.monthDay}
+                  {t('birthdayForecast', language)}: {nearest.koala.name} {t('ageYearsFormat', language, { age: nearest.upcomingAge })} - {nearest.monthDay}
                 </p>
               );
             })()}
@@ -228,6 +241,48 @@ function App() {
           </div>
         </div>
       </div>
+
+      {/* Contributions Footer */}
+      {(() => {
+        const boardName = boardToContributionName[currentBoard];
+        const boardContributions = contributionData.contributions.find(
+          c => c.board === boardName
+        );
+        if (!boardContributions) return null;
+        return (
+          <footer className="relative bg-white border-t border-gray-200 shrink-0">
+            {contributionsOpen && (
+              <div className="absolute bottom-full left-0 right-0 bg-white border border-gray-200 rounded-t-lg shadow-lg px-4 py-3 z-10">
+                <div className="container mx-auto flex flex-wrap gap-x-6 gap-y-1">
+                  {boardContributions.contributions.map((item, idx) => {
+                    const typeKey = contributionTypeKeys[item.contribution];
+                    const translatedType = typeKey ? t(typeKey, language) : item.contribution;
+                    return (
+                      <div key={idx} className="text-xs text-gray-500">
+                        <span className="font-medium text-gray-700">{translatedType}</span>
+                        {': '}
+                        {item.names.join(', ')}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+            <div className="container mx-auto">
+              <button
+                type="button"
+                onClick={() => setContributionsOpen(!contributionsOpen)}
+                className="w-full flex items-center justify-between py-2 px-4 text-sm font-semibold text-gray-600 hover:text-gray-800 hover:bg-gray-50 transition-colors"
+              >
+                {t('contributionsTitle', language)}
+                <span className={`text-xs transition-transform duration-200 ${contributionsOpen ? 'rotate-180' : ''}`}>
+                  ▲
+                </span>
+              </button>
+            </div>
+          </footer>
+        );
+      })()}
     </div>
   );
 }

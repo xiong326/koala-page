@@ -231,7 +231,7 @@ export default function FilterSidebar({ koalas, onKoalaClick, isOpen, onToggle }
               <option value="all">{t('all', language)}</option>
               {generations.map(gen => (
                 <option key={gen} value={gen}>
-                  {language === 'zh' ? `第${gen}代` : `${t('generation', language)} ${gen}`}
+                  {t('generationFormat', language, { gen })}
                 </option>
               ))}
             </select>
@@ -280,9 +280,7 @@ export default function FilterSidebar({ koalas, onKoalaClick, isOpen, onToggle }
                           <span>{koala.ageInYears} {t('years', language)}</span>
                           <span>•</span>
                           <span>
-                            {language === 'zh'
-                              ? `第${koala.generation}代`
-                              : `${t('gen', language)} ${koala.generation}`}
+                            {t('generationShortFormat', language, { gen: koala.generation })}
                           </span>
                         </div>
                       </div>

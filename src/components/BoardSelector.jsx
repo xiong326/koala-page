@@ -1,4 +1,5 @@
 import { useLanguage } from '../i18n/LanguageContext';
+import { t } from '../i18n/translations';
 
 const BoardSelector = ({ currentBoard, onBoardChange, boards }) => {
   const { language } = useLanguage();
@@ -17,7 +18,7 @@ const BoardSelector = ({ currentBoard, onBoardChange, boards }) => {
   return (
     <div className="flex items-center gap-2">
       <label className="text-white text-sm font-medium whitespace-nowrap">
-        {language === 'en' ? 'Family:' : '家族：'}
+        {t('familyLabel', language)}
       </label>
       <select
         value={currentBoard}

@@ -55,6 +55,10 @@ export const translations = {
     customAgeHint: "Leave blank for no limit. Results ordered by age (oldest first)",
     generation: "Generation",
     gen: "Gen",
+    generationFormat: "Generation {{gen}}",
+    generationShortFormat: "Gen {{gen}}",
+    familyLabel: "Family:",
+    ageYearsFormat: "({{age}})",
 
     // Relationship Calculator
     relationshipTitle: "Relationship",
@@ -102,6 +106,12 @@ export const translations = {
 
     // Graph Controls
     resetView: "Reset view",
+
+    // Contributions
+    contributionsTitle: "Credits & Contributions",
+    contributionKoalaPhoto: "Koala Photo",
+    contributionFamilyTree: "Family Tree",
+    contributionWebDesign: "Web Design & Development",
 
     // Language toggle
     language: "语言",
@@ -162,6 +172,10 @@ export const translations = {
     customAgeHint: "留空表示无限制。结果按年龄排序（最年长优先）",
     generation: "第",
     gen: "代",
+    generationFormat: "第{{gen}}代",
+    generationShortFormat: "第{{gen}}代",
+    familyLabel: "家族：",
+    ageYearsFormat: "{{age}}岁",
 
     // Relationship Calculator
     relationshipTitle: "关系计算",
@@ -209,6 +223,12 @@ export const translations = {
 
     // Graph Controls
     resetView: "重置视图",
+
+    // Contributions
+    contributionsTitle: "鸣谢与贡献",
+    contributionKoalaPhoto: "考拉照片",
+    contributionFamilyTree: "家族树",
+    contributionWebDesign: "网页设计与开发",
 
     // Language toggle
     language: "Language",
