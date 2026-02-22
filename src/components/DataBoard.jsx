@@ -339,7 +339,7 @@ export default function DataBoard({ koalas, isOpen, onClose, onKoalaClick }) {
                         ? <KoalaLink name={age.oldest.name} koalaId={age.oldest.id} onClick={handleKoalaNav} />
                         : '-'}
                     </p>
-                    {age.oldest && <p className="text-xs text-gray-400 mt-1">{age.oldest.ageInYears} {t('years', language)}</p>}
+                    {age.oldest && <p className="text-xs text-gray-400 mt-1">{age.oldest.ageForDisplay ? `${age.oldest.ageForDisplay.value} ${t(age.oldest.ageForDisplay.unit, language)}` : `${age.oldest.ageInYears} ${t('years', language)}`}</p>}
                   </div>
                   <div className="bg-white rounded-lg border border-gray-200 p-3 sm:p-4">
                     <p className="text-xs sm:text-sm text-gray-500 mb-1">{t('dbYoungest', language)}</p>
@@ -348,7 +348,7 @@ export default function DataBoard({ koalas, isOpen, onClose, onKoalaClick }) {
                         ? <KoalaLink name={age.youngest.name} koalaId={age.youngest.id} onClick={handleKoalaNav} />
                         : '-'}
                     </p>
-                    {age.youngest && <p className="text-xs text-gray-400 mt-1">{age.youngest.ageInYears} {t('years', language)}</p>}
+                    {age.youngest && <p className="text-xs text-gray-400 mt-1">{age.youngest.ageForDisplay ? `${age.youngest.ageForDisplay.value} ${t(age.youngest.ageForDisplay.unit, language)}` : `${age.youngest.ageInYears} ${t('years', language)}`}</p>}
                   </div>
                   <StatCard
                     label={t('dbAvgLifespan', language)}

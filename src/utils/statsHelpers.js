@@ -1,12 +1,17 @@
-import { calculateAgeInYears } from './ageUtils';
+import { calculateAgeInYears, calculateAgeParts, getAgeForDisplay } from './ageUtils';
 import { calculateGeneration } from './graphHelpers';
 
 export function enrichKoala(koala, allKoalas) {
+  const endDate = koala.deceased ? koala.dateOfDeath : null;
+  const ageParts = calculateAgeParts(koala.birthDate, endDate);
+  const preciseAge = ageParts
+    ? ageParts.years + ageParts.months / 12 + ageParts.days / 365
+    : 0;
   return {
     ...koala,
-    ageInYears: koala.deceased
-      ? calculateAgeInYears(koala.birthDate, koala.dateOfDeath)
-      : calculateAgeInYears(koala.birthDate),
+    ageInYears: calculateAgeInYears(koala.birthDate, endDate),
+    preciseAge,
+    ageForDisplay: getAgeForDisplay(koala.birthDate, endDate),
     generation: calculateGeneration(koala.id, allKoalas),
   };
 }
@@ -33,7 +38,7 @@ export function computeAgeStats(koalas) {
   const ages = koalas.map(k => k.ageInYears);
   const averageAge = +(ages.reduce((a, b) => a + b, 0) / ages.length).toFixed(1);
 
-  const sorted = [...koalas].sort((a, b) => b.ageInYears - a.ageInYears);
+  const sorted = [...koalas].sort((a, b) => b.preciseAge - a.preciseAge);
   const oldest = sorted[0];
   const youngest = sorted[sorted.length - 1];
 

@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useLanguage } from '../i18n/LanguageContext';
 import { t } from '../i18n/translations';
 import { calculateGeneration } from '../utils/graphHelpers';
-import { calculateAgeInYears } from '../utils/ageUtils';
+import { calculateAgeInYears, calculateAgeParts, getAgeForDisplay } from '../utils/ageUtils';
 import { getPhotoUrl } from '../utils/imageUtils';
 
 export default function FilterSidebar({ koalas, onKoalaClick, isOpen, onToggle }) {
@@ -20,13 +20,20 @@ export default function FilterSidebar({ koalas, onKoalaClick, isOpen, onToggle }
   const [filteredKoalas, setFilteredKoalas] = useState([]);
 
   // Calculate generations for all koalas
-  const koalasWithGeneration = koalas.map(koala => ({
-    ...koala,
-    generation: calculateGeneration(koala.id, koalas),
-    ageInYears: koala.deceased
-      ? calculateAgeInYears(koala.birthDate, koala.dateOfDeath)
-      : calculateAgeInYears(koala.birthDate),
-  }));
+  const koalasWithGeneration = koalas.map(koala => {
+    const endDate = koala.deceased ? koala.dateOfDeath : null;
+    const ageParts = calculateAgeParts(koala.birthDate, endDate);
+    const preciseAge = ageParts
+      ? ageParts.years + ageParts.months / 12 + ageParts.days / 365
+      : 0;
+    return {
+      ...koala,
+      generation: calculateGeneration(koala.id, koalas),
+      ageInYears: calculateAgeInYears(koala.birthDate, endDate),
+      preciseAge,
+      ageForDisplay: getAgeForDisplay(koala.birthDate, endDate),
+    };
+  });
 
   // Get unique generations
   const generations = [...new Set(koalasWithGeneration.map(k => k.generation))].sort((a, b) => a - b);
@@ -70,8 +77,8 @@ export default function FilterSidebar({ koalas, onKoalaClick, isOpen, onToggle }
       result = result.filter(k => !!k.deceased === isDeceased);
     }
 
-    // Sort by age from oldest to youngest
-    result.sort((a, b) => b.ageInYears - a.ageInYears);
+    // Sort by age from oldest to youngest (fractional for proper sub-year ordering)
+    result.sort((a, b) => b.preciseAge - a.preciseAge);
 
     setFilteredKoalas(result);
   }, [filters, koalas, customAgeRange]);
@@ -305,7 +312,7 @@ export default function FilterSidebar({ koalas, onKoalaClick, isOpen, onToggle }
                             {t(koala.sex, language)}
                           </span>
                           <span>•</span>
-                          <span>{koala.ageInYears} {t('years', language)}</span>
+                          <span>{koala.ageForDisplay ? `${koala.ageForDisplay.value} ${t(koala.ageForDisplay.unit, language)}` : `${koala.ageInYears} ${t('years', language)}`}</span>
                           <span>•</span>
                           <span>
                             {t('generationShortFormat', language, { gen: koala.generation })}
