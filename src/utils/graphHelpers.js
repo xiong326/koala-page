@@ -1,5 +1,6 @@
 import { localDateToISODateString } from './dateUtils';
 import { calculateAgeInYears } from './ageUtils';
+import { getPhotoUrl } from './imageUtils';
 
 // Backwards-compatible re-export (older callers may import from graphHelpers)
 export { calculateAgeInYears } from './ageUtils';
@@ -22,7 +23,8 @@ export function koalasToGraphElements(koalas) {
       data: {
         id: koala.id,
         label: label,
-        ...koala
+        ...koala,
+        photo: getPhotoUrl(koala.photo, 'thumb'),
       }
     };
   });

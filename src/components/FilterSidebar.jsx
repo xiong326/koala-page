@@ -3,6 +3,7 @@ import { useLanguage } from '../i18n/LanguageContext';
 import { t } from '../i18n/translations';
 import { calculateGeneration } from '../utils/graphHelpers';
 import { calculateAgeInYears } from '../utils/ageUtils';
+import { getPhotoUrl } from '../utils/imageUtils';
 
 export default function FilterSidebar({ koalas, onKoalaClick, isOpen, onToggle }) {
   const { language } = useLanguage();
@@ -287,8 +288,11 @@ export default function FilterSidebar({ koalas, onKoalaClick, isOpen, onToggle }
                     <div className="flex items-center gap-2">
                       {koala.photo && (
                         <img
-                          src={koala.photo}
+                          src={getPhotoUrl(koala.photo, 'thumb')}
                           alt={koala.name}
+                          loading="lazy"
+                          width={32}
+                          height={32}
                           className="w-8 h-8 rounded object-cover"
                         />
                       )}

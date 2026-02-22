@@ -308,19 +308,25 @@ function App() {
         return (
           <footer className="relative bg-white border-t border-gray-200 shrink-0">
             {contributionsOpen && (
-              <div className="absolute bottom-full left-0 right-0 bg-white border border-gray-200 rounded-t-lg shadow-lg px-4 py-3 z-10">
-                <div className="container mx-auto flex flex-wrap gap-x-6 gap-y-1">
-                  {boardContributions.contributions.map((item, idx) => {
-                    const typeKey = contributionTypeKeys[item.contribution];
-                    const translatedType = typeKey ? t(typeKey, language) : item.contribution;
-                    return (
-                      <div key={idx} className="text-xs text-gray-500">
-                        <span className="font-medium text-gray-700">{translatedType}</span>
-                        {': '}
-                        {item.names.join(', ')}
-                      </div>
-                    );
-                  })}
+              <div className="absolute bottom-full left-0 right-0 bg-gray-50 border border-gray-200 rounded-t-xl shadow-2xl z-10">
+                <div className="px-4 sm:px-5 py-4 space-y-3">
+                  <h3 className="text-sm font-semibold text-gray-600 uppercase tracking-wider">{t('contributionsTitle', language)}</h3>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+                    {boardContributions.contributions.map((item, idx) => {
+                      const typeKey = contributionTypeKeys[item.contribution];
+                      const translatedType = typeKey ? t(typeKey, language) : item.contribution;
+                      return (
+                        <div key={idx} className="bg-white rounded-lg border border-gray-200 p-3 sm:p-4">
+                          <p className="text-xs sm:text-sm text-gray-500 font-semibold mb-2">{translatedType}</p>
+                          <div className="space-y-1">
+                            {item.names.map((name, ni) => (
+                              <p key={ni} className="text-sm text-gray-700">{name}</p>
+                            ))}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
                 </div>
               </div>
             )}
