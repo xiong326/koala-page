@@ -6,6 +6,8 @@ import LanguageToggle from './components/LanguageToggle';
 import BoardSelector from './components/BoardSelector';
 import FilterSidebar from './components/FilterSidebar';
 import RelationshipSidebar from './components/RelationshipSidebar';
+import DataBoard from './components/DataBoard';
+import KoalaDetailModal from './components/KoalaDetailModal';
 import koalasDataBoard1 from './data/koalas.json';
 import koalasDataBoard2 from './data/koalas-board2.json';
 import contributionData from './data/contribution.json';
@@ -50,6 +52,8 @@ function App() {
   const [relationshipPath, setRelationshipPath] = useState([]);
   const [ancestorLineage, setAncestorLineage] = useState([]);
   const [upcomingBirthdays, setUpcomingBirthdays] = useState([]);
+  const [dataBoardOpen, setDataBoardOpen] = useState(false);
+  const [detailModalKoala, setDetailModalKoala] = useState(null);
   const [contributionsOpen, setContributionsOpen] = useState(false);
 
   // Handle board change
@@ -65,6 +69,7 @@ function App() {
     setAncestorLineage([]);
     setFilterSidebarOpen(false);
     setRelationshipSidebarOpen(false);
+    setDetailModalKoala(null);
 
     // Reset graph view
     setTimeout(() => {
@@ -136,6 +141,27 @@ function App() {
     handleNodeClick(koala);
   };
 
+  const handleOpenDetail = (koala) => {
+    setDetailModalKoala(koala);
+  };
+
+  const handleDetailKoalaClick = (koalaId) => {
+    const koala = koalas.find(k => k.id === koalaId);
+    if (koala) {
+      setDetailModalKoala(koala);
+      setSelectedKoalaId(koala.id);
+      setSelectedKoala(koala);
+      setRelationshipPath([]);
+      const lineage = getLineageHighlight(koala.id, koalas);
+      setHighlightedNodes(lineage.nodes);
+      setAncestorLineage(lineage.ancestorPath);
+    }
+  };
+
+  const handleCloseDetail = () => {
+    setDetailModalKoala(null);
+  };
+
   const handleRelationshipPath = useCallback((path) => {
     // Highlight the relationship path
     setHighlightedNodes(path);
@@ -188,8 +214,19 @@ function App() {
             </div>
             <button
               type="button"
+              onClick={() => setDataBoardOpen(true)}
+              className="px-3 py-2 text-sm rounded-md bg-white border border-gray-300 shadow-sm hover:bg-gray-50 whitespace-nowrap"
+            >
+              <span className="hidden sm:inline">{t('dataBoard', language)}</span>
+              <span className="sm:hidden">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                </svg>
+              </span>
+            </button>
+            <button
+              type="button"
               onClick={() => {
-                // Reset graph view
                 const event = new CustomEvent('resetGraphView');
                 window.dispatchEvent(event);
               }}
@@ -235,12 +272,31 @@ function App() {
                   onClose={handleCloseCard}
                   allKoalas={koalas}
                   onKoalaClick={handleParentClick}
+                  onOpenDetail={handleOpenDetail}
                 />
               </div>
             )}
           </div>
         </div>
       </div>
+
+      {/* Data Board Modal */}
+      <DataBoard
+        koalas={koalas}
+        isOpen={dataBoardOpen}
+        onClose={() => setDataBoardOpen(false)}
+        onKoalaClick={handleFilterKoalaClick}
+      />
+
+      {/* Koala Detail Modal */}
+      {detailModalKoala && (
+        <KoalaDetailModal
+          koala={detailModalKoala}
+          allKoalas={koalas}
+          onClose={handleCloseDetail}
+          onKoalaClick={handleDetailKoalaClick}
+        />
+      )}
 
       {/* Contributions Footer */}
       {(() => {
