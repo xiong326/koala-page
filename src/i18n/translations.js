@@ -182,7 +182,7 @@ export const translations = {
   },
   zh: {
     // Header - ADD CHINESE HERE
-    title: "考拉家族树",  // REPLACE WITH CHINESE
+    title: "考拉的毛茸茸族谱",
     subtitle: "探索考拉关系和家族联系",  // REPLACE WITH CHINESE
     birthdayForecast: "生日预告",
 

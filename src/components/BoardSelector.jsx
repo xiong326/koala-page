@@ -16,14 +16,14 @@ const BoardSelector = ({ currentBoard, onBoardChange, boards }) => {
   };
 
   return (
-    <div className="flex items-center gap-2">
-      <label className="text-white text-sm font-medium whitespace-nowrap">
+    <div className="flex items-center gap-1.5">
+      <label className="text-white text-xs font-medium whitespace-nowrap">
         {t('familyLabel', language)}
       </label>
       <select
         value={currentBoard}
         onChange={(e) => onBoardChange(e.target.value)}
-        className="px-3 py-1 rounded-md bg-blue-500 text-white border border-blue-400 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-white cursor-pointer"
+        className="px-2 py-0.5 h-7 rounded bg-blue-500 text-white text-xs border border-blue-400 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-white cursor-pointer"
       >
         {boards.map((board) => (
           <option key={board} value={board}>
