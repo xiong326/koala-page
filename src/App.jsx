@@ -10,6 +10,7 @@ import DataBoard from './components/DataBoard';
 import KoalaDetailModal from './components/KoalaDetailModal';
 import koalasDataBoard1 from './data/koalas.json';
 import koalasDataBoard2 from './data/koalas-board2.json';
+import contributionData from './data/contribution.json';
 import {
   koalasToGraphElements,
   getConnectedFamily,
@@ -27,6 +28,17 @@ const boardData = {
 
 const availableBoards = ['board2', 'board1'];
 
+const boardToContributionName = {
+  'board1': 'Hongshan',
+  'board2': 'Chimelong'
+};
+
+const contributionTypeKeys = {
+  'Koala Photo': 'contributionKoalaPhoto',
+  'Family Tree': 'contributionFamilyTree',
+  'Web Design & Development': 'contributionWebDesign',
+};
+
 function App() {
   const { language } = useLanguage();
   const [currentBoard, setCurrentBoard] = useState('board2');
@@ -42,6 +54,7 @@ function App() {
   const [upcomingBirthdays, setUpcomingBirthdays] = useState([]);
   const [dataBoardOpen, setDataBoardOpen] = useState(false);
   const [detailModalKoala, setDetailModalKoala] = useState(null);
+  const [contributionsOpen, setContributionsOpen] = useState(false);
 
   // Handle board change
   const handleBoardChange = (newBoard) => {
@@ -164,20 +177,20 @@ function App() {
   return (
     <div className="h-screen flex flex-col bg-gray-50">
       {/* Header */}
-      <header className="bg-blue-600 text-white p-4 shadow-lg">
-        <div className="container mx-auto flex justify-between items-start gap-4">
+      <header className="bg-blue-600 text-white px-4 py-1.5 shadow-lg">
+        <div className="container mx-auto flex justify-between items-center gap-3">
           <div className="flex-1 min-w-0">
-            <h1 className="text-3xl font-bold mb-2">{t('title', language)}</h1>
+            <h1 className="text-base sm:text-lg font-bold leading-tight">{t('title', language)}</h1>
             {upcomingBirthdays.length > 0 && (() => {
               const nearest = upcomingBirthdays[0];
               return (
-                <p className="text-blue-100 text-sm">
-                  {t('birthdayForecast', language)}: {nearest.koala.name} {language === 'zh' ? `${nearest.upcomingAge}岁` : `(${nearest.upcomingAge})`} - {nearest.monthDay}
+                <p className="text-blue-100 text-xs leading-tight">
+                  {t('birthdayForecast', language)}: {nearest.koala.name} {t('ageYearsFormat', language, { age: nearest.upcomingAge })} - {nearest.monthDay}
                 </p>
               );
             })()}
           </div>
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2">
             <BoardSelector
               currentBoard={currentBoard}
               onBoardChange={handleBoardChange}
@@ -284,6 +297,66 @@ function App() {
           onKoalaClick={handleDetailKoalaClick}
         />
       )}
+
+      {/* Contributions Footer */}
+      {(() => {
+        const boardName = boardToContributionName[currentBoard];
+        const boardContributions = contributionData.contributions.find(
+          c => c.board === boardName
+        );
+        if (!boardContributions) return null;
+        return (
+          <footer className="relative bg-white border-t border-gray-200 shrink-0">
+            {contributionsOpen && (
+              <div className="absolute bottom-full left-0 right-0 bg-gray-50 border border-gray-200 rounded-t-xl shadow-2xl z-10 max-h-[60vh] overflow-y-auto">
+                <div className="px-3 sm:px-4 py-2 sm:py-3 space-y-2">
+                  <h3 className="text-xs font-semibold text-gray-600 uppercase tracking-wider">{t('contributionsTitle', language)}</h3>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                    {boardContributions.contributions.map((item, idx) => {
+                      const typeKey = contributionTypeKeys[item.contribution];
+                      const translatedType = typeKey ? t(typeKey, language) : item.contribution;
+                      return (
+                        <div key={idx} className="bg-white rounded border border-gray-200 px-2 py-1.5">
+                          <p className="text-xs text-gray-500 font-semibold mb-1">{translatedType}</p>
+                          <div className="space-y-0.5">
+                            {item.names.map((entry, ni) => (
+                              <p key={ni} className="text-xs text-gray-700 leading-tight">
+                                {entry.name}@{entry.platforms.map((p, pi) => (
+                                  <span key={pi}>
+                                    {pi > 0 && ', '}
+                                    <a
+                                      href={p.link}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="text-blue-600 hover:text-blue-800 underline"
+                                    >{p.name}</a>
+                                  </span>
+                                ))}
+                              </p>
+                            ))}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
+            )}
+            <div className="container mx-auto">
+              <button
+                type="button"
+                onClick={() => setContributionsOpen(!contributionsOpen)}
+                className="w-full flex items-center justify-between py-1 px-3 text-xs font-semibold text-gray-600 hover:text-gray-800 hover:bg-gray-50 transition-colors"
+              >
+                {t('contributionsTitle', language)}
+                <span className={`text-[10px] transition-transform duration-200 ${contributionsOpen ? 'rotate-180' : ''}`}>
+                  ▲
+                </span>
+              </button>
+            </div>
+          </footer>
+        );
+      })()}
     </div>
   );
 }

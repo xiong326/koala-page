@@ -4,6 +4,7 @@ import { t } from '../i18n/translations';
 import { parseKoalaDateString } from '../utils/dateUtils';
 import { getAgeForDisplay } from '../utils/ageUtils';
 import { getDescendants, getAncestors, calculateGeneration } from '../utils/graphHelpers';
+import { getPhotoUrl } from '../utils/imageUtils';
 
 function KoalaLink({ name, koalaId, onClick }) {
   return (
@@ -217,7 +218,7 @@ export default function KoalaDetailModal({ koala, allKoalas, onClose, onKoalaCli
               <div className="flex-shrink-0">
                 {koala.photo ? (
                   <div className="w-24 h-24 sm:w-32 sm:h-32 bg-gray-100 rounded-lg overflow-hidden flex items-center justify-center">
-                    <img src={koala.photo} alt={koala.name} className="w-full h-full object-contain" />
+                    <img src={getPhotoUrl(koala.photo, 'medium')} alt={koala.name} loading="lazy" width={128} height={128} className="w-full h-full object-contain" />
                   </div>
                 ) : (
                   <div className="w-24 h-24 sm:w-32 sm:h-32 bg-gray-200 rounded-lg flex items-center justify-center">

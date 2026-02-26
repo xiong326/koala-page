@@ -57,6 +57,10 @@ export const translations = {
     gen: "Gen",
     filterByDeceased: "Status",
     alive: "Alive",
+    generationFormat: "Generation {{gen}}",
+    generationShortFormat: "Gen {{gen}}",
+    familyLabel: "Family:",
+    ageYearsFormat: "({{age}})",
 
     // Relationship Calculator
     relationshipTitle: "Relationship",
@@ -167,12 +171,18 @@ export const translations = {
     detailStatus: "Status",
     detailGeneration: "Generation",
 
+    // Contributions
+    contributionsTitle: "Credits & Contributions",
+    contributionKoalaPhoto: "Koala Photo",
+    contributionFamilyTree: "Family Tree",
+    contributionWebDesign: "Web Design & Development",
+
     // Language toggle
     language: "语言",
   },
   zh: {
     // Header - ADD CHINESE HERE
-    title: "考拉家族树",  // REPLACE WITH CHINESE
+    title: "考拉的毛茸茸族谱",
     subtitle: "探索考拉关系和家族联系",  // REPLACE WITH CHINESE
     birthdayForecast: "生日预告",
 
@@ -228,6 +238,10 @@ export const translations = {
     gen: "代",
     filterByDeceased: "状态",
     alive: "在世",
+    generationFormat: "第{{gen}}代",
+    generationShortFormat: "第{{gen}}代",
+    familyLabel: "家族：",
+    ageYearsFormat: "{{age}}岁",
 
     // Relationship Calculator
     relationshipTitle: "关系计算",
@@ -337,6 +351,12 @@ export const translations = {
     detailAgeAtDeath: "终年",
     detailStatus: "状态",
     detailGeneration: "世代",
+
+    // Contributions
+    contributionsTitle: "鸣谢与贡献",
+    contributionKoalaPhoto: "考拉照片",
+    contributionFamilyTree: "家族树",
+    contributionWebDesign: "网页设计与开发",
 
     // Language toggle
     language: "Language",

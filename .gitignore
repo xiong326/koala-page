@@ -12,6 +12,10 @@ dist
 dist-ssr
 *.local
 
+# Generated optimized images
+public/images/koalas/thumb
+public/images/koalas/medium
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

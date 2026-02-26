@@ -3,19 +3,19 @@
     {
       "id": "k001",
       "name": "茉莉",
-      "nicknames": ["茉莉妈妈"],
-      "birthDate": "2015",
+      "nicknames": ["茉莉妈妈", "茉莉女士", "Merindah"],
+      "birthDate": "2015-03",
       "sex": "female",
-      "photo": null,
+      "photo": "/images/koalas/moli.jpg",
       "mother": null,
       "father": null,
       "deceased": true,
-      "dateOfDeath": "2025"
+      "dateOfDeath": "2025-01-14"
     },
     {
       "id": "k002",
       "name": "梧桐",
-      "nicknames": ["梧桐爸爸"],
+      "nicknames": ["梧桐爸爸", "Pinpen"],
       "birthDate": "2014",
       "sex": "male",
       "photo": "/images/koalas/wutong.jpg",
@@ -25,7 +25,7 @@
     {
       "id": "k003",
       "name": "柠檬",
-      "nicknames": ["柠檬公主", "11"],
+      "nicknames": ["柠檬公主", "11", "Matilda"],
       "birthDate": "2018-02-01",
       "sex": "female",
       "photo": "/images/koalas/ningmeng.jpg",
@@ -35,31 +35,31 @@
     {
       "id": "k004",
       "name": "柚子",
-      "nicknames": ["小柚子"],
-      "birthDate": "2019",
+      "nicknames": ["Banjo"],
+      "birthDate": "2019-02-24",
       "sex": "male",
-      "photo": null,
+      "photo": "/images/koalas/youzi.jpg",
       "mother": "k001",
       "father": "k002",
       "deceased": true,
-      "dateOfDeath": "2024"
+      "dateOfDeath": "2023-06-08"
     },
     {
       "id": "k005",
       "name": "金桔",
-      "nicknames": [],
+      "nicknames": ["Opal"],
       "birthDate": "2020",
       "sex": "female",
-      "photo": null,
+      "photo": "/images/koalas/jinju.jpg",
       "mother": "k001",
       "father": "k002",
       "deceased": true,
-      "dateOfDeath": "2024"
+      "dateOfDeath": "2024-02-28"
     },
     {
       "id": "k006",
       "name": "橙子",
-      "nicknames": ["小橙子"],
+      "nicknames": ["Jarrah"],
       "birthDate": "2021",
       "sex": "male",
       "photo": "/images/koalas/chengzi.jpg",
@@ -69,7 +69,7 @@
     {
       "id": "k007",
       "name": "青柑",
-      "nicknames": ["五宝", "55"],
+      "nicknames": ["五宝", "55", "Kirra"],
       "birthDate": "2022",
       "sex": "female",
       "photo": "/images/koalas/qinggan.jpg",

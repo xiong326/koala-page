@@ -2,6 +2,7 @@ import { useLanguage } from '../i18n/LanguageContext';
 import { t } from '../i18n/translations';
 import { parseKoalaDateString } from '../utils/dateUtils';
 import { getAgeForDisplay } from '../utils/ageUtils';
+import { getPhotoUrl } from '../utils/imageUtils';
 
 export default function KoalaCard({ koala, onClose, allKoalas = [], onKoalaClick, onOpenDetail }) {
   const { language } = useLanguage();
@@ -92,7 +93,7 @@ export default function KoalaCard({ koala, onClose, allKoalas = [], onKoalaClick
           <div className="flex-shrink-0">
             {koala.photo ? (
               <div className="w-12 h-12 sm:w-16 sm:h-16 md:w-20 md:h-20 bg-gray-100 rounded-lg overflow-hidden flex items-center justify-center">
-                <img src={koala.photo} alt={koala.name} className="w-full h-full object-contain" />
+                <img src={getPhotoUrl(koala.photo, 'thumb')} alt={koala.name} loading="lazy" width={80} height={80} className="w-full h-full object-contain" />
               </div>
             ) : (
               <div className="w-12 h-12 sm:w-16 sm:h-16 md:w-20 md:h-20 bg-gray-200 rounded-lg flex items-center justify-center">
