@@ -319,8 +319,20 @@ function App() {
                         <div key={idx} className="bg-white rounded-lg border border-gray-200 p-3 sm:p-4">
                           <p className="text-xs sm:text-sm text-gray-500 font-semibold mb-2">{translatedType}</p>
                           <div className="space-y-1">
-                            {item.names.map((name, ni) => (
-                              <p key={ni} className="text-sm text-gray-700">{name}</p>
+                            {item.names.map((entry, ni) => (
+                              <p key={ni} className="text-sm text-gray-700">
+                                【{entry.name}】@【{entry.platforms.map((p, pi) => (
+                                  <span key={pi}>
+                                    {pi > 0 && ', '}
+                                    <a
+                                      href={p.link}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="text-blue-600 hover:text-blue-800 underline"
+                                    >{p.name}</a>
+                                  </span>
+                                ))}】
+                              </p>
                             ))}
                           </div>
                         </div>

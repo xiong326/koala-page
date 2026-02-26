@@ -4,15 +4,50 @@
       "board": "Chimelong",
       "contributions": [
         {
-          "names": ["【一只野生六六】@【抖音, 小红书】", "【Natalie】@【小红书, 抖音】", "【哦？】@【小红书】"],
+          "names": [
+            {
+              "name": "一只野生六六",
+              "platforms": [
+                { "name": "抖音", "link": " https://v.douyin.com/bJTaG07T3SY/" },
+                { "name": "小红书", "link": "https://xhslink.com/m/4mp1p9VsX4i" }
+              ]
+            },
+            {
+              "name": "Natalie",
+              "platforms": [
+                { "name": "小红书", "link": "https://xhslink.com/m/1iJT746SNQ7" },
+                { "name": "抖音", "link": " https://v.douyin.com/oKAk3XmV948/" }
+              ]
+            },
+            {
+              "name": "哦？",
+              "platforms": [
+                { "name": "小红书", "link": "https://xhslink.com/m/4txQxM0kg6V" }
+              ]
+            }
+          ],
           "contribution": "Koala Photo"
         },
         {
-          "names": ["【🌈小胖🐨困了】@【抖音】"],
+          "names": [
+            {
+              "name": "🌈小胖🐨困了",
+              "platforms": [
+                { "name": "抖音", "link": "https://v.douyin.com/6YWv8KUr8gM/" }
+              ]
+            }
+          ],
           "contribution": "Family Tree"
         },
         {
-          "names": ["【哦？】@【小红书】"],
+          "names": [
+            {
+              "name": "哦？",
+              "platforms": [
+                { "name": "小红书", "link": "https://xhslink.com/m/4txQxM0kg6V" }
+              ]
+            }
+          ],
           "contribution": "Web Design & Development"
         }
       ]
@@ -21,11 +56,31 @@
       "board": "Hongshan",
       "contributions": [
         {
-          "names": ["【哦？】@【小红书】"],
+          "names": [
+            {
+              "name": "哦？",
+              "platforms": [
+                { "name": "小红书", "link": "https://placeholder.link" }
+              ]
+            }
+          ],
           "contribution": "Koala Photo"
         },
         {
-          "names": ["【哦？】@【小红书】"],
+          "names": [
+            {
+              "name": "孔怕吃不饱",
+              "platforms": [
+                { "name": "小红书", "link": "https://xhslink.com/m/6OjVGQS44zG" }
+              ]
+            },
+            {
+              "name": "哦？",
+              "platforms": [
+                { "name": "小红书", "link": "https://xhslink.com/m/4txQxM0kg6V" }
+              ]
+            }
+          ],
           "contribution": "Web Design & Development"
         }
       ]

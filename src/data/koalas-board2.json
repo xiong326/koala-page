@@ -231,7 +231,9 @@
       "sex": "male",
       "photo": null,
       "mother": "b2k016",
-      "father": null
+      "father": null,
+      "deceased": true,
+      "dateOfDeath": "2026-01"
     },
     {
       "id": "b2k019",
@@ -241,7 +243,7 @@
       ],
       "birthDate": "2010-03-01",
       "sex": "male",
-      "photo": null,
+      "photo": "/images/koalas/ryan.jpg",
       "mother": "b2k016",
       "father": null,
       "deceased": true
@@ -464,7 +466,7 @@
       ],
       "birthDate": "2017-10-15",
       "sex": "female",
-      "photo": null,
+      "photo": "/images/koalas/galina.jpg",
       "mother": "b2k031",
       "father": null
     },
@@ -476,7 +478,7 @@
       ],
       "birthDate": "2019-09-09",
       "sex": "female",
-      "photo": null,
+      "photo": "/images/koalas/ida.jpg",
       "mother": "b2k031",
       "father": null
     },
@@ -538,7 +540,7 @@
       ],
       "birthDate": "2020-08-29",
       "sex": "female",
-      "photo": null,
+      "photo": "/images/koalas/judy.jpg",
       "mother": "b2k036",
       "father": null
     },
@@ -595,7 +597,7 @@
       "name": "Leshem",
       "nicknames": [],
       "birthDate": "2022",
-      "sex": "female",
+      "sex": "male",
       "photo": "/images/koalas/leshem.jpg",
       "mother": "b2k039",
       "father": null,
@@ -681,7 +683,7 @@
       ],
       "birthDate": "2024-02-09",
       "sex": "female",
-      "photo": null,
+      "photo": "/images/koalas/nice.jpg",
       "mother": "b2k043",
       "father": null
     },
@@ -813,7 +815,7 @@
       ],
       "birthDate": "2022-04-22",
       "sex": "female",
-      "photo": null,
+      "photo": "/images/koalas/lemon.jpg",
       "mother": "b2k064",
       "father": "b2k079"
     },
@@ -1129,7 +1131,7 @@
       ],
       "birthDate": "2024-10-19",
       "sex": "male",
-      "photo": null,
+      "photo": "/images/koalas/nunu.jpg",
       "mother": "b2k086",
       "father": null
     },
@@ -1181,7 +1183,7 @@
       ],
       "birthDate": "2022-06-21",
       "sex": "male",
-      "photo": null,
+      "photo": "/images/koalas/laughing.jpg",
       "mother": "b2k081",
       "father": null
     },
@@ -1294,7 +1296,7 @@
       ],
       "birthDate": "2025-03-27",
       "sex": "male",
-      "photo": null,
+      "photo": "/images/koalas/ocean.jpg",
       "mother": "b2k038",
       "father": null
     },
@@ -1307,7 +1309,7 @@
       ],
       "birthDate": "2025-05-10",
       "sex": "male",
-      "photo": null,
+      "photo": "/images/koalas/onion.jpg",
       "mother": "b2k042",
       "father": null
     },
@@ -1319,7 +1321,7 @@
       ],
       "birthDate": "2025-06-18",
       "sex": "male",
-      "photo": null,
+      "photo": "/images/koalas/oscar.jpg",
       "mother": "b2k046",
       "father": null
     },
@@ -1342,7 +1344,7 @@
       ],
       "birthDate": "2010-01-01",
       "sex": "male",
-      "photo": null,
+      "photo": "/images/koalas/pj.jpg",
       "mother": null,
       "father": null,
       "deceased": true
@@ -1421,7 +1423,7 @@
       ],
       "birthDate": "2009-02-25",
       "sex": "female",
-      "photo": null,
+      "photo": "/images/koalas/georgina.jpg",
       "mother": null,
       "father": null,
       "deceased": true
@@ -1516,7 +1518,7 @@
       ],
       "birthDate": "2023-06-15",
       "sex": "female",
-      "photo": null,
+      "photo": "/images/koalas/mango.jpg",
       "mother": "b2k120",
       "father": "b2k112"
     },
@@ -1570,7 +1572,7 @@
       "nicknames": [],
       "birthDate": "2013-05-13",
       "sex": "female",
-      "photo": null,
+      "photo": "/images/koalas/coco.jpg",
       "mother": null,
       "father": null
     },
@@ -1602,7 +1604,8 @@
       "sex": "female",
       "photo": "/images/koalas/kk.jpg",
       "mother": "b2k128",
-      "father": null
+      "father": null,
+      "deceased": true
     },
     {
       "id": "b2k132",
@@ -1620,7 +1623,7 @@
       "nicknames": ["橙子"],
       "birthDate": "2025-03-24",
       "sex": "female",
-      "photo": null,
+      "photo": "/images/koalas/orange.jpg",
       "mother": "b2k039",
       "father": null
     }
