@@ -175,7 +175,7 @@ function App() {
   }, []);
 
   return (
-    <div className="h-screen flex flex-col bg-gray-50">
+    <div className="h-dvh flex flex-col bg-gray-50">
       {/* Header */}
       <header className="bg-blue-600 text-white px-4 py-1.5 shadow-lg">
         <div className="container mx-auto flex justify-between items-center gap-3">
