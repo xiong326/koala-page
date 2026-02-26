@@ -202,10 +202,10 @@ function App() {
       </header>
 
       {/* Main Content */}
-      <div className="flex-1 container mx-auto p-4 flex gap-4" style={{ overflow: 'visible' }}>
+      <div className="flex-1 min-h-0 container mx-auto p-2 sm:p-4 flex gap-2 sm:gap-4 overflow-hidden">
         {/* Left Panel - Graph */}
-        <div className="flex-1 min-w-0 flex flex-col gap-4">
-          <div className="bg-white p-4 rounded-lg shadow flex items-center gap-3">
+        <div className="flex-1 min-w-0 min-h-0 flex flex-col gap-2 sm:gap-4">
+          <div className="bg-white p-2 sm:p-4 rounded-lg shadow flex items-center gap-2 sm:gap-3">
             <div className="flex-1">
               <SearchDropdown
                 koalas={koalas}
@@ -215,7 +215,7 @@ function App() {
             <button
               type="button"
               onClick={() => setDataBoardOpen(true)}
-              className="px-3 py-2 text-sm rounded-md bg-white border border-gray-300 shadow-sm hover:bg-gray-50 whitespace-nowrap"
+              className="px-2 py-1.5 sm:px-3 sm:py-2 text-sm rounded-md bg-white border border-gray-300 shadow-sm hover:bg-gray-50 whitespace-nowrap"
             >
               <span className="hidden sm:inline">{t('dataBoard', language)}</span>
               <span className="sm:hidden">
@@ -230,7 +230,7 @@ function App() {
                 const event = new CustomEvent('resetGraphView');
                 window.dispatchEvent(event);
               }}
-              className="px-3 py-2 text-sm rounded-md bg-white border border-gray-300 shadow-sm hover:bg-gray-50 whitespace-nowrap"
+              className="px-2 py-1.5 sm:px-3 sm:py-2 text-sm rounded-md bg-white border border-gray-300 shadow-sm hover:bg-gray-50 whitespace-nowrap"
             >
               <span className="hidden sm:inline">{t('resetView', language)}</span>
               <span className="sm:hidden">↺</span>
