@@ -194,11 +194,19 @@ export function calculateGeneration(koalaId, koalas) {
   const koala = koalas.find(k => k.id === koalaId);
   if (!koala) return 1;
 
-  // If no mother, this is a founder (generation 1)
-  if (!koala.mother) return 1;
+  // If no mother and no father, this is a founder (generation 1)
+  if (!koala.mother && !koala.father) return 1;
 
-  // Otherwise, generation is 1 + mother's generation
-  return 1 + calculateGeneration(koala.mother, koalas);
+  let motherGeneration = 0;
+  let fatherGeneration = 0;
+  if (koala.mother) {
+    motherGeneration = calculateGeneration(koala.mother, koalas);
+  }
+  if (koala.father) {
+    fatherGeneration = calculateGeneration(koala.father, koalas);
+  }
+
+  return 1 + Math.max(motherGeneration, fatherGeneration);
 }
 
 /**
