@@ -256,6 +256,7 @@ Deploy the `dist/` folder to Vercel, Netlify, GitHub Pages, or any static hostin
 - [ ] Backend API for data persistence
 - [ ] Import/export data (CSV, JSON)
 - [ ] Print-friendly family tree layout
+- [ ] Tag System for Koala fun facts
 
 ## License
 

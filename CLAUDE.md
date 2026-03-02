@@ -56,11 +56,14 @@ The app supports multiple koala family boards (e.g., Chimelong/长隆, Hongshan/
 - Node styling: Rounded rectangle nodes (70x70px) with photo thumbnails, pink borders for females, blue for males, dashed borders for deceased
 - Node labels show name + gender symbol + deceased symbol + birth year
 
-**Edge Highlighting Logic:**
-Three distinct highlighting modes:
-1. **Lineage Mode** (single node click): Highlights all ancestors AND descendants, but only lights up edges in the ancestor path (upward) and descendant paths (downward) - NOT sibling edges
+**Highlight Model:**
+Two distinct highlighting modes:
+1. **Lineage Mode** (single node click):
+   - **Clicked nodes** (orange border): the clicked original node + all its proxy copies. Clicking a proxy counts as clicking the original.
+   - **Highlighted nodes** (own-color border): all ancestors + all descendants. Mates are NOT highlighted. For every highlighted original male, all its proxy copies are also highlighted (own color).
+   - **Edges** (orange): mother-child edges where both endpoints are highlighted/clicked. Father-child connections via proxies: the proxy's mate edge + the mother-child edge are highlighted only when at least one child through that mate is highlighted/clicked.
+   - Proxy copies do not recursively expand further highlights.
 2. **Relationship Path Mode**: Highlights only the specific path between two selected koalas (orange endpoints), fits all path nodes in viewport
-3. **Family Network Mode**: Highlights all connected edges (fallback)
 
 **Important:** The graph uses event listeners for viewport reset (`window.addEventListener('resetGraphView')`) which must fire AFTER board data changes.
 
@@ -283,7 +286,7 @@ A collapsible footer section showing credits per board. Maps `currentBoard` to `
 ### Component Communication Patterns
 
 **App.jsx** is the central coordinator:
-- Manages global state (koalas, selectedKoala, highlightedNodes, relationshipPath, ancestorLineage, dataBoardOpen, detailModalKoala, contributionsOpen)
+- Manages global state (koalas, selectedKoala, highlightedNodes, relationshipPath, dataBoardOpen, detailModalKoala, contributionsOpen)
 - Passes data and callbacks down to children
 - Handles board switching and state reset
 - Coordinates graph centering and card display

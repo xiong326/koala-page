@@ -308,7 +308,7 @@ export const translations = {
     dbTopParents: "后代最多的父母",
     dbOffspring: "个后代",
     dbGenerationDist: "世代分布",
-    dbFounders: "最早世代个体数",
+    dbFounders: "第一代个体数",
     dbDeepestGen: "最年轻世代",
     dbBirthsPerYear: "每年出生数",
     dbCount: "数量",
