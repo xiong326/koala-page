@@ -50,10 +50,12 @@ The app supports multiple koala family boards (e.g., Chimelong/长隆, Hongshan/
 **Component:** `KoalaGraph.jsx`
 
 **Layout Configuration:**
-- Uses `cytoscape-dagre` for hierarchical top-to-bottom layout
-- **Edge Style:** Taxi (orthogonal polylines) with `taxi-direction: 'downward'` for cleaner hierarchical visualization
-- Edge styling: Regular edges are 2px gray, highlighted edges are 5px orange with `z-index: 999`
-- Node styling: Rounded rectangle nodes (70x70px) with photo thumbnails, pink borders for females, blue for males, dashed borders for deceased
+- Uses a two-phase layout: dagre on the maternal skeleton first, then proxy father nodes added as satellites
+- **Phase 1:** Original nodes + mother→child edges laid out with `cytoscape-dagre` (hierarchical TB)
+- **Phase 2:** Proxy father nodes (42px, slightly transparent) positioned as satellites around their female mates using collision-aware placement (`positionSatellites`). Mate edges are dashed pink, no arrows, straight lines.
+- **Edge Style:** Mother→child edges use taxi (orthogonal polylines) with `taxi-direction: 'downward'`
+- Edge styling: Regular mother→child edges are 2px gray, highlighted edges are 5px orange with `z-index: 999`
+- Node styling: Rounded rectangle nodes (70x70px) with photo thumbnails, pink borders for females, blue for males, dashed borders for deceased. Proxy nodes are 42px with reduced opacity (0.8) and smaller font.
 - Node labels show name + gender symbol + deceased symbol + birth year
 
 **Highlight Model:**
@@ -152,7 +154,7 @@ Date handling is split across three files to prevent timezone-related bugs:
    - `getUpcomingBirthdays(koalas, daysAhead=60)` - Birthday forecast logic
    - Re-exports `calculateAgeInYears` for backward compatibility
    - Contains graph traversal utilities: `getDescendants`, `getAncestors`, `getAncestorPath`, `getLineageHighlight`, `getConnectedFamily`, `searchKoalas`, `calculateGeneration`
-   - `koalasToGraphElements(koalas)` - Converts koala data to Cytoscape elements (nodes + edges)
+   - `koalasToGraphElements(koalas)` - Returns `{ primaryElements, proxyElements }` where primary = original nodes + mother→child edges (for dagre), proxy = proxy father nodes + mate edges (positioned as satellites after layout)
 
 **Date Format Support:**
 - Year only: `"2015"`
@@ -210,7 +212,7 @@ Four filter types (all can be combined):
 2. **Age Range:**
    - Preset ranges: infant (<1), young (1-3), adult (3-10), senior (10+)
    - Custom range: User-defined min/max with 2-digit inputs (inclusive boundaries)
-3. **Generation:** Calculated dynamically based on maternal lineage depth
+3. **Generation:** Calculated dynamically based on both maternal and paternal lineage (max of both parents' generation + 1)
 4. **Deceased Status:** all, alive, deceased
 
 **Filter Result Display:**
@@ -274,8 +276,8 @@ Search matches against:
 **Key Conventions:**
 - IDs for Hongshan board: `k001`, `k002`, etc.
 - IDs for Chimelong board: `b2k001`, `b2k002`, etc. (prefixed to avoid conflicts)
-- Mother field is primary for lineage calculations (father is supplementary)
-- Generation calculation is based on maternal lineage only
+- Mother field is primary for graph structure (dagre layout skeleton); fathers appear as proxy satellite nodes
+- Generation calculation considers both parents: `1 + max(motherGeneration, fatherGeneration)`
 
 ### Contributions Footer
 
