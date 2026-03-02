@@ -5,55 +5,94 @@ import { getPhotoUrl } from './imageUtils';
 // Backwards-compatible re-export (older callers may import from graphHelpers)
 export { calculateAgeInYears } from './ageUtils';
 
+function buildKoalaLabel(koala) {
+  const genderSymbol = koala.sex === 'female' ? ' ♀' : koala.sex === 'male' ? ' ♂' : '';
+  const deceasedSymbol = koala.deceased ? ' †' : '';
+  const birthYear = koala.birthDate ? koala.birthDate.split('-')[0] : '';
+  return koala.name + genderSymbol + deceasedSymbol + (birthYear ? '\n' + birthYear : '');
+}
+
 /**
- * Convert koala data to Cytoscape graph elements
+ * Convert koala data to Cytoscape graph elements.
+ * Returns { primaryElements, proxyElements } where:
+ * - primaryElements: original nodes + mother->child edges (dagre layout)
+ * - proxyElements: proxy father nodes + mate edges (added as satellites after layout)
  */
 export function koalasToGraphElements(koalas) {
-  const nodes = koalas.map(koala => {
-    // Add gender symbol to label
-    const genderSymbol = koala.sex === 'female' ? ' ♀' : koala.sex === 'male' ? ' ♂' : '';
-    // Add deceased symbol
-    const deceasedSymbol = koala.deceased ? ' †' : '';
-    // Format birth date (just year)
-    const birthYear = koala.birthDate ? koala.birthDate.split('-')[0] : '';
-    // Combine name with symbols and birth year on new line
-    const label = koala.name + genderSymbol + deceasedSymbol + (birthYear ? '\n' + birthYear : '');
+  const koalaMap = new Map(koalas.map(k => [k.id, k]));
 
-    return {
-      data: {
-        id: koala.id,
-        label: label,
-        ...koala,
-        photo: getPhotoUrl(koala.photo, 'thumb'),
-      }
-    };
-  });
+  const nodes = koalas.map(koala => ({
+    data: {
+      id: koala.id,
+      label: buildKoalaLabel(koala),
+      ...koala,
+      photo: getPhotoUrl(koala.photo, 'thumb'),
+    }
+  }));
 
-  const edges = [];
+  const motherEdges = [];
   koalas.forEach(koala => {
-    // Add mother -> child relationships
     if (koala.mother) {
-      edges.push({
+      motherEdges.push({
         data: {
           id: `${koala.mother}-${koala.id}`,
           source: koala.mother,
-          target: koala.id
-        }
-      });
-    }
-    // Add father -> child relationships
-    if (koala.father) {
-      edges.push({
-        data: {
-          id: `${koala.father}-${koala.id}`,
-          source: koala.father,
-          target: koala.id
+          target: koala.id,
+          edgeType: 'mother-child',
         }
       });
     }
   });
 
-  return [...nodes, ...edges];
+  // Collect unique (mother, father) mating pairs
+  const matingPairs = new Map();
+  koalas.forEach(koala => {
+    if (koala.mother && koala.father) {
+      const key = `${koala.mother}-${koala.father}`;
+      if (!matingPairs.has(key)) {
+        matingPairs.set(key, { motherId: koala.mother, fatherId: koala.father });
+      }
+    }
+  });
+
+  const proxyNodes = [];
+  const mateEdges = [];
+
+  for (const { motherId, fatherId } of matingPairs.values()) {
+    const father = koalaMap.get(fatherId);
+    if (!father) continue;
+
+    const proxyId = `${fatherId}_m_${motherId}`;
+    proxyNodes.push({
+      data: {
+        id: proxyId,
+        label: buildKoalaLabel(father),
+        ...father,
+        // Override id-level fields for the proxy
+        id: proxyId,
+        nodeType: 'proxy',
+        originalId: fatherId,
+        mateOf: motherId,
+        photo: getPhotoUrl(father.photo, 'thumb'),
+      },
+      classes: 'proxy',
+    });
+
+    mateEdges.push({
+      data: {
+        id: `mate_${proxyId}_${motherId}`,
+        source: proxyId,
+        target: motherId,
+        edgeType: 'mate',
+      },
+      classes: 'mate-edge',
+    });
+  }
+
+  return {
+    primaryElements: [...nodes, ...motherEdges],
+    proxyElements: [...proxyNodes, ...mateEdges],
+  };
 }
 
 /**
@@ -126,22 +165,13 @@ export function getAncestorPath(koalaId, koalas) {
 }
 
 /**
- * Get ancestors and descendants for highlighting lineage
+ * Get ancestors and descendants for highlighting lineage.
  */
 export function getLineageHighlight(koalaId, koalas) {
-  // Get ancestor path (ordered)
   const ancestorPath = getAncestorPath(koalaId, koalas);
-
-  // Get all descendants
   const descendants = getDescendants(koalaId, koalas);
-
-  // Combine all nodes to highlight (remove duplicates)
   const allNodes = [...new Set([...ancestorPath, ...descendants])];
-
-  return {
-    nodes: allNodes,
-    ancestorPath: ancestorPath  // Keep ordered path for edge highlighting
-  };
+  return { nodes: allNodes };
 }
 
 /**
@@ -194,11 +224,19 @@ export function calculateGeneration(koalaId, koalas) {
   const koala = koalas.find(k => k.id === koalaId);
   if (!koala) return 1;
 
-  // If no mother, this is a founder (generation 1)
-  if (!koala.mother) return 1;
+  // If no mother and no father, this is a founder (generation 1)
+  if (!koala.mother && !koala.father) return 1;
 
-  // Otherwise, generation is 1 + mother's generation
-  return 1 + calculateGeneration(koala.mother, koalas);
+  let motherGeneration = 0;
+  let fatherGeneration = 0;
+  if (koala.mother) {
+    motherGeneration = calculateGeneration(koala.mother, koalas);
+  }
+  if (koala.father) {
+    fatherGeneration = calculateGeneration(koala.father, koalas);
+  }
+
+  return 1 + Math.max(motherGeneration, fatherGeneration);
 }
 
 /**

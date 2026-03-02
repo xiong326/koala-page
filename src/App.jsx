@@ -13,8 +13,6 @@ import koalasDataBoard2 from './data/koalas-board2.json';
 import contributionData from './data/contribution.json';
 import {
   koalasToGraphElements,
-  getConnectedFamily,
-  getAncestorPath,
   getLineageHighlight,
   getUpcomingBirthdays,
 } from './utils/graphHelpers';
@@ -45,12 +43,12 @@ function App() {
   const [koalas, setKoalas] = useState(boardData['board2'].koalas);
   const [selectedKoala, setSelectedKoala] = useState(null);
   const [highlightedNodes, setHighlightedNodes] = useState([]);
-  const [graphElements, setGraphElements] = useState([]);
+  const [primaryElements, setPrimaryElements] = useState([]);
+  const [proxyElements, setProxyElements] = useState([]);
   const [selectedKoalaId, setSelectedKoalaId] = useState(null);
   const [filterSidebarOpen, setFilterSidebarOpen] = useState(false);
   const [relationshipSidebarOpen, setRelationshipSidebarOpen] = useState(false);
   const [relationshipPath, setRelationshipPath] = useState([]);
-  const [ancestorLineage, setAncestorLineage] = useState([]);
   const [upcomingBirthdays, setUpcomingBirthdays] = useState([]);
   const [dataBoardOpen, setDataBoardOpen] = useState(false);
   const [detailModalKoala, setDetailModalKoala] = useState(null);
@@ -66,7 +64,6 @@ function App() {
     setHighlightedNodes([]);
     setSelectedKoalaId(null);
     setRelationshipPath([]);
-    setAncestorLineage([]);
     setFilterSidebarOpen(false);
     setRelationshipSidebarOpen(false);
     setDetailModalKoala(null);
@@ -78,12 +75,11 @@ function App() {
     }, 100);
   };
 
-  // Initialize graph elements (always show full graph)
   useEffect(() => {
-    const elements = koalasToGraphElements(koalas);
-    setGraphElements(elements);
+    const { primaryElements: primary, proxyElements: proxy } = koalasToGraphElements(koalas);
+    setPrimaryElements(primary);
+    setProxyElements(proxy);
 
-    // Update upcoming birthdays
     const birthdays = getUpcomingBirthdays(koalas);
     setUpcomingBirthdays(birthdays);
   }, [koalas]);
@@ -104,10 +100,8 @@ function App() {
     setSelectedKoala(koala);
     setSelectedKoalaId(koala.id);
 
-    // Highlight ancestors and descendants
     const lineage = getLineageHighlight(koala.id, koalas);
     setHighlightedNodes(lineage.nodes);
-    setAncestorLineage(lineage.ancestorPath);
   };
 
   const handleSearchSelect = (koala) => {
@@ -121,7 +115,6 @@ function App() {
     setHighlightedNodes([]);
     setSelectedKoalaId(null);
     setRelationshipPath([]);
-    setAncestorLineage([]);
   };
 
   const handleParentClick = (koalaId) => {
@@ -154,7 +147,6 @@ function App() {
       setRelationshipPath([]);
       const lineage = getLineageHighlight(koala.id, koalas);
       setHighlightedNodes(lineage.nodes);
-      setAncestorLineage(lineage.ancestorPath);
     }
   };
 
@@ -166,7 +158,6 @@ function App() {
     // Highlight the relationship path
     setHighlightedNodes(path);
     setRelationshipPath(path);
-    setAncestorLineage([]); // Clear ancestor lineage when showing relationship
 
     // Clear card and selection when showing relationship path
     // Both endpoints will be highlighted in orange, but no card shown
@@ -239,12 +230,12 @@ function App() {
 
           <div className="flex-1 min-h-0 relative">
             <KoalaGraph
-              elements={graphElements}
+              primaryElements={primaryElements}
+              proxyElements={proxyElements}
               onNodeClick={handleNodeClick}
               highlightedNodes={highlightedNodes}
               selectedKoalaId={selectedKoalaId}
               relationshipPath={relationshipPath}
-              ancestorLineage={ancestorLineage}
             />
 
             {/* Filter Sidebar */}

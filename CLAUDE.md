@@ -50,17 +50,22 @@ The app supports multiple koala family boards (e.g., Chimelong/长隆, Hongshan/
 **Component:** `KoalaGraph.jsx`
 
 **Layout Configuration:**
-- Uses `cytoscape-dagre` for hierarchical top-to-bottom layout
-- **Edge Style:** Taxi (orthogonal polylines) with `taxi-direction: 'downward'` for cleaner hierarchical visualization
-- Edge styling: Regular edges are 2px gray, highlighted edges are 5px orange with `z-index: 999`
-- Node styling: Rounded rectangle nodes (70x70px) with photo thumbnails, pink borders for females, blue for males, dashed borders for deceased
+- Uses a two-phase layout: dagre on the maternal skeleton first, then proxy father nodes added as satellites
+- **Phase 1:** Original nodes + mother→child edges laid out with `cytoscape-dagre` (hierarchical TB)
+- **Phase 2:** Proxy father nodes (42px, slightly transparent) positioned as satellites around their female mates using collision-aware placement (`positionSatellites`). Mate edges are dashed pink, no arrows, straight lines.
+- **Edge Style:** Mother→child edges use taxi (orthogonal polylines) with `taxi-direction: 'downward'`
+- Edge styling: Regular mother→child edges are 2px gray, highlighted edges are 5px orange with `z-index: 999`
+- Node styling: Rounded rectangle nodes (70x70px) with photo thumbnails, pink borders for females, blue for males, dashed borders for deceased. Proxy nodes are 42px with reduced opacity (0.8) and smaller font.
 - Node labels show name + gender symbol + deceased symbol + birth year
 
-**Edge Highlighting Logic:**
-Three distinct highlighting modes:
-1. **Lineage Mode** (single node click): Highlights all ancestors AND descendants, but only lights up edges in the ancestor path (upward) and descendant paths (downward) - NOT sibling edges
+**Highlight Model:**
+Two distinct highlighting modes:
+1. **Lineage Mode** (single node click):
+   - **Clicked nodes** (orange border): the clicked original node + all its proxy copies. Clicking a proxy counts as clicking the original.
+   - **Highlighted nodes** (own-color border): all ancestors + all descendants. Mates are NOT highlighted. For every highlighted original male, all its proxy copies are also highlighted (own color).
+   - **Edges** (orange): mother-child edges where both endpoints are highlighted/clicked. Father-child connections via proxies: the proxy's mate edge + the mother-child edge are highlighted only when at least one child through that mate is highlighted/clicked.
+   - Proxy copies do not recursively expand further highlights.
 2. **Relationship Path Mode**: Highlights only the specific path between two selected koalas (orange endpoints), fits all path nodes in viewport
-3. **Family Network Mode**: Highlights all connected edges (fallback)
 
 **Important:** The graph uses event listeners for viewport reset (`window.addEventListener('resetGraphView')`) which must fire AFTER board data changes.
 
@@ -149,7 +154,7 @@ Date handling is split across three files to prevent timezone-related bugs:
    - `getUpcomingBirthdays(koalas, daysAhead=60)` - Birthday forecast logic
    - Re-exports `calculateAgeInYears` for backward compatibility
    - Contains graph traversal utilities: `getDescendants`, `getAncestors`, `getAncestorPath`, `getLineageHighlight`, `getConnectedFamily`, `searchKoalas`, `calculateGeneration`
-   - `koalasToGraphElements(koalas)` - Converts koala data to Cytoscape elements (nodes + edges)
+   - `koalasToGraphElements(koalas)` - Returns `{ primaryElements, proxyElements }` where primary = original nodes + mother→child edges (for dagre), proxy = proxy father nodes + mate edges (positioned as satellites after layout)
 
 **Date Format Support:**
 - Year only: `"2015"`
@@ -207,7 +212,7 @@ Four filter types (all can be combined):
 2. **Age Range:**
    - Preset ranges: infant (<1), young (1-3), adult (3-10), senior (10+)
    - Custom range: User-defined min/max with 2-digit inputs (inclusive boundaries)
-3. **Generation:** Calculated dynamically based on maternal lineage depth
+3. **Generation:** Calculated dynamically based on both maternal and paternal lineage (max of both parents' generation + 1)
 4. **Deceased Status:** all, alive, deceased
 
 **Filter Result Display:**
@@ -271,8 +276,8 @@ Search matches against:
 **Key Conventions:**
 - IDs for Hongshan board: `k001`, `k002`, etc.
 - IDs for Chimelong board: `b2k001`, `b2k002`, etc. (prefixed to avoid conflicts)
-- Mother field is primary for lineage calculations (father is supplementary)
-- Generation calculation is based on maternal lineage only
+- Mother field is primary for graph structure (dagre layout skeleton); fathers appear as proxy satellite nodes
+- Generation calculation considers both parents: `1 + max(motherGeneration, fatherGeneration)`
 
 ### Contributions Footer
 
@@ -283,7 +288,7 @@ A collapsible footer section showing credits per board. Maps `currentBoard` to `
 ### Component Communication Patterns
 
 **App.jsx** is the central coordinator:
-- Manages global state (koalas, selectedKoala, highlightedNodes, relationshipPath, ancestorLineage, dataBoardOpen, detailModalKoala, contributionsOpen)
+- Manages global state (koalas, selectedKoala, highlightedNodes, relationshipPath, dataBoardOpen, detailModalKoala, contributionsOpen)
 - Passes data and callbacks down to children
 - Handles board switching and state reset
 - Coordinates graph centering and card display

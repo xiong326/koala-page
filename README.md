@@ -10,18 +10,20 @@ An interactive bilingual (English/Chinese) koala family tree visualization app b
   - Per-board contribution credits in a collapsible footer
 
 - **Interactive Family Graph**: Visualize koala family trees with zoom, pan, and click interactions
-  - Dagre hierarchical layout with parents at the top
+  - Maternal skeleton layout (dagre) with father proxy satellites around their mates
   - Color-coded borders (pink for females, blue for males)
   - Optimized WebP photo thumbnails in nodes
   - Special styling for deceased koalas (dashed border, grayed out)
+  - Dashed pink mate edges connecting father proxies to their female partners
   - Smooth animations when centering on nodes
   - Reset view button to restore default zoom and pan
 
 - **Lineage Highlighting**: Click on any koala to highlight their direct lineage
-  - Selected koala gets orange border (6px)
+  - Selected koala gets orange border (6px), including all proxy copies
   - All ancestors highlighted (mother → grandmother → etc.)
   - All descendants highlighted (children → grandchildren → etc.)
-  - Only ancestor path edges and descendant edges highlighted (not siblings)
+  - Father-child connections highlighted through proxy nodes and mate edges
+  - Male proxy copies automatically highlighted when their original is in the lineage
 
 - **Advanced Filter Sidebar**: Filter koalas by multiple criteria
   - Filter by sex (male/female)
@@ -239,7 +241,7 @@ Deploy the `dist/` folder to Vercel, Netlify, GitHub Pages, or any static hostin
 - [x] Flexible date formats (year, year-month, full date)
 - [x] Advanced filtering (age range, sex, generation, deceased status)
 - [x] Relationship calculator with path visualization
-- [x] Generation calculation (automatic, maternal lineage)
+- [x] Generation calculation (automatic, max of maternal + paternal lineage)
 - [x] Multiple family boards (Chimelong, Hongshan)
 - [x] Data analytics dashboard with charts (Recharts)
 - [x] Birthday forecast in header
@@ -247,6 +249,7 @@ Deploy the `dist/` folder to Vercel, Netlify, GitHub Pages, or any static hostin
 - [x] Image optimization pipeline (sharp → WebP)
 - [x] Credits & contributions footer per board
 - [x] Precise age display (months for koalas under 1 year)
+- [x] Graph reorganization: maternal skeleton + father proxy satellites with collision-aware placement
 
 ### Planned
 - [ ] Add/edit koala form in the UI
@@ -256,6 +259,7 @@ Deploy the `dist/` folder to Vercel, Netlify, GitHub Pages, or any static hostin
 - [ ] Backend API for data persistence
 - [ ] Import/export data (CSV, JSON)
 - [ ] Print-friendly family tree layout
+- [ ] Tag System for Koala fun facts
 
 ## License
 

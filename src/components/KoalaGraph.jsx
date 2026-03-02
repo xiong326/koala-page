@@ -4,15 +4,29 @@ import dagre from 'cytoscape-dagre';
 import { useLanguage } from '../i18n/LanguageContext';
 import { t } from '../i18n/translations';
 
-// Register dagre layout
 cytoscape.use(dagre);
 
-export default function KoalaGraph({ elements, onNodeClick, highlightedNodes = [], selectedKoalaId = null, relationshipPath = [], ancestorLineage = [] }) {
+const PROXY_SIZE = 42;
+const NODE_SIZE = 70;
+// Extra vertical space for the text label below each node
+const LABEL_ALLOWANCE = 22;
+
+const SATELLITE_OFFSETS = [
+  { dx: -80, dy: 0 },    // left
+  { dx: 80, dy: 0 },     // right
+  { dx: -50, dy: -15 },  // top-left
+  { dx: 50, dy: -15 },   // top-right
+  { dx: -50, dy: 15 },   // bottom-left
+  { dx: 50, dy: 15 },    // bottom-right
+];
+
+export default function KoalaGraph({ primaryElements, proxyElements, onNodeClick, highlightedNodes = [], selectedKoalaId = null, relationshipPath = [] }) {
   const { language } = useLanguage();
   const containerRef = useRef(null);
   const cyRef = useRef(null);
   const defaultViewportRef = useRef(null);
   const onNodeClickRef = useRef(onNodeClick);
+  const centeredByClickRef = useRef(false);
   const [isReady, setIsReady] = useState(false);
 
   // Avoid re-initializing Cytoscape when parent re-renders and passes a new function identity
@@ -38,12 +52,12 @@ export default function KoalaGraph({ elements, onNodeClick, highlightedNodes = [
   }, []);
 
   useEffect(() => {
-    if (!containerRef.current || elements.length === 0) return;
+    if (!containerRef.current || primaryElements.length === 0) return;
 
-    // Initialize Cytoscape
+    // Phase 1: dagre on the maternal tree only
     cyRef.current = cytoscape({
       container: containerRef.current,
-      elements: elements,
+      elements: primaryElements,
       style: [
         {
           selector: 'node',
@@ -56,8 +70,8 @@ export default function KoalaGraph({ elements, onNodeClick, highlightedNodes = [
             'text-halign': 'center',
             'font-size': '9px',
             'font-weight': '600',
-            'width': '70px',
-            'height': '70px',
+            'width': `${NODE_SIZE}px`,
+            'height': `${NODE_SIZE}px`,
             'border-width': '2px',
             'border-color': '#9ca3af',
             'text-wrap': 'wrap',
@@ -100,6 +114,19 @@ export default function KoalaGraph({ elements, onNodeClick, highlightedNodes = [
             'opacity': 0.7,
           }
         },
+        // Proxy nodes: small satellites
+        {
+          selector: 'node.proxy',
+          style: {
+            'width': `${PROXY_SIZE}px`,
+            'height': `${PROXY_SIZE}px`,
+            'opacity': 0.8,
+            'font-size': '7px',
+            'text-max-width': `${PROXY_SIZE}px`,
+            'background-width': '55%',
+            'background-height': '55%',
+          }
+        },
         {
           selector: 'node[sex="female"].highlighted',
           style: {
@@ -129,6 +156,7 @@ export default function KoalaGraph({ elements, onNodeClick, highlightedNodes = [
             'border-width': '6px',
           }
         },
+        // Mother->child edges
         {
           selector: 'edge',
           style: {
@@ -143,6 +171,18 @@ export default function KoalaGraph({ elements, onNodeClick, highlightedNodes = [
             'arrow-scale': 1.5,
           }
         },
+        // Mate edges: dashed pink, no arrow
+        {
+          selector: 'edge.mate-edge',
+          style: {
+            'width': 1.5,
+            'line-color': '#f472b6',
+            'line-style': 'dashed',
+            'target-arrow-shape': 'none',
+            'curve-style': 'straight',
+            'z-index': 0,
+          }
+        },
         {
           selector: 'edge.highlighted',
           style: {
@@ -151,14 +191,22 @@ export default function KoalaGraph({ elements, onNodeClick, highlightedNodes = [
             'width': 5,
             'z-index': 999,
           }
-        }
+        },
+        {
+          selector: 'edge.mate-edge.highlighted',
+          style: {
+            'line-color': '#f59e0b',
+            'target-arrow-shape': 'none',
+            'width': 4,
+            'z-index': 999,
+          }
+        },
       ],
       minZoom: 0.3,
       maxZoom: 3,
       autoungrabify: true,
     });
 
-    // Run layout and capture the initial "default" viewport (zoom + pan)
     const layoutOptions = {
       name: 'dagre',
       rankDir: 'TB',
@@ -168,28 +216,40 @@ export default function KoalaGraph({ elements, onNodeClick, highlightedNodes = [
     };
 
     cyRef.current.one('layoutstop', () => {
+      const cy = cyRef.current;
+
+      // Phase 2: add proxy nodes + mate edges as satellites
+      if (proxyElements.length > 0) {
+        cy.add(proxyElements);
+        positionSatellites(cy);
+      }
+
       defaultViewportRef.current = {
-        zoom: cyRef.current.zoom(),
-        pan: { ...cyRef.current.pan() },
+        zoom: cy.zoom(),
+        pan: { ...cy.pan() },
       };
     });
 
     cyRef.current.layout(layoutOptions).run();
 
-    // Add click handler
+    // Click handler: resolve proxy -> original, center on clicked node
     cyRef.current.on('tap', 'node', (evt) => {
       const node = evt.target;
       const koalaData = node.data();
 
-      // Center the clicked node (keep user's current zoom level)
+      const resolvedData = koalaData.nodeType === 'proxy'
+        ? { ...koalaData, id: koalaData.originalId }
+        : koalaData;
+
+      centeredByClickRef.current = true;
+
       cyRef.current.animate({
         center: { eles: node },
       }, {
         duration: 500,
         complete: () => {
-          // Show card in fixed position
           if (onNodeClickRef.current) {
-            onNodeClickRef.current(koalaData);
+            onNodeClickRef.current(resolvedData);
           }
         }
       });
@@ -197,140 +257,89 @@ export default function KoalaGraph({ elements, onNodeClick, highlightedNodes = [
 
     setIsReady(true);
 
-    // Cleanup
     return () => {
       if (cyRef.current) {
         cyRef.current.destroy();
       }
     };
-  }, [elements]);
+  }, [primaryElements, proxyElements]);
 
-  // Update highlighting when highlightedNodes changes
+  // Highlighting logic
   useEffect(() => {
     if (!cyRef.current || !isReady) return;
 
-    // Remove all previous highlighting
-    cyRef.current.elements().removeClass('highlighted selected');
+    const cy = cyRef.current;
+    cy.elements().removeClass('highlighted selected');
 
-    if (highlightedNodes.length > 0) {
-      // Check if this is a relationship path (ordered) or family network (unordered)
-      const isRelationshipPath = relationshipPath.length > 0;
+    if (highlightedNodes.length === 0) return;
 
-      // Highlight specified nodes
+    const isRelationshipPath = relationshipPath.length > 0;
+
+    if (isRelationshipPath) {
+      relationshipPath.forEach((nodeId, idx) => {
+        const node = cy.getElementById(nodeId);
+        if (node.length === 0) return;
+        if (idx === 0 || idx === relationshipPath.length - 1) {
+          node.addClass('selected');
+        } else {
+          node.addClass('highlighted');
+        }
+      });
+      highlightRelationshipPathEdges(cy, relationshipPath);
+
+      const pathNodes = cy.collection();
+      relationshipPath.forEach(nodeId => {
+        const node = cy.getElementById(nodeId);
+        if (node.length > 0) pathNodes.merge(node);
+      });
+      if (pathNodes.length > 0) {
+        cy.animate({
+          fit: { eles: pathNodes, padding: 50 }
+        }, { duration: 500 });
+      }
+    } else {
+      // Lineage mode
+
+      // Step 1: Clicked nodes -> orange (original + all proxy copies)
+      if (selectedKoalaId) {
+        const sel = cy.getElementById(selectedKoalaId);
+        if (sel.length > 0) sel.addClass('selected');
+        cy.nodes(`[originalId = "${selectedKoalaId}"]`).addClass('selected');
+      }
+
+      // Step 2: Highlighted nodes -> own color; expand proxy copies for males
       highlightedNodes.forEach(nodeId => {
-        const node = cyRef.current.getElementById(nodeId);
-
-        if (node.length > 0) {
-          // For relationship paths, highlight both endpoints in orange
-          if (isRelationshipPath && (nodeId === relationshipPath[0] || nodeId === relationshipPath[relationshipPath.length - 1])) {
-            node.addClass('selected');
-          }
-          // For single clicked node, highlight only that one
-          else if (nodeId === selectedKoalaId) {
-            node.addClass('selected');
-          }
-          // All others get regular highlighting
-          else {
-            node.addClass('highlighted');
-          }
+        if (nodeId === selectedKoalaId) return;
+        const node = cy.getElementById(nodeId);
+        if (node.length === 0) return;
+        node.addClass('highlighted');
+        if (node.data('sex') === 'male') {
+          cy.nodes(`[originalId = "${nodeId}"]`).forEach(proxy => {
+            if (!proxy.hasClass('selected')) proxy.addClass('highlighted');
+          });
         }
       });
 
-      // Highlight edges
-      if (isRelationshipPath) {
-        // Only highlight edges in the specific relationship path
-        for (let i = 0; i < relationshipPath.length - 1; i++) {
-          const sourceId = relationshipPath[i];
-          const targetId = relationshipPath[i + 1];
-
-          // Find the edge between these two nodes (could be either direction)
-          const edge1 = cyRef.current.getElementById(`${sourceId}-${targetId}`);
-          const edge2 = cyRef.current.getElementById(`${targetId}-${sourceId}`);
-
-          if (edge1.length > 0) edge1.addClass('highlighted');
-          if (edge2.length > 0) edge2.addClass('highlighted');
-        }
-      } else if (ancestorLineage.length > 0) {
-        // Highlight edges in ancestor lineage + all descendant edges
-        const selectedId = ancestorLineage[0]; // First in lineage is the selected koala
-
-        // 1. Highlight all edges between ancestors
-        // For each ancestor, highlight edges connecting to its parents (if they're also in the ancestor list)
-        ancestorLineage.forEach(ancestorId => {
-          const node = cyRef.current.getElementById(ancestorId);
-          if (node.length > 0) {
-            // Highlight incoming edges (from parents) if the parent is in ancestorLineage
-            node.connectedEdges('[target = "' + ancestorId + '"]').forEach(edge => {
-              const sourceId = edge.data('source');
-              if (ancestorLineage.includes(sourceId)) {
-                edge.addClass('highlighted');
-              }
-            });
-          }
-        });
-
-        // 2. Highlight all edges from the selected koala to its descendants
-        highlightedNodes.forEach(nodeId => {
-          // Only highlight outgoing edges from selected and descendants (not ancestors)
-          // Descendants are nodes in highlightedNodes but not in ancestorLineage (except selected)
-          const isDescendant = !ancestorLineage.includes(nodeId) || nodeId === selectedId;
-          if (isDescendant) {
-            const node = cyRef.current.getElementById(nodeId);
-            if (node.length > 0) {
-              // Highlight edges where this node is the source (parent → child)
-              node.connectedEdges('[source = "' + nodeId + '"]').addClass('highlighted');
-            }
-          }
-        });
-      } else {
-        // Highlight all connected edges (family network)
-        highlightedNodes.forEach(nodeId => {
-          const node = cyRef.current.getElementById(nodeId);
-          if (node.length > 0) {
-            node.connectedEdges().addClass('highlighted');
-          }
-        });
-      }
-
-      // Fit relationship path in viewport
-      if (isRelationshipPath && relationshipPath.length > 0) {
-        const pathNodes = cyRef.current.collection();
-        relationshipPath.forEach(nodeId => {
-          const node = cyRef.current.getElementById(nodeId);
-          if (node.length > 0) {
-            pathNodes.merge(node);
-          }
-        });
-
-        if (pathNodes.length > 0) {
-          cyRef.current.animate({
-            fit: {
-              eles: pathNodes,
-              padding: 50
-            }
-          }, {
-            duration: 500
-          });
-        }
-      }
+      // Step 3: Edge highlighting
+      highlightLineageEdges(cy);
     }
-  }, [highlightedNodes, selectedKoalaId, relationshipPath, ancestorLineage, isReady]);
+  }, [highlightedNodes, selectedKoalaId, relationshipPath, isReady]);
 
-  // Programmatically center on selected node (from search dropdown)
-  // Skip if we're showing a relationship path (already fitted above)
+  // Center on selected node (from search/filter, NOT from click)
   useEffect(() => {
     if (!cyRef.current || !isReady || !selectedKoalaId) return;
-
-    // Don't center if we're showing a relationship path
     if (relationshipPath.length > 0) return;
+
+    if (centeredByClickRef.current) {
+      centeredByClickRef.current = false;
+      return;
+    }
 
     const node = cyRef.current.getElementById(selectedKoalaId);
     if (node && node.length > 0) {
       cyRef.current.animate({
         center: { eles: node },
-      }, {
-        duration: 500
-      });
+      }, { duration: 500 });
     }
   }, [selectedKoalaId, isReady, relationshipPath]);
 
@@ -339,4 +348,209 @@ export default function KoalaGraph({ elements, onNodeClick, highlightedNodes = [
       <div ref={containerRef} className="w-full h-full" />
     </div>
   );
+}
+
+/**
+ * Position proxy nodes as satellites around their female mate.
+ * Uses collision avoidance against dagre-placed nodes AND edge segments.
+ */
+function positionSatellites(cy) {
+  const occupiedBoxes = [];
+  cy.nodes(':not(.proxy)').forEach(node => {
+    const pos = node.position();
+    const halfW = NODE_SIZE / 2 + 4;
+    const halfH = NODE_SIZE / 2 + LABEL_ALLOWANCE + 4;
+    occupiedBoxes.push({
+      x1: pos.x - halfW, y1: pos.y - halfW,
+      x2: pos.x + halfW, y2: pos.y + halfH,
+    });
+  });
+
+  // Approximate taxi-routed edge segments as thin bounding boxes
+  const EDGE_PAD = 5;
+  const TAXI_TURN = 15;
+  const edgeBoxes = [];
+  cy.edges('[edgeType = "mother-child"]').forEach(edge => {
+    const srcNode = cy.getElementById(edge.data('source'));
+    const tgtNode = cy.getElementById(edge.data('target'));
+    if (srcNode.length === 0 || tgtNode.length === 0) return;
+    const src = srcNode.position();
+    const tgt = tgtNode.position();
+
+    const srcBottom = src.y + NODE_SIZE / 2;
+    const tgtTop = tgt.y - NODE_SIZE / 2;
+    const turnY = srcBottom + TAXI_TURN;
+
+    // Segment 1: vertical from source bottom down to turn point
+    edgeBoxes.push({
+      x1: src.x - EDGE_PAD, y1: srcBottom,
+      x2: src.x + EDGE_PAD, y2: Math.min(turnY, tgtTop),
+    });
+    // Segment 2: horizontal from src.x to tgt.x at turnY
+    if (Math.abs(src.x - tgt.x) > EDGE_PAD * 2 && turnY < tgtTop) {
+      edgeBoxes.push({
+        x1: Math.min(src.x, tgt.x), y1: turnY - EDGE_PAD,
+        x2: Math.max(src.x, tgt.x), y2: turnY + EDGE_PAD,
+      });
+    }
+    // Segment 3: vertical from turn point down to target top
+    if (turnY < tgtTop) {
+      edgeBoxes.push({
+        x1: tgt.x - EDGE_PAD, y1: turnY,
+        x2: tgt.x + EDGE_PAD, y2: tgtTop,
+      });
+    }
+  });
+
+  const boxesOverlap = (a, b) =>
+    a.x1 < b.x2 && a.x2 > b.x1 && a.y1 < b.y2 && a.y2 > b.y1;
+
+  const proxiesByMate = new Map();
+  cy.nodes('.proxy').forEach(proxy => {
+    const mateOfId = proxy.data('mateOf');
+    if (!proxiesByMate.has(mateOfId)) {
+      proxiesByMate.set(mateOfId, []);
+    }
+    proxiesByMate.get(mateOfId).push(proxy);
+  });
+
+  const proxyHalfW = PROXY_SIZE / 2 + 2;
+  const proxyHalfH = PROXY_SIZE / 2 + LABEL_ALLOWANCE + 2;
+  const stackGap = PROXY_SIZE + LABEL_ALLOWANCE + 8;
+
+  proxiesByMate.forEach((proxies, mateOfId) => {
+    const mateNode = cy.getElementById(mateOfId);
+    if (mateNode.length === 0) return;
+    const femalePos = mateNode.position();
+
+    proxies.forEach((proxy) => {
+      const makeBox = (cx, cy_pos) => ({
+        x1: cx - proxyHalfW, y1: cy_pos - proxyHalfW,
+        x2: cx + proxyHalfW, y2: cy_pos + proxyHalfH,
+      });
+
+      const tryPlace = (shift, checkEdges) => {
+        for (const { dx, dy } of SATELLITE_OFFSETS) {
+          const cx = femalePos.x + dx;
+          const shiftDir = dy !== 0 ? Math.sign(dy) : 1;
+          const cy_pos = femalePos.y + dy + shift * shiftDir;
+          const box = makeBox(cx, cy_pos);
+
+          if (occupiedBoxes.some(ob => boxesOverlap(box, ob))) continue;
+          if (checkEdges && edgeBoxes.some(eb => boxesOverlap(box, eb))) continue;
+
+          proxy.position({ x: cx, y: cy_pos });
+          occupiedBoxes.push(box);
+          return true;
+        }
+        return false;
+      };
+
+      // Try base positions first, then progressively stack outward
+      for (let level = 0; level < 3; level++) {
+        const shift = level * stackGap;
+        if (tryPlace(shift, true)) return;
+        if (tryPlace(shift, false)) return;
+      }
+
+      const cx = femalePos.x + SATELLITE_OFFSETS[0].dx;
+      const cy_pos = femalePos.y + SATELLITE_OFFSETS[0].dy;
+      proxy.position({ x: cx, y: cy_pos });
+      occupiedBoxes.push(makeBox(cx, cy_pos));
+    });
+  });
+}
+
+/**
+ * Highlight edges for lineage mode based on node CSS classes already applied.
+ */
+function highlightLineageEdges(cy) {
+  const isActive = (node) => node.hasClass('highlighted') || node.hasClass('selected');
+
+  // 1. Mother-child edges where both endpoints are highlighted/clicked
+  cy.edges('[edgeType = "mother-child"]').forEach(edge => {
+    const src = cy.getElementById(edge.data('source'));
+    const tgt = cy.getElementById(edge.data('target'));
+    if (isActive(src) && isActive(tgt)) {
+      edge.addClass('highlighted');
+    }
+  });
+
+  // 2. Father-child connections via proxies: highlight the mate edge + mother-child
+  //    edge only when at least one child through that mate is highlighted/clicked
+  cy.nodes('.proxy.highlighted, .proxy.selected').forEach(proxy => {
+    const mateOfId = proxy.data('mateOf');
+    const originalId = proxy.data('originalId');
+    let hasHighlightedChild = false;
+
+    cy.edges(`[source = "${mateOfId}"][edgeType = "mother-child"]`).forEach(edge => {
+      const childNode = cy.getElementById(edge.data('target'));
+      if (childNode.length === 0) return;
+      if (!isActive(childNode)) return;
+      if (childNode.data('father') !== originalId) return;
+      edge.addClass('highlighted');
+      hasHighlightedChild = true;
+    });
+
+    if (hasHighlightedChild) {
+      proxy.connectedEdges('.mate-edge').addClass('highlighted');
+    }
+  });
+}
+
+/**
+ * Highlight edges for a relationship path.
+ * Handles father->child connections that go through proxy + mate edges.
+ */
+function highlightRelationshipPathEdges(cy, relationshipPath) {
+  for (let i = 0; i < relationshipPath.length - 1; i++) {
+    const idA = relationshipPath[i];
+    const idB = relationshipPath[i + 1];
+
+    // Try direct mother->child edge in either direction
+    const edgeAB = cy.getElementById(`${idA}-${idB}`);
+    const edgeBA = cy.getElementById(`${idB}-${idA}`);
+
+    if (edgeAB.length > 0) { edgeAB.addClass('highlighted'); continue; }
+    if (edgeBA.length > 0) { edgeBA.addClass('highlighted'); continue; }
+
+    // No direct edge: must be a father->child link going through a proxy
+    const nodeA = cy.getElementById(idA);
+    const nodeB = cy.getElementById(idB);
+    if (nodeA.length === 0 || nodeB.length === 0) continue;
+
+    // Check if idA is the father of idB
+    if (nodeB.data('father') === idA) {
+      const motherId = nodeB.data('mother');
+      if (motherId) {
+        highlightFatherChildConnection(cy, idA, motherId, idB);
+        // Also highlight the mother node as an intermediary
+        const motherNode = cy.getElementById(motherId);
+        if (motherNode.length > 0) motherNode.addClass('highlighted');
+      }
+    } else if (nodeA.data('father') === idB) {
+      const motherId = nodeA.data('mother');
+      if (motherId) {
+        highlightFatherChildConnection(cy, idB, motherId, idA);
+        const motherNode = cy.getElementById(motherId);
+        if (motherNode.length > 0) motherNode.addClass('highlighted');
+      }
+    }
+  }
+}
+
+/**
+ * Highlight the proxy node, mate edge, and mother->child edge
+ * that visually represent a father->child connection.
+ */
+function highlightFatherChildConnection(cy, fatherId, motherId, childId) {
+  const proxyId = `${fatherId}_m_${motherId}`;
+  const proxyNode = cy.getElementById(proxyId);
+  if (proxyNode.length > 0) proxyNode.addClass('highlighted');
+
+  const mateEdge = cy.getElementById(`mate_${proxyId}_${motherId}`);
+  if (mateEdge.length > 0) mateEdge.addClass('highlighted');
+
+  const motherChildEdge = cy.getElementById(`${motherId}-${childId}`);
+  if (motherChildEdge.length > 0) motherChildEdge.addClass('highlighted');
 }
