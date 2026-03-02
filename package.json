@@ -8,9 +8,10 @@
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint .",
-    "preview": "vite preview",
+    "preview": "npm run build && wrangler dev",
     "optimize-images": "node scripts/optimize-images.js",
-    "prebuild": "node scripts/optimize-images.js"
+    "prebuild": "node scripts/optimize-images.js",
+    "deploy": "npm run build && wrangler deploy"
   },
   "dependencies": {
     "@popperjs/core": "^2.11.8",
@@ -23,6 +24,7 @@
     "recharts": "^3.7.0"
   },
   "devDependencies": {
+    "@cloudflare/vite-plugin": "^1.25.6",
     "@eslint/js": "^9.39.1",
     "@tailwindcss/postcss": "^4.1.18",
     "@types/react": "^19.2.5",
@@ -35,6 +37,7 @@
     "globals": "^16.5.0",
     "postcss": "^8.5.6",
     "sharp": "^0.34.5",
-    "vite": "^7.2.4"
+    "vite": "^7.2.4",
+    "wrangler": "^4.69.0"
   }
 }
