@@ -152,7 +152,7 @@
       "sex": "male",
       "photo": "/images/koalas/michael.jpg",
       "mother": "b2k011",
-      "father": null,
+      "father": "b2k014",
       "deceased": true
     },
     {
@@ -1633,7 +1633,7 @@
       "id": "b2k134",
       "name": "Darwin",
       "nicknames": ["达尔文"],
-      "birthDate": "2014",
+      "birthDate": "2014-08-30",
       "sex": "male",
       "photo": null,
       "mother": null,

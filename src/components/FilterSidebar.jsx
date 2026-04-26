@@ -3,6 +3,7 @@ import { useLanguage } from '../i18n/LanguageContext';
 import { t } from '../i18n/translations';
 import { calculateGeneration } from '../utils/graphHelpers';
 import { calculateAgeInYears, calculateAgeParts, getAgeForDisplay } from '../utils/ageUtils';
+import { parseKoalaDateString } from '../utils/dateUtils';
 import { getPhotoUrl } from '../utils/imageUtils';
 
 export default function FilterSidebar({ koalas, onKoalaClick, isOpen, onToggle }) {
@@ -21,14 +22,29 @@ export default function FilterSidebar({ koalas, onKoalaClick, isOpen, onToggle }
 
   // Calculate generations for all koalas
   const koalasWithGeneration = koalas.map(koala => {
+    const ageUnknown = !!koala.deceased && !koala.dateOfDeath;
     const endDate = koala.deceased ? koala.dateOfDeath : null;
+    const generation = calculateGeneration(koala.id, koalas);
+
+    if (ageUnknown) {
+      return {
+        ...koala,
+        generation,
+        ageUnknown: true,
+        ageInYears: null,
+        preciseAge: null,
+        ageForDisplay: null,
+      };
+    }
+
     const ageParts = calculateAgeParts(koala.birthDate, endDate);
     const preciseAge = ageParts
       ? ageParts.years + ageParts.months / 12 + ageParts.days / 365
       : 0;
     return {
       ...koala,
-      generation: calculateGeneration(koala.id, koalas),
+      generation,
+      ageUnknown: false,
       ageInYears: calculateAgeInYears(koala.birthDate, endDate),
       preciseAge,
       ageForDisplay: getAgeForDisplay(koala.birthDate, endDate),
@@ -50,6 +66,7 @@ export default function FilterSidebar({ koalas, onKoalaClick, isOpen, onToggle }
     // Filter by age range
     if (filters.ageRange !== 'all') {
       result = result.filter(k => {
+        if (k.ageUnknown) return false;
         const age = k.ageInYears;
         switch (filters.ageRange) {
           case 'infant': return age < 1;
@@ -77,8 +94,20 @@ export default function FilterSidebar({ koalas, onKoalaClick, isOpen, onToggle }
       result = result.filter(k => !!k.deceased === isDeceased);
     }
 
-    // Sort by age from oldest to youngest (fractional for proper sub-year ordering)
-    result.sort((a, b) => b.preciseAge - a.preciseAge);
+    // Sort by age from oldest to youngest; unknown-age koalas go last, tiebreak on birthDate
+    result.sort((a, b) => {
+      if (a.ageUnknown && b.ageUnknown) {
+        const da = parseKoalaDateString(a.birthDate);
+        const db = parseKoalaDateString(b.birthDate);
+        if (!da && !db) return 0;
+        if (!da) return 1;
+        if (!db) return -1;
+        return da - db;
+      }
+      if (a.ageUnknown) return 1;
+      if (b.ageUnknown) return -1;
+      return b.preciseAge - a.preciseAge;
+    });
 
     setFilteredKoalas(result);
   }, [filters, koalas, customAgeRange]);
@@ -312,7 +341,7 @@ export default function FilterSidebar({ koalas, onKoalaClick, isOpen, onToggle }
                             {t(koala.sex, language)}
                           </span>
                           <span>•</span>
-                          <span>{koala.ageForDisplay ? `${koala.ageForDisplay.value} ${t(koala.ageForDisplay.unit, language)}` : `${koala.ageInYears} ${t('years', language)}`}</span>
+                          <span>{koala.ageUnknown ? t('unknown', language) : koala.ageForDisplay ? `${koala.ageForDisplay.value} ${t(koala.ageForDisplay.unit, language)}` : `${koala.ageInYears} ${t('years', language)}`}</span>
                           <span>•</span>
                           <span>
                             {t('generationShortFormat', language, { gen: koala.generation })}
