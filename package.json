@@ -10,7 +10,10 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "optimize-images": "node scripts/optimize-images.js",
-    "prebuild": "node scripts/optimize-images.js"
+    "prebuild": "node scripts/optimize-images.js",
+    "dev:full": "npx wrangler pages dev --proxy 5173",
+    "migrate": "node scripts/migrate-to-d1.js",
+    "create-admin": "node scripts/create-admin-passkey.js"
   },
   "dependencies": {
     "@popperjs/core": "^2.11.8",
@@ -35,6 +38,7 @@
     "globals": "^16.5.0",
     "postcss": "^8.5.6",
     "sharp": "^0.34.5",
-    "vite": "^7.2.4"
+    "vite": "^7.2.4",
+    "wrangler": "^4.85.0"
   }
 }

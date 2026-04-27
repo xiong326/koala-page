@@ -16,6 +16,12 @@ dist-ssr
 public/images/koalas/thumb
 public/images/koalas/medium
 
+# Wrangler
+.wrangler
+
+# Generated migration seed
+migrations/0003_admin_passkey.sql
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

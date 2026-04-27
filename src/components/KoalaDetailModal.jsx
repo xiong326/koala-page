@@ -1,10 +1,12 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { useLanguage } from '../i18n/LanguageContext';
 import { t } from '../i18n/translations';
 import { parseKoalaDateString } from '../utils/dateUtils';
 import { getAgeForDisplay } from '../utils/ageUtils';
 import { getDescendants, getAncestors, calculateGeneration } from '../utils/graphHelpers';
 import { getPhotoUrl } from '../utils/imageUtils';
+import KoalaEditForm from './KoalaEditForm';
+import * as api from '../api/koalaApi';
 
 function KoalaLink({ name, koalaId, onClick }) {
   return (
@@ -33,8 +35,10 @@ function InfoRow({ label, children }) {
   );
 }
 
-export default function KoalaDetailModal({ koala, allKoalas, onClose, onKoalaClick }) {
+export default function KoalaDetailModal({ koala, allKoalas, onClose, onKoalaClick, isAuthenticated, onKoalaUpdated, onKoalaDeleted, currentBoard }) {
   const { language } = useLanguage();
+  const [editing, setEditing] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   const sortedByBirth = useMemo(() => {
     return [...allKoalas].sort((a, b) => {
@@ -148,11 +152,41 @@ export default function KoalaDetailModal({ koala, allKoalas, onClose, onKoalaCli
 
   const handleNav = (targetKoala) => {
     if (targetKoala && onKoalaClick) {
+      setEditing(false);
       onKoalaClick(targetKoala.id);
     }
   };
 
+  const handleDelete = async () => {
+    try {
+      await api.deleteKoala(koala.id);
+      if (onKoalaDeleted) onKoalaDeleted();
+    } catch {
+      setDeleting(false);
+    }
+  };
+
   if (!koala) return null;
+
+  if (editing) {
+    return (
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onClick={() => setEditing(false)}>
+        <div className="bg-white rounded-xl shadow-2xl w-[90vw] max-w-2xl max-h-[85vh] overflow-y-auto p-6" onClick={e => e.stopPropagation()}>
+          <h2 className="text-lg font-bold text-gray-800 mb-4">{t('editEdit', language)}: {koala.name}</h2>
+          <KoalaEditForm
+            koala={koala}
+            board={currentBoard}
+            allKoalas={allKoalas}
+            onSave={(updated) => {
+              setEditing(false);
+              if (onKoalaUpdated) onKoalaUpdated(updated);
+            }}
+            onCancel={() => setEditing(false)}
+          />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onClick={onClose}>
@@ -160,6 +194,19 @@ export default function KoalaDetailModal({ koala, allKoalas, onClose, onKoalaCli
         className="bg-gray-50 w-[90vw] max-w-3xl max-h-[85vh] rounded-xl shadow-2xl flex flex-col overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
+        {/* Delete confirmation */}
+        {deleting && (
+          <div className="absolute inset-0 z-10 flex items-center justify-center bg-black/30 rounded-xl">
+            <div className="bg-white rounded-lg shadow-xl p-6 max-w-sm mx-4">
+              <p className="text-sm text-gray-700 mb-4">{t('editDeleteConfirm', language, { name: koala.name })}</p>
+              <div className="flex justify-end gap-2">
+                <button onClick={() => setDeleting(false)} className="px-3 py-1.5 text-sm text-gray-600 hover:text-gray-800">{t('cancel', language)}</button>
+                <button onClick={handleDelete} className="px-3 py-1.5 text-sm bg-red-500 text-white rounded-md hover:bg-red-600">{t('editDelete', language)}</button>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Header */}
         <div className="flex items-center justify-between p-4 sm:p-5 border-b border-gray-200 bg-white">
           <div className="flex items-center gap-3 min-w-0 flex-1">
@@ -198,14 +245,38 @@ export default function KoalaDetailModal({ koala, allKoalas, onClose, onKoalaCli
               </svg>
             </button>
           </div>
-          <button
-            onClick={onClose}
-            className="p-1.5 rounded-md hover:bg-gray-100 text-gray-500 hover:text-gray-800 transition-colors ml-3 flex-shrink-0"
-          >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
+          <div className="flex items-center gap-1 ml-3 flex-shrink-0">
+            {isAuthenticated && (
+              <>
+                <button
+                  onClick={() => setEditing(true)}
+                  className="p-1.5 rounded-md hover:bg-blue-50 text-blue-500 hover:text-blue-700 transition-colors"
+                  title={t('editEdit', language)}
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                  </svg>
+                </button>
+                <button
+                  onClick={() => setDeleting(true)}
+                  className="p-1.5 rounded-md hover:bg-red-50 text-red-400 hover:text-red-600 transition-colors"
+                  title={t('editDelete', language)}
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                  </svg>
+                </button>
+              </>
+            )}
+            <button
+              onClick={onClose}
+              className="p-1.5 rounded-md hover:bg-gray-100 text-gray-500 hover:text-gray-800 transition-colors"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
         </div>
 
         {/* Scrollable content */}

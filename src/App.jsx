@@ -8,6 +8,9 @@ import FilterSidebar from './components/FilterSidebar';
 import RelationshipSidebar from './components/RelationshipSidebar';
 import DataBoard from './components/DataBoard';
 import KoalaDetailModal from './components/KoalaDetailModal';
+import LoginModal from './components/LoginModal';
+import AdminPanel from './components/AdminPanel';
+import KoalaEditForm from './components/KoalaEditForm';
 import koalasDataBoard1 from './data/koalas.json';
 import koalasDataBoard2 from './data/koalas-board2.json';
 import contributionData from './data/contribution.json';
@@ -18,8 +21,10 @@ import {
 } from './utils/graphHelpers';
 import { useLanguage } from './i18n/LanguageContext';
 import { t } from './i18n/translations';
+import { useAuth } from './contexts/AuthContext';
+import * as api from './api/koalaApi';
 
-const boardData = {
+const fallbackData = {
   'board1': koalasDataBoard1,
   'board2': koalasDataBoard2
 };
@@ -39,8 +44,9 @@ const contributionTypeKeys = {
 
 function App() {
   const { language } = useLanguage();
+  const { isAuthenticated, role, logout } = useAuth();
   const [currentBoard, setCurrentBoard] = useState('board2');
-  const [koalas, setKoalas] = useState(boardData['board2'].koalas);
+  const [koalas, setKoalas] = useState(fallbackData['board2'].koalas);
   const [selectedKoala, setSelectedKoala] = useState(null);
   const [highlightedNodes, setHighlightedNodes] = useState([]);
   const [primaryElements, setPrimaryElements] = useState([]);
@@ -53,13 +59,26 @@ function App() {
   const [dataBoardOpen, setDataBoardOpen] = useState(false);
   const [detailModalKoala, setDetailModalKoala] = useState(null);
   const [contributionsOpen, setContributionsOpen] = useState(false);
+  const [loginModalOpen, setLoginModalOpen] = useState(false);
+  const [adminPanelOpen, setAdminPanelOpen] = useState(false);
+  const [createModalOpen, setCreateModalOpen] = useState(false);
 
-  // Handle board change
+  const loadKoalas = useCallback(async (board) => {
+    try {
+      const data = await api.fetchKoalas(board);
+      setKoalas(data.koalas);
+    } catch {
+      setKoalas(fallbackData[board]?.koalas || []);
+    }
+  }, []);
+
+  useEffect(() => {
+    loadKoalas(currentBoard);
+  }, [currentBoard, loadKoalas]);
+
   const handleBoardChange = (newBoard) => {
     setCurrentBoard(newBoard);
-    setKoalas(boardData[newBoard].koalas);
 
-    // Reset all UI state when switching boards
     setSelectedKoala(null);
     setHighlightedNodes([]);
     setSelectedKoalaId(null);
@@ -68,12 +87,41 @@ function App() {
     setRelationshipSidebarOpen(false);
     setDetailModalKoala(null);
 
-    // Reset graph view
     setTimeout(() => {
       const event = new CustomEvent('resetGraphView');
       window.dispatchEvent(event);
     }, 100);
   };
+
+  const handleDataChange = useCallback(() => {
+    loadKoalas(currentBoard);
+  }, [currentBoard, loadKoalas]);
+
+  const handleKoalaCreated = useCallback((newKoala) => {
+    setCreateModalOpen(false);
+    handleDataChange();
+    setTimeout(() => {
+      setSelectedKoalaId(newKoala.id);
+      const koala = { ...newKoala };
+      setSelectedKoala(koala);
+      const lineage = getLineageHighlight(koala.id, [...koalas, koala]);
+      setHighlightedNodes(lineage.nodes);
+    }, 200);
+  }, [handleDataChange, koalas]);
+
+  const handleKoalaUpdated = useCallback((updated) => {
+    handleDataChange();
+    setDetailModalKoala(prev => prev?.id === updated.id ? updated : prev);
+    setSelectedKoala(prev => prev?.id === updated.id ? updated : prev);
+  }, [handleDataChange]);
+
+  const handleKoalaDeleted = useCallback(() => {
+    setDetailModalKoala(null);
+    setSelectedKoala(null);
+    setSelectedKoalaId(null);
+    setHighlightedNodes([]);
+    handleDataChange();
+  }, [handleDataChange]);
 
   useEffect(() => {
     const { primaryElements: primary, proxyElements: proxy } = koalasToGraphElements(koalas);
@@ -82,6 +130,23 @@ function App() {
 
     const birthdays = getUpcomingBirthdays(koalas);
     setUpcomingBirthdays(birthdays);
+
+    if (selectedKoala) {
+      const fresh = koalas.find(k => k.id === selectedKoala.id);
+      if (fresh) {
+        setSelectedKoala(fresh);
+      } else {
+        setSelectedKoala(null);
+        setSelectedKoalaId(null);
+        setHighlightedNodes([]);
+      }
+    }
+    if (detailModalKoala) {
+      const fresh = koalas.find(k => k.id === detailModalKoala.id);
+      if (fresh) {
+        setDetailModalKoala(fresh);
+      }
+    }
   }, [koalas]);
 
 
@@ -182,6 +247,49 @@ function App() {
             })()}
           </div>
           <div className="flex items-center gap-2">
+            {isAuthenticated && (
+              <>
+                <span className="text-xs bg-green-500 text-white px-1.5 py-0.5 rounded hidden sm:inline">
+                  {t('editMode', language)}
+                </span>
+                <button
+                  onClick={() => setCreateModalOpen(true)}
+                  className="px-2 py-1 text-xs rounded-md bg-white/20 hover:bg-white/30 text-white"
+                  title={t('editAdd', language)}
+                >
+                  + {t('editAdd', language)}
+                </button>
+                {role === 'admin' && (
+                  <button
+                    onClick={() => setAdminPanelOpen(true)}
+                    className="p-1 rounded-md hover:bg-white/20 text-white"
+                    title={t('adminTitle', language)}
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                  </button>
+                )}
+                <button
+                  onClick={logout}
+                  className="px-2 py-1 text-xs rounded-md bg-white/20 hover:bg-white/30 text-white"
+                >
+                  {t('editModeLogout', language)}
+                </button>
+              </>
+            )}
+            {!isAuthenticated && (
+              <button
+                onClick={() => setLoginModalOpen(true)}
+                className="p-1 rounded-md hover:bg-white/20 text-white"
+                title={t('loginTitle', language)}
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                </svg>
+              </button>
+            )}
             <BoardSelector
               currentBoard={currentBoard}
               onBoardChange={handleBoardChange}
@@ -286,7 +394,34 @@ function App() {
           allKoalas={koalas}
           onClose={handleCloseDetail}
           onKoalaClick={handleDetailKoalaClick}
+          isAuthenticated={isAuthenticated}
+          onKoalaUpdated={handleKoalaUpdated}
+          onKoalaDeleted={handleKoalaDeleted}
+          currentBoard={currentBoard}
         />
+      )}
+
+      {/* Login Modal */}
+      {loginModalOpen && (
+        <LoginModal onClose={() => setLoginModalOpen(false)} />
+      )}
+
+      {/* Admin Panel */}
+      <AdminPanel isOpen={adminPanelOpen} onClose={() => setAdminPanelOpen(false)} />
+
+      {/* Create Koala Modal */}
+      {createModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onClick={() => setCreateModalOpen(false)}>
+          <div className="bg-white rounded-xl shadow-2xl w-[90vw] max-w-2xl max-h-[85vh] overflow-y-auto p-6" onClick={e => e.stopPropagation()}>
+            <h2 className="text-lg font-bold text-gray-800 mb-4">{t('editAdd', language)}</h2>
+            <KoalaEditForm
+              board={currentBoard}
+              allKoalas={koalas}
+              onSave={handleKoalaCreated}
+              onCancel={() => setCreateModalOpen(false)}
+            />
+          </div>
+        </div>
       )}
 
       {/* Contributions Footer */}

@@ -40,6 +40,7 @@ export const translations = {
 
     // Filter
     filterTitle: "Filters",
+    filterConditions: "Filter Conditions",
     clearFilters: "Clear All",
     filterBySex: "Sex",
     filterByAge: "Age Range",
@@ -179,6 +180,54 @@ export const translations = {
 
     // Language toggle
     language: "语言",
+
+    // Auth & Edit Mode
+    loginTitle: "Enter Edit Mode",
+    loginPlaceholder: "Enter access code",
+    loginInvalidCode: "Invalid access code",
+    loginError: "Login failed. Please try again.",
+    loginSubmit: "Login",
+    cancel: "Cancel",
+    editMode: "Edit Mode",
+    editModeLogout: "Exit Edit Mode",
+    editAdd: "Add Koala",
+    editEdit: "Edit",
+    editDelete: "Delete",
+    editDeleteConfirm: "Are you sure you want to delete {{name}}? This cannot be undone.",
+    editCreate: "Create",
+    editSave: "Save",
+    editIdAutoAssigned: "Assigned when saved",
+    editNicknames: "Nicknames",
+    editNicknamesPlaceholder: "Comma-separated nicknames",
+    editDateHint: "YYYY, YYYY-MM, or YYYY-MM-DD",
+    editSelectParent: "Search for a koala...",
+    editPhoto: "Photo",
+    cropInstruction: "Drag to position, scroll or use buttons to zoom. The square area will be used.",
+    cropConfirm: "Crop",
+    cropReset: "Reset",
+    name: "Name",
+
+    // Admin Panel
+    adminTitle: "Admin Panel",
+    adminPasskeys: "Access Codes",
+    adminAuditLog: "Audit Log",
+    adminCreatePasskey: "Create New Access Code",
+    adminPasskeyName: "Label (e.g. person's name)",
+    adminCodeCreated: "Access code created successfully!",
+    adminCopy: "Copy",
+    adminCodeWarning: "This code will only be shown once. Copy it now.",
+    adminAllPasskeys: "All Access Codes",
+    adminNoPasskeys: "No access codes yet",
+    adminRevoke: "Revoke",
+    adminRevoked: "Revoked",
+    adminRecentChanges: "Recent Changes",
+    adminNoChanges: "No changes recorded yet",
+    adminChangedFields: "Changed fields",
+    adminFrom: "From",
+    adminTo: "To",
+    adminEmptyValue: "Empty",
+    adminYes: "Yes",
+    adminNo: "No",
   },
   zh: {
     // Header - ADD CHINESE HERE
@@ -221,6 +270,7 @@ export const translations = {
 
     // Filter
     filterTitle: "筛选",
+    filterConditions: "筛选条件",
     clearFilters: "清除全部",
     filterBySex: "性别",
     filterByAge: "年龄范围",
@@ -360,6 +410,54 @@ export const translations = {
 
     // Language toggle
     language: "Language",
+
+    // Auth & Edit Mode
+    loginTitle: "进入编辑模式",
+    loginPlaceholder: "输入访问码",
+    loginInvalidCode: "访问码无效",
+    loginError: "登录失败，请重试",
+    loginSubmit: "登录",
+    cancel: "取消",
+    editMode: "编辑模式",
+    editModeLogout: "退出编辑",
+    editAdd: "添加考拉",
+    editEdit: "编辑",
+    editDelete: "删除",
+    editDeleteConfirm: "确定要删除 {{name}} 吗？此操作无法撤销。",
+    editCreate: "创建",
+    editSave: "保存",
+    editIdAutoAssigned: "保存时自动分配",
+    editNicknames: "昵称",
+    editNicknamesPlaceholder: "用逗号分隔多个昵称",
+    editDateHint: "年份、年-月 或 年-月-日",
+    editSelectParent: "搜索考拉...",
+    editPhoto: "照片",
+    cropInstruction: "拖动调整位置，滚轮或按钮缩放。方形区域内的部分将被使用。",
+    cropConfirm: "裁剪",
+    cropReset: "重置",
+    name: "名字",
+
+    // Admin Panel
+    adminTitle: "管理面板",
+    adminPasskeys: "访问码管理",
+    adminAuditLog: "操作日志",
+    adminCreatePasskey: "创建新访问码",
+    adminPasskeyName: "标签（如：使用者名字）",
+    adminCodeCreated: "访问码创建成功！",
+    adminCopy: "复制",
+    adminCodeWarning: "此访问码仅显示一次，请立即复制。",
+    adminAllPasskeys: "全部访问码",
+    adminNoPasskeys: "暂无访问码",
+    adminRevoke: "吊销",
+    adminRevoked: "已吊销",
+    adminRecentChanges: "最近更改",
+    adminNoChanges: "暂无更改记录",
+    adminChangedFields: "更改字段",
+    adminFrom: "原值",
+    adminTo: "新值",
+    adminEmptyValue: "空",
+    adminYes: "是",
+    adminNo: "否",
   }
 };
 
