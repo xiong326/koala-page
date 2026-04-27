@@ -234,21 +234,21 @@ function App() {
     <div className="h-dvh flex flex-col bg-gray-50">
       {/* Header */}
       <header className="bg-blue-600 text-white px-4 py-1.5 shadow-lg">
-        <div className="container mx-auto flex justify-between items-center gap-3">
-          <div className="flex-1 min-w-0">
+        <div className="container mx-auto flex flex-wrap justify-between items-center gap-x-3 gap-y-1.5">
+          <div className="flex-1 min-w-0 basis-0">
             <h1 className="text-base sm:text-lg font-bold leading-tight">{t('title', language)}</h1>
             {upcomingBirthdays.length > 0 && (() => {
               const nearest = upcomingBirthdays[0];
               return (
-                <p className="text-blue-100 text-xs leading-tight">
+                <p className="text-blue-100 text-xs leading-tight truncate">
                   {t('birthdayForecast', language)}: {nearest.koala.name} {t('ageYearsFormat', language, { age: nearest.upcomingAge })} - {nearest.monthDay}
                 </p>
               );
             })()}
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
             {isAuthenticated && (
-              <>
+              <div className="hidden sm:flex items-center gap-2">
                 <span className="text-xs bg-green-500 text-white px-1.5 py-0.5 rounded hidden sm:inline">
                   {t('editMode', language)}
                 </span>
@@ -277,7 +277,7 @@ function App() {
                 >
                   {t('editModeLogout', language)}
                 </button>
-              </>
+              </div>
             )}
             {!isAuthenticated && (
               <button
@@ -297,6 +297,38 @@ function App() {
             />
             <LanguageToggle />
           </div>
+          {isAuthenticated && (
+            <div className="w-full flex sm:hidden items-center justify-end gap-1.5">
+              <span className="text-[11px] bg-green-500 text-white px-1.5 py-0.5 rounded mr-auto">
+                {t('editMode', language)}
+              </span>
+              <button
+                onClick={() => setCreateModalOpen(true)}
+                className="px-2 py-1 text-xs rounded-md bg-white/20 hover:bg-white/30 text-white"
+                title={t('editAdd', language)}
+              >
+                + {t('editAdd', language)}
+              </button>
+              {role === 'admin' && (
+                <button
+                  onClick={() => setAdminPanelOpen(true)}
+                  className="p-1 rounded-md hover:bg-white/20 text-white"
+                  title={t('adminTitle', language)}
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                  </svg>
+                </button>
+              )}
+              <button
+                onClick={logout}
+                className="px-2 py-1 text-xs rounded-md bg-white/20 hover:bg-white/30 text-white"
+              >
+                {t('editModeLogout', language)}
+              </button>
+            </div>
+          )}
         </div>
       </header>
 

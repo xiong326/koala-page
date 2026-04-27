@@ -264,6 +264,63 @@ export default function KoalaGraph({ primaryElements, proxyElements, onNodeClick
     };
   }, [primaryElements, proxyElements]);
 
+  useEffect(() => {
+    if (!isReady) return;
+
+    const refreshImages = () => {
+      const cy = cyRef.current;
+      if (!cy || document.visibilityState === 'hidden') return;
+
+      const nodesWithPhotos = cy.nodes().filter(node => !!node.data('photo'));
+      if (nodesWithPhotos.length === 0) {
+        cy.resize();
+        return;
+      }
+
+      const photos = nodesWithPhotos.map(node => ({
+        node,
+        photo: node.data('photo'),
+      }));
+
+      cy.batch(() => {
+        photos.forEach(({ node }) => node.removeData('photo'));
+      });
+      cy.elements().updateStyle();
+      cy.resize();
+
+      requestAnimationFrame(() => {
+        const latestCy = cyRef.current;
+        if (!latestCy || latestCy.destroyed()) return;
+
+        latestCy.batch(() => {
+          photos.forEach(({ node, photo }) => {
+            if (!node.removed()) {
+              node.data('photo', photo);
+            }
+          });
+        });
+        latestCy.elements().updateStyle();
+        latestCy.resize();
+      });
+    };
+
+    const refreshSoon = () => {
+      if (document.visibilityState === 'hidden') return;
+      setTimeout(refreshImages, 50);
+      setTimeout(refreshImages, 300);
+    };
+
+    window.addEventListener('pageshow', refreshSoon);
+    window.addEventListener('focus', refreshSoon);
+    document.addEventListener('visibilitychange', refreshSoon);
+
+    return () => {
+      window.removeEventListener('pageshow', refreshSoon);
+      window.removeEventListener('focus', refreshSoon);
+      document.removeEventListener('visibilitychange', refreshSoon);
+    };
+  }, [isReady]);
+
   // Highlighting logic
   useEffect(() => {
     if (!cyRef.current || !isReady) return;

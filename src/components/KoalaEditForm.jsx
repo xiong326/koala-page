@@ -6,6 +6,77 @@ import ImageCropper from './ImageCropper';
 import * as api from '../api/koalaApi';
 import { getPhotoUrl } from '../utils/imageUtils';
 
+const YEAR_RE = /^\d{4}$/;
+const MONTH_RE = /^\d{4}-\d{2}$/;
+const FULL_DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
+
+function getDatePrecision(value) {
+  if (FULL_DATE_RE.test(value || '')) return 'day';
+  if (MONTH_RE.test(value || '')) return 'month';
+  return 'year';
+}
+
+function getDateValueForPrecision(value, precision) {
+  if (precision === 'day') return FULL_DATE_RE.test(value || '') ? value : '';
+  if (precision === 'month') return MONTH_RE.test(value || '') ? value : '';
+  return YEAR_RE.test(value || '') ? value : '';
+}
+
+function normalizeDateForPrecision(value, precision) {
+  if (precision === 'day') {
+    return FULL_DATE_RE.test(value) ? value : '';
+  }
+  if (precision === 'month') {
+    return MONTH_RE.test(value) ? value : '';
+  }
+  return YEAR_RE.test(value) ? value : '';
+}
+
+function PrecisionDateInput({ label, value, onChange, language }) {
+  const [precision, setPrecision] = useState(() => getDatePrecision(value));
+
+  const handlePrecisionChange = (nextPrecision) => {
+    setPrecision(nextPrecision);
+    onChange(normalizeDateForPrecision(value, nextPrecision));
+  };
+
+  const inputType = precision === 'day' ? 'date' : precision === 'month' ? 'month' : 'number';
+
+  return (
+    <div>
+      <label className="block text-xs font-semibold text-gray-600 mb-1">{label}</label>
+      <div className="flex rounded-md border border-gray-300 overflow-hidden mb-2">
+        {['year', 'month', 'day'].map(option => (
+          <button
+            key={option}
+            type="button"
+            onClick={() => handlePrecisionChange(option)}
+            className={`flex-1 px-2 py-1 text-xs font-medium ${
+              precision === option
+                ? 'bg-blue-500 text-white'
+                : 'bg-white text-gray-600 hover:bg-gray-50'
+            }`}
+          >
+            {t(`datePrecision${option[0].toUpperCase()}${option.slice(1)}`, language)}
+          </button>
+        ))}
+      </div>
+      <input
+        type={inputType}
+        inputMode={precision === 'year' ? 'numeric' : undefined}
+        min={precision === 'year' ? '1900' : undefined}
+        max={precision === 'year' ? '2100' : undefined}
+        step={precision === 'year' ? '1' : undefined}
+        value={getDateValueForPrecision(value, precision)}
+        onChange={(e) => onChange(normalizeDateForPrecision(e.target.value, precision))}
+        placeholder={precision === 'year' ? 'YYYY' : undefined}
+        className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+      />
+      <p className="text-xs text-gray-400 mt-0.5">{t('editPartialDateHint', language)}</p>
+    </div>
+  );
+}
+
 function SearchableSelect({ value, onChange, koalas, placeholder, language }) {
   const [search, setSearch] = useState('');
   const [open, setOpen] = useState(false);
@@ -75,7 +146,7 @@ export default function KoalaEditForm({ koala, board, allKoalas, onSave, onCance
     name: koala?.name || '',
     nicknames: (koala?.nicknames || []).join(', '),
     birthDate: koala?.birthDate || '',
-    sex: koala?.sex || 'male',
+    sex: koala?.sex || '',
     mother: koala?.mother || null,
     father: koala?.father || null,
     deceased: koala?.deceased || false,
@@ -189,6 +260,7 @@ export default function KoalaEditForm({ koala, board, allKoalas, onSave, onCance
             className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             required
           />
+          <p className="text-xs text-gray-400 mt-0.5">{t('editNameHint', language)}</p>
         </div>
 
         {/* Nicknames */}
@@ -210,24 +282,21 @@ export default function KoalaEditForm({ koala, board, allKoalas, onSave, onCance
             value={form.sex}
             onChange={(e) => handleChange('sex', e.target.value)}
             className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            required
           >
+            <option value="" disabled>{t('editSelectSex', language)}</option>
             <option value="male">{t('male', language)}</option>
             <option value="female">{t('female', language)}</option>
           </select>
         </div>
 
         {/* Birth Date */}
-        <div>
-          <label className="block text-xs font-semibold text-gray-600 mb-1">{t('birthDate', language)}</label>
-          <input
-            type="text"
-            value={form.birthDate}
-            onChange={(e) => handleChange('birthDate', e.target.value)}
-            placeholder="YYYY-MM-DD"
-            className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-          />
-          <p className="text-xs text-gray-400 mt-0.5">{t('editDateHint', language)}</p>
-        </div>
+        <PrecisionDateInput
+          label={t('birthDate', language)}
+          value={form.birthDate}
+          onChange={(value) => handleChange('birthDate', value)}
+          language={language}
+        />
 
         {/* Mother */}
         <div>
@@ -266,13 +335,11 @@ export default function KoalaEditForm({ koala, board, allKoalas, onSave, onCance
           </label>
           {form.deceased && (
             <div className="mt-2">
-              <label className="block text-xs font-semibold text-gray-600 mb-1">{t('dateOfDeath', language)}</label>
-              <input
-                type="text"
+              <PrecisionDateInput
+                label={t('dateOfDeath', language)}
                 value={form.dateOfDeath}
-                onChange={(e) => handleChange('dateOfDeath', e.target.value)}
-                placeholder="YYYY-MM-DD"
-                className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                onChange={(value) => handleChange('dateOfDeath', value)}
+                language={language}
               />
             </div>
           )}
