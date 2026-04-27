@@ -7,6 +7,8 @@ import BoardSelector from './components/BoardSelector';
 import FilterSidebar from './components/FilterSidebar';
 import RelationshipSidebar from './components/RelationshipSidebar';
 import DataBoard from './components/DataBoard';
+import SubFamilyGraph from './components/SubFamilyGraph';
+import RelationshipPathGraph from './components/RelationshipPathGraph';
 import KoalaDetailModal from './components/KoalaDetailModal';
 import LoginModal from './components/LoginModal';
 import AdminPanel from './components/AdminPanel';
@@ -55,8 +57,11 @@ function App() {
   const [filterSidebarOpen, setFilterSidebarOpen] = useState(false);
   const [relationshipSidebarOpen, setRelationshipSidebarOpen] = useState(false);
   const [relationshipPath, setRelationshipPath] = useState([]);
+  const [relationshipResult, setRelationshipResult] = useState(null);
+  const [relationshipGraphOpen, setRelationshipGraphOpen] = useState(false);
   const [upcomingBirthdays, setUpcomingBirthdays] = useState([]);
   const [dataBoardOpen, setDataBoardOpen] = useState(false);
+  const [subFamilyOpen, setSubFamilyOpen] = useState(false);
   const [detailModalKoala, setDetailModalKoala] = useState(null);
   const [contributionsOpen, setContributionsOpen] = useState(false);
   const [loginModalOpen, setLoginModalOpen] = useState(false);
@@ -83,9 +88,12 @@ function App() {
     setHighlightedNodes([]);
     setSelectedKoalaId(null);
     setRelationshipPath([]);
+    setRelationshipResult(null);
+    setRelationshipGraphOpen(false);
     setFilterSidebarOpen(false);
     setRelationshipSidebarOpen(false);
     setDetailModalKoala(null);
+    setSubFamilyOpen(false);
 
     setTimeout(() => {
       const event = new CustomEvent('resetGraphView');
@@ -139,6 +147,7 @@ function App() {
         setSelectedKoala(null);
         setSelectedKoalaId(null);
         setHighlightedNodes([]);
+        setSubFamilyOpen(false);
       }
     }
     if (detailModalKoala) {
@@ -153,6 +162,8 @@ function App() {
   const handleNodeClick = (koalaData) => {
     // Clear relationship path first when clicking a node
     setRelationshipPath([]);
+    setRelationshipResult(null);
+    setRelationshipGraphOpen(false);
 
     // Find the full koala object
     const koala = koalas.find(k => k.id === koalaData.id);
@@ -180,6 +191,9 @@ function App() {
     setHighlightedNodes([]);
     setSelectedKoalaId(null);
     setRelationshipPath([]);
+    setRelationshipResult(null);
+    setRelationshipGraphOpen(false);
+    setSubFamilyOpen(false);
   };
 
   const handleParentClick = (koalaId) => {
@@ -210,6 +224,8 @@ function App() {
       setSelectedKoalaId(koala.id);
       setSelectedKoala(koala);
       setRelationshipPath([]);
+      setRelationshipResult(null);
+      setRelationshipGraphOpen(false);
       const lineage = getLineageHighlight(koala.id, koalas);
       setHighlightedNodes(lineage.nodes);
     }
@@ -219,15 +235,20 @@ function App() {
     setDetailModalKoala(null);
   };
 
-  const handleRelationshipPath = useCallback((path) => {
+  const handleRelationshipPath = useCallback((path, result = null) => {
     // Highlight the relationship path
     setHighlightedNodes(path);
     setRelationshipPath(path);
+    setRelationshipResult(result);
+    if (!path?.length) {
+      setRelationshipGraphOpen(false);
+    }
 
     // Clear card and selection when showing relationship path
     // Both endpoints will be highlighted in orange, but no card shown
     setSelectedKoalaId(null);
     setSelectedKoala(null);
+    setSubFamilyOpen(false);
   }, []);
 
   return (
@@ -357,6 +378,20 @@ function App() {
             </button>
             <button
               type="button"
+              onClick={() => setSubFamilyOpen(true)}
+              disabled={!selectedKoala}
+              className="px-2 py-1.5 sm:px-3 sm:py-2 text-sm rounded-md bg-white border border-gray-300 shadow-sm hover:bg-gray-50 whitespace-nowrap disabled:opacity-40 disabled:cursor-not-allowed"
+              title={selectedKoala ? t('subFamilyGraph', language) : t('subFamilySelectFirst', language)}
+            >
+              <span className="hidden sm:inline">{t('subFamilyGraph', language)}</span>
+              <span className="sm:hidden">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a4 4 0 00-5-3.87M9 20H4v-2a4 4 0 015-3.87m8-3.13a4 4 0 10-8 0m8 0a4 4 0 11-8 0m8 0c0 1.66-1.34 3-3 3s-3-1.34-3-3" />
+                </svg>
+              </span>
+            </button>
+            <button
+              type="button"
               onClick={() => {
                 const event = new CustomEvent('resetGraphView');
                 window.dispatchEvent(event);
@@ -393,6 +428,7 @@ function App() {
               isOpen={relationshipSidebarOpen}
               onToggle={() => setRelationshipSidebarOpen(!relationshipSidebarOpen)}
               onRelationshipCalculated={handleRelationshipPath}
+              onOpenRelationshipGraph={() => setRelationshipGraphOpen(true)}
             />
 
             {/* Koala Detail Card - fixed at top center */}
@@ -407,6 +443,21 @@ function App() {
                 />
               </div>
             )}
+
+            <SubFamilyGraph
+              selectedKoala={selectedKoala}
+              koalas={koalas}
+              isOpen={subFamilyOpen}
+              onClose={() => setSubFamilyOpen(false)}
+            />
+
+            <RelationshipPathGraph
+              relationship={relationshipResult}
+              relationshipPath={relationshipPath}
+              koalas={koalas}
+              isOpen={relationshipGraphOpen}
+              onClose={() => setRelationshipGraphOpen(false)}
+            />
           </div>
         </div>
       </div>

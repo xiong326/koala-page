@@ -2,8 +2,9 @@ import { useState, useEffect } from 'react';
 import { useLanguage } from '../i18n/LanguageContext';
 import { t } from '../i18n/translations';
 import { calculateRelationship } from '../utils/relationshipCalculator';
+import { getRelationshipDescription } from '../utils/relationshipDisplay';
 
-export default function RelationshipSidebar({ koalas, onKoalaClick, isOpen, onToggle, onRelationshipCalculated }) {
+export default function RelationshipSidebar({ koalas, onKoalaClick, isOpen, onToggle, onRelationshipCalculated, onOpenRelationshipGraph }) {
   const { language } = useLanguage();
   const [koala1Id, setKoala1Id] = useState('');
   const [koala2Id, setKoala2Id] = useState('');
@@ -34,13 +35,13 @@ export default function RelationshipSidebar({ koalas, onKoalaClick, isOpen, onTo
       setRelationship(result);
       // Notify parent to highlight the path
       if (onRelationshipCalculated && result.path) {
-        onRelationshipCalculated(result.path);
+        onRelationshipCalculated(result.path, result);
       }
     } else {
       setRelationship(null);
       // Clear highlighting when no relationship
       if (onRelationshipCalculated) {
-        onRelationshipCalculated([]);
+        onRelationshipCalculated([], null);
       }
     }
   }, [koala1Id, koala2Id, koalas, onRelationshipCalculated]);
@@ -72,94 +73,6 @@ export default function RelationshipSidebar({ koalas, onKoalaClick, isOpen, onTo
     setKoala2Id(tempId);
     setSearchTerm1(searchTerm2);
     setSearchTerm2(tempSearch);
-  };
-
-  const getRelationshipDescription = (rel) => {
-    if (!rel) return { description: '', details: '' };
-
-    const params = {
-      koala1: rel.koala1Name,
-      koala2: rel.koala2Name,
-      mother: rel.motherName,
-      parent: rel.parentName,
-      ancestor: rel.ancestorName,
-      gens: rel.generations || rel.generationsApart,
-    };
-
-    switch (rel.type) {
-      case 'self':
-        return {
-          description: t('relSelf', language),
-          details: ''
-        };
-      case 'unknown':
-        return {
-          description: t('relUnknown', language),
-          details: ''
-        };
-      case 'parent-child':
-        return {
-          description: t('relParentChild', language),
-          details: rel.direction === 'koala1-is-mother'
-            ? t('relParentChildDetail2', language, params)
-            : rel.direction === 'koala1-is-father'
-            ? t('relParentChildDetailFather2', language, params)
-            : rel.direction === 'koala2-is-father'
-            ? t('relParentChildDetailFather1', language, params)
-            : t('relParentChildDetail1', language, params)
-        };
-      case 'siblings':
-        return {
-          description: rel.subtype === 'full' ? t('relFullSiblings', language) : t('relHalfSiblings', language),
-          details: t('relSiblingsDetail', language, params)
-        };
-      case 'grandparent':
-        // Determine gender-appropriate title
-        const grandparentSex = rel.direction === 'koala1-is-grandparent' ? rel.koala1Sex : rel.koala2Sex;
-        const isMale = grandparentSex === 'male';
-
-        return {
-          description: isMale ? t('relGrandfather', language) : t('relGrandmother', language),
-          details: rel.direction === 'koala1-is-grandparent'
-            ? (isMale ? t('relGrandfatherDetail1', language, params) : t('relGrandmotherDetail1', language, params))
-            : (isMale ? t('relGrandfatherDetail2', language, params) : t('relGrandmotherDetail2', language, params))
-        };
-      case 'ancestor':
-        return {
-          description: t('relAncestor', language),
-          details: rel.direction === 'koala1-is-ancestor'
-            ? t('relAncestorDetail1', language, params)
-            : t('relAncestorDetail2', language, params)
-        };
-      case 'aunt-niece':
-        // Determine gender-appropriate title for aunt/uncle
-        const auntSex = rel.direction === 'koala1-is-aunt' ? rel.koala1Sex : rel.koala2Sex;
-        const isAuntMale = auntSex === 'male';
-
-        return {
-          description: isAuntMale ? t('relUncleNiece', language) : t('relAuntNiece', language),
-          details: rel.direction === 'koala1-is-aunt'
-            ? (isAuntMale ? t('relUncleNieceDetail1', language, params) : t('relAuntNieceDetail1', language, params))
-            : (isAuntMale ? t('relUncleNieceDetail2', language, params) : t('relAuntNieceDetail2', language, params))
-        };
-      case 'cousins':
-        return {
-          description: t('relCousins', language),
-          details: t('relCousinsDetail', language, params)
-        };
-      case 'related':
-        return {
-          description: t('relRelated', language),
-          details: t('relRelatedDetail', language, params)
-        };
-      case 'unrelated':
-        return {
-          description: t('relUnrelated', language),
-          details: t('relUnrelatedDetail', language)
-        };
-      default:
-        return { description: '', details: '' };
-    }
   };
 
   const getRelationshipColor = (type) => {
@@ -338,7 +251,7 @@ export default function RelationshipSidebar({ koalas, onKoalaClick, isOpen, onTo
 
         {/* Relationship Result */}
         {relationship && (() => {
-          const { description, details } = getRelationshipDescription(relationship);
+          const { description, details } = getRelationshipDescription(relationship, language);
           return (
             <div className="flex-1 overflow-y-auto p-2 sm:p-3 md:p-4">
               <div className="bg-gray-50 rounded-lg p-2 sm:p-3 md:p-4 border border-gray-200">
@@ -354,6 +267,15 @@ export default function RelationshipSidebar({ koalas, onKoalaClick, isOpen, onTo
                   <p className="text-xs sm:text-sm text-gray-700 leading-relaxed">
                     {details}
                   </p>
+                )}
+                {relationship.path?.length > 0 && relationship.type !== 'unrelated' && (
+                  <button
+                    type="button"
+                    onClick={onOpenRelationshipGraph}
+                    className="mt-3 w-full px-2 py-1.5 text-xs sm:text-sm rounded-md bg-blue-600 text-white hover:bg-blue-700"
+                  >
+                    {t('relationshipOpenGraph', language)}
+                  </button>
                 )}
               </div>
 

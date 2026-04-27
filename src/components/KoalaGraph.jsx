@@ -1,8 +1,6 @@
-import { useEffect, useRef, useState } from 'react';
+import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react';
 import cytoscape from 'cytoscape';
 import dagre from 'cytoscape-dagre';
-import { useLanguage } from '../i18n/LanguageContext';
-import { t } from '../i18n/translations';
 
 cytoscape.use(dagre);
 
@@ -20,14 +18,32 @@ const SATELLITE_OFFSETS = [
   { dx: 50, dy: 15 },    // bottom-right
 ];
 
-export default function KoalaGraph({ primaryElements, proxyElements, onNodeClick, highlightedNodes = [], selectedKoalaId = null, relationshipPath = [] }) {
-  const { language } = useLanguage();
+const KoalaGraph = forwardRef(function KoalaGraph({
+  primaryElements,
+  proxyElements,
+  onNodeClick,
+  highlightedNodes = [],
+  selectedKoalaId = null,
+  relationshipPath = [],
+}, ref) {
   const containerRef = useRef(null);
   const cyRef = useRef(null);
   const defaultViewportRef = useRef(null);
   const onNodeClickRef = useRef(onNodeClick);
   const centeredByClickRef = useRef(false);
   const [isReady, setIsReady] = useState(false);
+
+  useImperativeHandle(ref, () => ({
+    exportPng(options = {}) {
+      if (!cyRef.current) return null;
+      return cyRef.current.png({
+        full: true,
+        scale: 2,
+        bg: '#ffffff',
+        ...options,
+      });
+    },
+  }), []);
 
   // Avoid re-initializing Cytoscape when parent re-renders and passes a new function identity
   useEffect(() => {
@@ -128,6 +144,13 @@ export default function KoalaGraph({ primaryElements, proxyElements, onNodeClick
           }
         },
         {
+          selector: 'node.proxy[fatherColor]',
+          style: {
+            'border-color': 'data(fatherColor)',
+            'border-width': '4px',
+          }
+        },
+        {
           selector: 'node[sex="female"].highlighted',
           style: {
             'border-color': '#be185d',
@@ -171,6 +194,14 @@ export default function KoalaGraph({ primaryElements, proxyElements, onNodeClick
             'arrow-scale': 1.5,
           }
         },
+        {
+          selector: 'edge[edgeType = "mother-child"][fatherColor]',
+          style: {
+            'line-color': 'data(fatherColor)',
+            'target-arrow-color': 'data(fatherColor)',
+            'width': 3,
+          }
+        },
         // Mate edges: dashed pink, no arrow
         {
           selector: 'edge.mate-edge',
@@ -181,6 +212,13 @@ export default function KoalaGraph({ primaryElements, proxyElements, onNodeClick
             'target-arrow-shape': 'none',
             'curve-style': 'straight',
             'z-index': 0,
+          }
+        },
+        {
+          selector: 'edge.mate-edge[fatherColor]',
+          style: {
+            'line-color': 'data(fatherColor)',
+            'width': 2.5,
           }
         },
         {
@@ -326,7 +364,10 @@ export default function KoalaGraph({ primaryElements, proxyElements, onNodeClick
     if (!cyRef.current || !isReady) return;
 
     const cy = cyRef.current;
-    cy.elements().removeClass('highlighted selected');
+    cy.batch(() => {
+      cy.elements().removeClass('highlighted selected');
+    });
+    cy.elements().updateStyle();
 
     if (highlightedNodes.length === 0) return;
 
@@ -405,7 +446,9 @@ export default function KoalaGraph({ primaryElements, proxyElements, onNodeClick
       <div ref={containerRef} className="w-full h-full" />
     </div>
   );
-}
+});
+
+export default KoalaGraph;
 
 /**
  * Position proxy nodes as satellites around their female mate.
