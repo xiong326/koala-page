@@ -2,17 +2,32 @@ import { calculateAgeInYears, calculateAgeParts, getAgeForDisplay } from './ageU
 import { calculateGeneration } from './graphHelpers';
 
 export function enrichKoala(koala, allKoalas) {
+  const ageUnknown = !!koala.deceased && !koala.dateOfDeath;
   const endDate = koala.deceased ? koala.dateOfDeath : null;
+  const generation = calculateGeneration(koala.id, allKoalas);
+
+  if (ageUnknown) {
+    return {
+      ...koala,
+      ageUnknown: true,
+      ageInYears: null,
+      preciseAge: null,
+      ageForDisplay: null,
+      generation,
+    };
+  }
+
   const ageParts = calculateAgeParts(koala.birthDate, endDate);
   const preciseAge = ageParts
     ? ageParts.years + ageParts.months / 12 + ageParts.days / 365
     : 0;
   return {
     ...koala,
+    ageUnknown: false,
     ageInYears: calculateAgeInYears(koala.birthDate, endDate),
     preciseAge,
     ageForDisplay: getAgeForDisplay(koala.birthDate, endDate),
-    generation: calculateGeneration(koala.id, allKoalas),
+    generation,
   };
 }
 
@@ -31,18 +46,20 @@ export function computePopulationStats(koalas) {
 }
 
 export function computeAgeStats(koalas) {
-  if (koalas.length === 0) {
+  const knownAge = koalas.filter(k => !k.ageUnknown);
+
+  if (knownAge.length === 0) {
     return { averageAge: 0, oldest: null, youngest: null, avgLifespan: 0 };
   }
 
-  const ages = koalas.map(k => k.ageInYears);
+  const ages = knownAge.map(k => k.ageInYears);
   const averageAge = +(ages.reduce((a, b) => a + b, 0) / ages.length).toFixed(1);
 
-  const sorted = [...koalas].sort((a, b) => b.preciseAge - a.preciseAge);
+  const sorted = [...knownAge].sort((a, b) => b.preciseAge - a.preciseAge);
   const oldest = sorted[0];
   const youngest = sorted[sorted.length - 1];
 
-  const deceasedKoalas = koalas.filter(k => k.deceased);
+  const deceasedKoalas = knownAge.filter(k => k.deceased);
   const avgLifespan = deceasedKoalas.length > 0
     ? +(deceasedKoalas.reduce((sum, k) => sum + k.ageInYears, 0) / deceasedKoalas.length).toFixed(1)
     : 0;
@@ -61,9 +78,10 @@ const AGE_BUCKETS = [
 ];
 
 export function computeAgeDistribution(koalas) {
+  const knownAge = koalas.filter(k => !k.ageUnknown);
   return AGE_BUCKETS.map(bucket => ({
     range: bucket.key,
-    count: koalas.filter(k => k.ageInYears >= bucket.min && k.ageInYears < bucket.max).length,
+    count: knownAge.filter(k => k.ageInYears >= bucket.min && k.ageInYears < bucket.max).length,
   }));
 }
 

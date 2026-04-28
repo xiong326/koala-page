@@ -6,7 +6,7 @@ export const translations = {
     birthdayForecast: "Birthday forecast",
 
     // Search
-    searchPlaceholder: "Search by name, nickname, or ID...",
+    searchPlaceholder: "Search by name, tag, or ID...",
     showingCount: "Showing {{filtered}} of {{total}} koalas",
     noResults: "No koalas found",
 
@@ -15,12 +15,12 @@ export const translations = {
     instructionClick: "Click on a koala to view details and highlight their family",
     instructionZoom: "Use mouse wheel or pinch to zoom in/out",
     instructionPan: "Click and drag to pan around the graph",
-    instructionSearch: "Search by name, nickname, or ID to find a specific koala",
+    instructionSearch: "Search by name, tag, or ID to find a specific koala",
     instructionFilter: "Use filters to view koalas by age, sex, or generation",
 
     // Koala Card
     id: "ID",
-    nicknames: "Nicknames",
+    tags: "Tags",
     sex: "Sex",
     birthDate: "Birth Date",
     age: "Age",
@@ -40,6 +40,7 @@ export const translations = {
 
     // Filter
     filterTitle: "Filters",
+    filterConditions: "Filter Conditions",
     clearFilters: "Clear All",
     filterBySex: "Sex",
     filterByAge: "Age Range",
@@ -142,6 +143,7 @@ export const translations = {
 
     // Detail Modal
     moreInfo: "More Info",
+    viewFullProfile: "View Full Profile",
     detailBasicInfo: "Basic Info",
     detailFamily: "Family",
     detailFamilyStats: "Family Stats",
@@ -166,6 +168,7 @@ export const translations = {
     detailNoMates: "None",
     detailNone: "None",
     detailBorn: "Born",
+    detailBabyBorn: "Baby born",
     detailDied: "Died",
     detailAgeAtDeath: "Age at death",
     detailStatus: "Status",
@@ -179,6 +182,72 @@ export const translations = {
 
     // Language toggle
     language: "语言",
+
+    // Auth & Edit Mode
+    loginTitle: "Enter Edit Mode",
+    loginPlaceholder: "Enter access code",
+    loginInvalidCode: "Invalid access code",
+    loginError: "Login failed. Please try again.",
+    loginSubmit: "Login",
+    cancel: "Cancel",
+    close: "Close",
+    subFamilyGraph: "Sub Family",
+    subFamilySelectFirst: "Select a koala first",
+    subFamilySummary: "{{mates}} mate(s), {{descendants}} descendant(s)",
+    subFamilyNoChildren: "{{name}} has no recorded children",
+    subFamilyExportImage: "Export image",
+    relationshipOpenGraph: "View path graph",
+    relationshipPathGraph: "Relationship Path",
+    relationshipNoPath: "No relationship path to display",
+    relationshipExportImage: "Export image",
+    editMode: "Edit Mode",
+    editModeLogout: "Exit Edit Mode",
+    editAdd: "Add Koala",
+    editEdit: "Edit",
+    editDelete: "Delete",
+    editDeleteConfirm: "Are you sure you want to delete {{name}}? This cannot be undone.",
+    editCreate: "Create",
+    editSave: "Save",
+    editIdAutoAssigned: "Assigned when saved",
+    editPartialDateHint: "Partial dates are acceptable.",
+    editSelectSex: "Select sex...",
+    editNameHint: "Use the English name with the first letter capitalized.",
+    datePrecisionYear: "Year",
+    datePrecisionMonth: "Month",
+    datePrecisionDay: "Day",
+    editTags: "Tags",
+    editTagsPlaceholder: "Add one tag at a time",
+    editAddTag: "Add",
+    editRemoveTag: "Remove {{tag}}",
+    editDateHint: "YYYY, YYYY-MM, or YYYY-MM-DD",
+    editSelectParent: "Search for a koala...",
+    editPhoto: "Photo",
+    cropInstruction: "Drag to position, scroll or use buttons to zoom. The square area will be used.",
+    cropConfirm: "Crop",
+    cropReset: "Reset",
+    name: "Name",
+
+    // Admin Panel
+    adminTitle: "Admin Panel",
+    adminPasskeys: "Access Codes",
+    adminAuditLog: "Audit Log",
+    adminCreatePasskey: "Create New Access Code",
+    adminPasskeyName: "Label (e.g. person's name)",
+    adminCodeCreated: "Access code created successfully!",
+    adminCopy: "Copy",
+    adminCodeWarning: "This code will only be shown once. Copy it now.",
+    adminAllPasskeys: "All Access Codes",
+    adminNoPasskeys: "No access codes yet",
+    adminRevoke: "Revoke",
+    adminRevoked: "Revoked",
+    adminRecentChanges: "Recent Changes",
+    adminNoChanges: "No changes recorded yet",
+    adminChangedFields: "Changed fields",
+    adminFrom: "From",
+    adminTo: "To",
+    adminEmptyValue: "Empty",
+    adminYes: "Yes",
+    adminNo: "No",
   },
   zh: {
     // Header - ADD CHINESE HERE
@@ -187,7 +256,7 @@ export const translations = {
     birthdayForecast: "生日预告",
 
     // Search - ADD CHINESE HERE
-    searchPlaceholder: "按名字、昵称或ID搜索...",  // REPLACE WITH CHINESE
+    searchPlaceholder: "按名字、标签或ID搜索...",  // REPLACE WITH CHINESE
     showingCount: "显示 {{filtered}} / {{total}} 只考拉",  // REPLACE WITH CHINESE
     noResults: "未找到考拉",  // REPLACE WITH CHINESE
 
@@ -196,12 +265,12 @@ export const translations = {
     instructionClick: "点击考拉查看详情并高亮其家族",  // REPLACE WITH CHINESE
     instructionZoom: "使用鼠标滚轮或捏合手势进行缩放",  // REPLACE WITH CHINESE
     instructionPan: "点击并拖动以平移图表",  // REPLACE WITH CHINESE
-    instructionSearch: "按名字、昵称或ID查找特定考拉",  // REPLACE WITH CHINESE
+    instructionSearch: "按名字、标签或ID查找特定考拉",  // REPLACE WITH CHINESE
     instructionFilter: "使用筛选器按年龄、性别或世代查看考拉",  // REPLACE WITH CHINESE
 
     // Koala Card - ADD CHINESE HERE
     id: "编号",  // REPLACE WITH CHINESE
-    nicknames: "昵称",  // REPLACE WITH CHINESE
+    tags: "标签",  // REPLACE WITH CHINESE
     sex: "性别",  // REPLACE WITH CHINESE
     birthDate: "出生日期",  // REPLACE WITH CHINESE
     age: "年龄",  // REPLACE WITH CHINESE
@@ -221,6 +290,7 @@ export const translations = {
 
     // Filter
     filterTitle: "筛选",
+    filterConditions: "筛选条件",
     clearFilters: "清除全部",
     filterBySex: "性别",
     filterByAge: "年龄范围",
@@ -237,7 +307,7 @@ export const translations = {
     generation: "第",
     gen: "代",
     filterByDeceased: "状态",
-    alive: "在世",
+    alive: "地球服役中",
     generationFormat: "第{{gen}}代",
     generationShortFormat: "第{{gen}}代",
     familyLabel: "家族：",
@@ -294,7 +364,7 @@ export const translations = {
     dataBoard: "数据看板",
     dbPopulation: "种群概况",
     dbTotal: "总数",
-    dbAlive: "在世",
+    dbAlive: "地球服役中",
     dbDeceased: "已回考拉星",
     dbSexRatio: "性别比例",
     dbAgeAnalytics: "年龄分析",
@@ -323,6 +393,7 @@ export const translations = {
 
     // Detail Modal
     moreInfo: "详细资料",
+    viewFullProfile: "查看完整档案",
     detailBasicInfo: "基本信息",
     detailFamily: "家庭关系",
     detailFamilyStats: "家族统计",
@@ -347,6 +418,7 @@ export const translations = {
     detailNoMates: "无",
     detailNone: "无",
     detailBorn: "出生",
+    detailBabyBorn: "宝宝出生",
     detailDied: "回考拉星",
     detailAgeAtDeath: "终年",
     detailStatus: "状态",
@@ -360,6 +432,72 @@ export const translations = {
 
     // Language toggle
     language: "Language",
+
+    // Auth & Edit Mode
+    loginTitle: "进入编辑模式",
+    loginPlaceholder: "输入访问码",
+    loginInvalidCode: "访问码无效",
+    loginError: "登录失败，请重试",
+    loginSubmit: "登录",
+    cancel: "取消",
+    close: "关闭",
+    subFamilyGraph: "小家庭",
+    subFamilySelectFirst: "请先选择一只考拉",
+    subFamilySummary: "{{mates}} 位配偶，{{descendants}} 个后代",
+    subFamilyNoChildren: "{{name}} 暂无记录的孩子",
+    subFamilyExportImage: "导出图片",
+    relationshipOpenGraph: "查看关系路径图",
+    relationshipPathGraph: "关系路径图",
+    relationshipNoPath: "暂无可显示的关系路径",
+    relationshipExportImage: "导出图片",
+    editMode: "编辑模式",
+    editModeLogout: "退出编辑",
+    editAdd: "添加考拉",
+    editEdit: "编辑",
+    editDelete: "删除",
+    editDeleteConfirm: "确定要删除 {{name}} 吗？此操作无法撤销。",
+    editCreate: "创建",
+    editSave: "保存",
+    editIdAutoAssigned: "保存时自动分配",
+    editPartialDateHint: "可以填写不完整日期。",
+    editSelectSex: "请选择性别...",
+    editNameHint: "请填写英文名，并将首字母大写。",
+    datePrecisionYear: "年",
+    datePrecisionMonth: "月",
+    datePrecisionDay: "日",
+    editTags: "标签",
+    editTagsPlaceholder: "一次添加一个标签",
+    editAddTag: "添加",
+    editRemoveTag: "移除 {{tag}}",
+    editDateHint: "年份、年-月 或 年-月-日",
+    editSelectParent: "搜索考拉...",
+    editPhoto: "照片",
+    cropInstruction: "拖动调整位置，滚轮或按钮缩放。方形区域内的部分将被使用。",
+    cropConfirm: "裁剪",
+    cropReset: "重置",
+    name: "名字",
+
+    // Admin Panel
+    adminTitle: "管理面板",
+    adminPasskeys: "访问码管理",
+    adminAuditLog: "操作日志",
+    adminCreatePasskey: "创建新访问码",
+    adminPasskeyName: "标签（如：使用者名字）",
+    adminCodeCreated: "访问码创建成功！",
+    adminCopy: "复制",
+    adminCodeWarning: "此访问码仅显示一次，请立即复制。",
+    adminAllPasskeys: "全部访问码",
+    adminNoPasskeys: "暂无访问码",
+    adminRevoke: "吊销",
+    adminRevoked: "已吊销",
+    adminRecentChanges: "最近更改",
+    adminNoChanges: "暂无更改记录",
+    adminChangedFields: "更改字段",
+    adminFrom: "原值",
+    adminTo: "新值",
+    adminEmptyValue: "空",
+    adminYes: "是",
+    adminNo: "否",
   }
 };
 

@@ -1,8 +1,6 @@
-import { useEffect, useRef, useState } from 'react';
+import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react';
 import cytoscape from 'cytoscape';
 import dagre from 'cytoscape-dagre';
-import { useLanguage } from '../i18n/LanguageContext';
-import { t } from '../i18n/translations';
 
 cytoscape.use(dagre);
 
@@ -20,14 +18,55 @@ const SATELLITE_OFFSETS = [
   { dx: 50, dy: 15 },    // bottom-right
 ];
 
-export default function KoalaGraph({ primaryElements, proxyElements, onNodeClick, highlightedNodes = [], selectedKoalaId = null, relationshipPath = [] }) {
-  const { language } = useLanguage();
+const MOBILE_IMAGE_REFRESH_QUERY = '(hover: none), (pointer: coarse), (max-width: 767px)';
+
+function applyNodePhotoStyles(cy) {
+  if (!cy || cy.destroyed()) return;
+
+  cy.batch(() => {
+    cy.nodes().forEach((node) => {
+      const photo = node.data('photo');
+      if (photo) {
+        node.style('background-image', photo);
+      } else {
+        node.removeStyle('background-image');
+      }
+    });
+  });
+}
+
+function shouldRefreshImagesAfterResume() {
+  if (typeof window === 'undefined') return false;
+  if (document.visibilityState === 'hidden') return false;
+  return window.matchMedia?.(MOBILE_IMAGE_REFRESH_QUERY).matches ?? window.innerWidth < 768;
+}
+
+const KoalaGraph = forwardRef(function KoalaGraph({
+  primaryElements,
+  proxyElements,
+  onNodeClick,
+  highlightedNodes = [],
+  selectedKoalaId = null,
+  relationshipPath = [],
+}, ref) {
   const containerRef = useRef(null);
   const cyRef = useRef(null);
   const defaultViewportRef = useRef(null);
   const onNodeClickRef = useRef(onNodeClick);
   const centeredByClickRef = useRef(false);
   const [isReady, setIsReady] = useState(false);
+
+  useImperativeHandle(ref, () => ({
+    exportPng(options = {}) {
+      if (!cyRef.current) return null;
+      return cyRef.current.png({
+        full: true,
+        scale: 2,
+        bg: '#ffffff',
+        ...options,
+      });
+    },
+  }), []);
 
   // Avoid re-initializing Cytoscape when parent re-renders and passes a new function identity
   useEffect(() => {
@@ -83,7 +122,6 @@ export default function KoalaGraph({ primaryElements, proxyElements, onNodeClick
         {
           selector: 'node[photo]',
           style: {
-            'background-image': 'data(photo)',
             'background-fit': 'contain',
             'background-width': '60%',
             'background-height': '60%',
@@ -125,6 +163,13 @@ export default function KoalaGraph({ primaryElements, proxyElements, onNodeClick
             'text-max-width': `${PROXY_SIZE}px`,
             'background-width': '55%',
             'background-height': '55%',
+          }
+        },
+        {
+          selector: 'node.proxy[fatherColor]',
+          style: {
+            'border-color': 'data(fatherColor)',
+            'border-width': '4px',
           }
         },
         {
@@ -171,6 +216,14 @@ export default function KoalaGraph({ primaryElements, proxyElements, onNodeClick
             'arrow-scale': 1.5,
           }
         },
+        {
+          selector: 'edge[edgeType = "mother-child"][fatherColor]',
+          style: {
+            'line-color': 'data(fatherColor)',
+            'target-arrow-color': 'data(fatherColor)',
+            'width': 3,
+          }
+        },
         // Mate edges: dashed pink, no arrow
         {
           selector: 'edge.mate-edge',
@@ -181,6 +234,13 @@ export default function KoalaGraph({ primaryElements, proxyElements, onNodeClick
             'target-arrow-shape': 'none',
             'curve-style': 'straight',
             'z-index': 0,
+          }
+        },
+        {
+          selector: 'edge.mate-edge[fatherColor]',
+          style: {
+            'line-color': 'data(fatherColor)',
+            'width': 2.5,
           }
         },
         {
@@ -223,6 +283,7 @@ export default function KoalaGraph({ primaryElements, proxyElements, onNodeClick
         cy.add(proxyElements);
         positionSatellites(cy);
       }
+      applyNodePhotoStyles(cy);
 
       defaultViewportRef.current = {
         zoom: cy.zoom(),
@@ -264,12 +325,63 @@ export default function KoalaGraph({ primaryElements, proxyElements, onNodeClick
     };
   }, [primaryElements, proxyElements]);
 
+  useEffect(() => {
+    if (!isReady) return;
+
+    const refreshImagesAfterResume = () => {
+      const cy = cyRef.current;
+      if (!cy || !shouldRefreshImagesAfterResume()) return;
+
+      const nodesWithPhotos = cy.nodes().filter(node => !!node.data('photo'));
+      if (nodesWithPhotos.length === 0) {
+        cy.resize();
+        return;
+      }
+
+      cy.batch(() => {
+        nodesWithPhotos.forEach(node => node.removeStyle('background-image'));
+      });
+      cy.elements().updateStyle();
+      cy.resize();
+
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          const latestCy = cyRef.current;
+          if (!latestCy || latestCy.destroyed()) return;
+
+          applyNodePhotoStyles(latestCy);
+          latestCy.elements().updateStyle();
+          latestCy.resize();
+        });
+      });
+    };
+
+    const refreshSoon = () => {
+      if (!shouldRefreshImagesAfterResume()) return;
+      setTimeout(refreshImagesAfterResume, 50);
+      setTimeout(refreshImagesAfterResume, 300);
+    };
+
+    window.addEventListener('pageshow', refreshSoon);
+    window.addEventListener('focus', refreshSoon);
+    document.addEventListener('visibilitychange', refreshSoon);
+
+    return () => {
+      window.removeEventListener('pageshow', refreshSoon);
+      window.removeEventListener('focus', refreshSoon);
+      document.removeEventListener('visibilitychange', refreshSoon);
+    };
+  }, [isReady]);
+
   // Highlighting logic
   useEffect(() => {
     if (!cyRef.current || !isReady) return;
 
     const cy = cyRef.current;
-    cy.elements().removeClass('highlighted selected');
+    cy.batch(() => {
+      cy.elements().removeClass('highlighted selected');
+    });
+    cy.elements().updateStyle();
 
     if (highlightedNodes.length === 0) return;
 
@@ -348,7 +460,9 @@ export default function KoalaGraph({ primaryElements, proxyElements, onNodeClick
       <div ref={containerRef} className="w-full h-full" />
     </div>
   );
-}
+});
+
+export default KoalaGraph;
 
 /**
  * Position proxy nodes as satellites around their female mate.

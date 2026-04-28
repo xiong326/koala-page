@@ -1,9 +1,24 @@
 import { localDateToISODateString } from './dateUtils';
 import { calculateAgeInYears } from './ageUtils';
 import { getPhotoUrl } from './imageUtils';
+import { tagMatches } from './tagUtils';
 
 // Backwards-compatible re-export (older callers may import from graphHelpers)
 export { calculateAgeInYears } from './ageUtils';
+
+const FATHER_GROUP_COLORS = [
+  '#0ea5e9',
+  '#22c55e',
+  '#a855f7',
+  '#14b8a6',
+  '#f59e0b',
+  '#84cc16',
+  '#06b6d4',
+  '#8b5cf6',
+  '#10b981',
+  '#3b82f6',
+  '#ec4899',
+];
 
 function buildKoalaLabel(koala) {
   const genderSymbol = koala.sex === 'female' ? ' ♀' : koala.sex === 'male' ? ' ♂' : '';
@@ -20,6 +35,28 @@ function buildKoalaLabel(koala) {
  */
 export function koalasToGraphElements(koalas) {
   const koalaMap = new Map(koalas.map(k => [k.id, k]));
+  const fatherColorByPair = new Map();
+  const fathersByMother = new Map();
+
+  koalas.forEach(koala => {
+    if (!koala.mother || !koala.father) return;
+    if (!fathersByMother.has(koala.mother)) {
+      fathersByMother.set(koala.mother, []);
+    }
+    const fatherIds = fathersByMother.get(koala.mother);
+    if (!fatherIds.includes(koala.father)) {
+      fatherIds.push(koala.father);
+    }
+  });
+
+  fathersByMother.forEach((fatherIds, motherId) => {
+    fatherIds.forEach((fatherId, index) => {
+      fatherColorByPair.set(
+        `${motherId}-${fatherId}`,
+        FATHER_GROUP_COLORS[index % FATHER_GROUP_COLORS.length],
+      );
+    });
+  });
 
   const nodes = koalas.map(koala => ({
     data: {
@@ -33,13 +70,21 @@ export function koalasToGraphElements(koalas) {
   const motherEdges = [];
   koalas.forEach(koala => {
     if (koala.mother) {
+      const fatherColor = koala.father
+        ? fatherColorByPair.get(`${koala.mother}-${koala.father}`)
+        : null;
+      const edgeData = {
+        id: `${koala.mother}-${koala.id}`,
+        source: koala.mother,
+        target: koala.id,
+        edgeType: 'mother-child',
+        fatherId: koala.father || null,
+      };
+      if (fatherColor) {
+        edgeData.fatherColor = fatherColor;
+      }
       motherEdges.push({
-        data: {
-          id: `${koala.mother}-${koala.id}`,
-          source: koala.mother,
-          target: koala.id,
-          edgeType: 'mother-child',
-        }
+        data: edgeData,
       });
     }
   });
@@ -63,6 +108,7 @@ export function koalasToGraphElements(koalas) {
     if (!father) continue;
 
     const proxyId = `${fatherId}_m_${motherId}`;
+    const fatherColor = fatherColorByPair.get(`${motherId}-${fatherId}`);
     proxyNodes.push({
       data: {
         id: proxyId,
@@ -73,6 +119,7 @@ export function koalasToGraphElements(koalas) {
         nodeType: 'proxy',
         originalId: fatherId,
         mateOf: motherId,
+        fatherColor,
         photo: getPhotoUrl(father.photo, 'thumb'),
       },
       classes: 'proxy',
@@ -84,6 +131,7 @@ export function koalasToGraphElements(koalas) {
         source: proxyId,
         target: motherId,
         edgeType: 'mate',
+        fatherColor,
       },
       classes: 'mate-edge',
     });
@@ -205,15 +253,13 @@ export function searchKoalas(koalas, searchTerm) {
     // Safe check for name
     const nameMatch = koala.name?.toLowerCase().includes(term) || false;
 
-    // Safe check for nicknames array
-    const nicknameMatch = Array.isArray(koala.nicknames)
-      ? koala.nicknames.some(nickname => nickname?.toLowerCase().includes(term))
-      : false;
+    // Safe check for tags array
+    const tagMatch = tagMatches(koala.tags, term);
 
     // Safe check for id
     const idMatch = koala.id?.toLowerCase().includes(term) || false;
 
-    return nameMatch || nicknameMatch || idMatch;
+    return nameMatch || tagMatch || idMatch;
   });
 }
 

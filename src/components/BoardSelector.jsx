@@ -17,20 +17,30 @@ const BoardSelector = ({ currentBoard, onBoardChange, boards }) => {
 
   return (
     <div className="flex items-center gap-1.5">
-      <label className="text-white text-xs font-medium whitespace-nowrap">
+      <label className="text-slate-100 text-xs font-medium whitespace-nowrap">
         {t('familyLabel', language)}
       </label>
-      <select
-        value={currentBoard}
-        onChange={(e) => onBoardChange(e.target.value)}
-        className="px-2 py-0.5 h-7 rounded bg-blue-500 text-white text-xs border border-blue-400 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-white cursor-pointer"
+      <div
+        className="flex h-7 overflow-hidden rounded border border-white/20 bg-white/12 p-0.5 shadow-sm"
+        role="group"
+        aria-label={t('familyLabel', language)}
       >
         {boards.map((board) => (
-          <option key={board} value={board}>
+          <button
+            key={board}
+            type="button"
+            onClick={() => onBoardChange(board)}
+            className={`px-2 text-xs font-medium transition-colors ${
+              currentBoard === board
+                ? 'rounded-sm bg-white text-slate-800 shadow-sm'
+                : 'text-slate-100 hover:bg-white/16'
+            }`}
+            aria-pressed={currentBoard === board}
+          >
             {boardNames[board][language]}
-          </option>
+          </button>
         ))}
-      </select>
+      </div>
     </div>
   );
 };

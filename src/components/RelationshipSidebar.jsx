@@ -2,8 +2,11 @@ import { useState, useEffect } from 'react';
 import { useLanguage } from '../i18n/LanguageContext';
 import { t } from '../i18n/translations';
 import { calculateRelationship } from '../utils/relationshipCalculator';
+import { getRelationshipDescription } from '../utils/relationshipDisplay';
+import TagChips from './TagChips';
+import { tagMatches } from '../utils/tagUtils';
 
-export default function RelationshipSidebar({ koalas, onKoalaClick, isOpen, onToggle, onRelationshipCalculated }) {
+export default function RelationshipSidebar({ koalas, onKoalaClick, isOpen, onToggle, onRelationshipCalculated, onOpenRelationshipGraph }) {
   const { language } = useLanguage();
   const [koala1Id, setKoala1Id] = useState('');
   const [koala2Id, setKoala2Id] = useState('');
@@ -20,7 +23,7 @@ export default function RelationshipSidebar({ koalas, onKoalaClick, isOpen, onTo
     return koalas.filter(k =>
       k.name?.toLowerCase().includes(lowerTerm) ||
       k.id?.toLowerCase().includes(lowerTerm) ||
-      k.nicknames?.some(n => n.toLowerCase().includes(lowerTerm))
+      tagMatches(k.tags, lowerTerm)
     ).slice(0, 5); // Limit to 5 results
   };
 
@@ -34,13 +37,13 @@ export default function RelationshipSidebar({ koalas, onKoalaClick, isOpen, onTo
       setRelationship(result);
       // Notify parent to highlight the path
       if (onRelationshipCalculated && result.path) {
-        onRelationshipCalculated(result.path);
+        onRelationshipCalculated(result.path, result);
       }
     } else {
       setRelationship(null);
       // Clear highlighting when no relationship
       if (onRelationshipCalculated) {
-        onRelationshipCalculated([]);
+        onRelationshipCalculated([], null);
       }
     }
   }, [koala1Id, koala2Id, koalas, onRelationshipCalculated]);
@@ -74,100 +77,12 @@ export default function RelationshipSidebar({ koalas, onKoalaClick, isOpen, onTo
     setSearchTerm2(tempSearch);
   };
 
-  const getRelationshipDescription = (rel) => {
-    if (!rel) return { description: '', details: '' };
-
-    const params = {
-      koala1: rel.koala1Name,
-      koala2: rel.koala2Name,
-      mother: rel.motherName,
-      parent: rel.parentName,
-      ancestor: rel.ancestorName,
-      gens: rel.generations || rel.generationsApart,
-    };
-
-    switch (rel.type) {
-      case 'self':
-        return {
-          description: t('relSelf', language),
-          details: ''
-        };
-      case 'unknown':
-        return {
-          description: t('relUnknown', language),
-          details: ''
-        };
-      case 'parent-child':
-        return {
-          description: t('relParentChild', language),
-          details: rel.direction === 'koala1-is-mother'
-            ? t('relParentChildDetail2', language, params)
-            : rel.direction === 'koala1-is-father'
-            ? t('relParentChildDetailFather2', language, params)
-            : rel.direction === 'koala2-is-father'
-            ? t('relParentChildDetailFather1', language, params)
-            : t('relParentChildDetail1', language, params)
-        };
-      case 'siblings':
-        return {
-          description: rel.subtype === 'full' ? t('relFullSiblings', language) : t('relHalfSiblings', language),
-          details: t('relSiblingsDetail', language, params)
-        };
-      case 'grandparent':
-        // Determine gender-appropriate title
-        const grandparentSex = rel.direction === 'koala1-is-grandparent' ? rel.koala1Sex : rel.koala2Sex;
-        const isMale = grandparentSex === 'male';
-
-        return {
-          description: isMale ? t('relGrandfather', language) : t('relGrandmother', language),
-          details: rel.direction === 'koala1-is-grandparent'
-            ? (isMale ? t('relGrandfatherDetail1', language, params) : t('relGrandmotherDetail1', language, params))
-            : (isMale ? t('relGrandfatherDetail2', language, params) : t('relGrandmotherDetail2', language, params))
-        };
-      case 'ancestor':
-        return {
-          description: t('relAncestor', language),
-          details: rel.direction === 'koala1-is-ancestor'
-            ? t('relAncestorDetail1', language, params)
-            : t('relAncestorDetail2', language, params)
-        };
-      case 'aunt-niece':
-        // Determine gender-appropriate title for aunt/uncle
-        const auntSex = rel.direction === 'koala1-is-aunt' ? rel.koala1Sex : rel.koala2Sex;
-        const isAuntMale = auntSex === 'male';
-
-        return {
-          description: isAuntMale ? t('relUncleNiece', language) : t('relAuntNiece', language),
-          details: rel.direction === 'koala1-is-aunt'
-            ? (isAuntMale ? t('relUncleNieceDetail1', language, params) : t('relAuntNieceDetail1', language, params))
-            : (isAuntMale ? t('relUncleNieceDetail2', language, params) : t('relAuntNieceDetail2', language, params))
-        };
-      case 'cousins':
-        return {
-          description: t('relCousins', language),
-          details: t('relCousinsDetail', language, params)
-        };
-      case 'related':
-        return {
-          description: t('relRelated', language),
-          details: t('relRelatedDetail', language, params)
-        };
-      case 'unrelated':
-        return {
-          description: t('relUnrelated', language),
-          details: t('relUnrelatedDetail', language)
-        };
-      default:
-        return { description: '', details: '' };
-    }
-  };
-
   const getRelationshipColor = (type) => {
     switch (type) {
       case 'self': return 'text-gray-600';
-      case 'parent-child': return 'text-blue-600';
+      case 'parent-child': return 'text-slate-600';
       case 'siblings': return 'text-purple-600';
-      case 'grandparent': return 'text-indigo-600';
+      case 'grandparent': return 'text-stone-600';
       case 'aunt-niece': return 'text-pink-600';
       case 'cousins': return 'text-green-600';
       case 'related': return 'text-teal-600';
@@ -205,7 +120,7 @@ export default function RelationshipSidebar({ koalas, onKoalaClick, isOpen, onTo
       {!isOpen && (
         <button
           onClick={onToggle}
-          className="absolute top-2 right-2 z-20 px-2 py-1 sm:px-3 sm:py-1.5 text-xs sm:text-sm rounded-md bg-white/90 border border-gray-300 shadow hover:bg-white flex items-center gap-1 sm:gap-2"
+          className="koala-bite-inset absolute top-2 right-2 z-20 px-2 py-1 sm:px-3 sm:py-1.5 text-xs sm:text-sm rounded-md bg-white/90 border border-gray-300 shadow hover:bg-white flex items-center gap-1 sm:gap-2"
         >
           <svg
             className="w-3 h-3 sm:w-4 sm:h-4"
@@ -230,7 +145,7 @@ export default function RelationshipSidebar({ koalas, onKoalaClick, isOpen, onTo
           {(koala1Id || koala2Id) && (
             <button
               onClick={clearSelection}
-              className="text-xs text-blue-600 hover:text-blue-800 underline whitespace-nowrap"
+              className="text-xs text-slate-600 hover:text-slate-900 underline whitespace-nowrap"
             >
               {t('clearFilters', language)}
             </button>
@@ -261,7 +176,7 @@ export default function RelationshipSidebar({ koalas, onKoalaClick, isOpen, onTo
               }}
               onFocus={() => setShowDropdown1(true)}
               placeholder={t('searchPlaceholder', language)}
-              className="w-full px-2 py-1.5 sm:px-3 sm:py-2 text-xs sm:text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-2 py-1.5 sm:px-3 sm:py-2 text-xs sm:text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-slate-500 focus:border-transparent"
             />
             {showDropdown1 && filteredKoalas1.length > 0 && (
               <div className="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-32 sm:max-h-40 overflow-y-auto">
@@ -269,14 +184,10 @@ export default function RelationshipSidebar({ koalas, onKoalaClick, isOpen, onTo
                   <button
                     key={koala.id}
                     onClick={() => handleSelectKoala1(koala)}
-                    className="w-full px-2 py-1.5 sm:px-3 sm:py-2 text-left hover:bg-blue-50 text-xs sm:text-sm"
+                    className="w-full px-2 py-1.5 sm:px-3 sm:py-2 text-left hover:bg-slate-50 text-xs sm:text-sm"
                   >
                     <div className="font-semibold">{koala.name}</div>
-                    {koala.nicknames && koala.nicknames.length > 0 && (
-                      <div className="text-xs text-gray-500">
-                        {koala.nicknames.join(', ')}
-                      </div>
-                    )}
+                    <TagChips tags={koala.tags} size="xs" className="mt-1" />
                   </button>
                 ))}
               </div>
@@ -313,7 +224,7 @@ export default function RelationshipSidebar({ koalas, onKoalaClick, isOpen, onTo
               }}
               onFocus={() => setShowDropdown2(true)}
               placeholder={t('searchPlaceholder', language)}
-              className="w-full px-2 py-1.5 sm:px-3 sm:py-2 text-xs sm:text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-2 py-1.5 sm:px-3 sm:py-2 text-xs sm:text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-slate-500 focus:border-transparent"
             />
             {showDropdown2 && filteredKoalas2.length > 0 && (
               <div className="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-32 sm:max-h-40 overflow-y-auto">
@@ -321,14 +232,10 @@ export default function RelationshipSidebar({ koalas, onKoalaClick, isOpen, onTo
                   <button
                     key={koala.id}
                     onClick={() => handleSelectKoala2(koala)}
-                    className="w-full px-2 py-1.5 sm:px-3 sm:py-2 text-left hover:bg-blue-50 text-xs sm:text-sm"
+                    className="w-full px-2 py-1.5 sm:px-3 sm:py-2 text-left hover:bg-slate-50 text-xs sm:text-sm"
                   >
                     <div className="font-semibold">{koala.name}</div>
-                    {koala.nicknames && koala.nicknames.length > 0 && (
-                      <div className="text-xs text-gray-500">
-                        {koala.nicknames.join(', ')}
-                      </div>
-                    )}
+                    <TagChips tags={koala.tags} size="xs" className="mt-1" />
                   </button>
                 ))}
               </div>
@@ -338,7 +245,7 @@ export default function RelationshipSidebar({ koalas, onKoalaClick, isOpen, onTo
 
         {/* Relationship Result */}
         {relationship && (() => {
-          const { description, details } = getRelationshipDescription(relationship);
+          const { description, details } = getRelationshipDescription(relationship, language);
           return (
             <div className="flex-1 overflow-y-auto p-2 sm:p-3 md:p-4">
               <div className="bg-gray-50 rounded-lg p-2 sm:p-3 md:p-4 border border-gray-200">
@@ -355,6 +262,15 @@ export default function RelationshipSidebar({ koalas, onKoalaClick, isOpen, onTo
                     {details}
                   </p>
                 )}
+                {relationship.path?.length > 0 && relationship.type !== 'unrelated' && (
+                  <button
+                    type="button"
+                    onClick={onOpenRelationshipGraph}
+                    className="mt-3 w-full px-2 py-1.5 text-xs sm:text-sm rounded-md bg-slate-700 text-white hover:bg-slate-800"
+                  >
+                    {t('relationshipOpenGraph', language)}
+                  </button>
+                )}
               </div>
 
             {/* Quick Navigation */}
@@ -365,13 +281,13 @@ export default function RelationshipSidebar({ koalas, onKoalaClick, isOpen, onTo
                 </p>
                 <button
                   onClick={() => onKoalaClick(koalas.find(k => k.id === koala1Id))}
-                  className="w-full px-2 py-1.5 sm:px-3 sm:py-2 text-left bg-white border border-gray-300 rounded-md hover:bg-blue-50 text-xs sm:text-sm"
+                  className="w-full px-2 py-1.5 sm:px-3 sm:py-2 text-left bg-white border border-gray-300 rounded-md hover:bg-slate-50 text-xs sm:text-sm"
                 >
                   {koalas.find(k => k.id === koala1Id)?.name}
                 </button>
                 <button
                   onClick={() => onKoalaClick(koalas.find(k => k.id === koala2Id))}
-                  className="w-full px-2 py-1.5 sm:px-3 sm:py-2 text-left bg-white border border-gray-300 rounded-md hover:bg-blue-50 text-xs sm:text-sm"
+                  className="w-full px-2 py-1.5 sm:px-3 sm:py-2 text-left bg-white border border-gray-300 rounded-md hover:bg-slate-50 text-xs sm:text-sm"
                 >
                   {koalas.find(k => k.id === koala2Id)?.name}
                 </button>

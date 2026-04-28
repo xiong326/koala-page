@@ -79,18 +79,29 @@ export function calculateAgeInYears(birthDateString, endDateString = null) {
 }
 
 /**
- * Age formatted choice helper: show months if under 1 year, otherwise years.
+ * Age formatted helper: show whole years + whole months.
  * (The caller can localize the unit label.)
  */
 export function getAgeForDisplay(birthDateString, endDateString = null) {
   const parts = calculateAgeParts(birthDateString, endDateString);
   if (!parts) return null;
 
-  if (parts.years <= 0) {
-    return { value: Math.max(0, parts.months), unit: 'months' };
-  }
-
-  return { value: parts.years, unit: 'years' };
+  return {
+    years: Math.max(0, parts.years),
+    months: Math.max(0, parts.months),
+  };
 }
 
+export function formatAgeForDisplay(age, t, language) {
+  if (!age) return null;
+
+  const parts = [];
+  if (age.years > 0) {
+    parts.push(`${age.years} ${t('years', language)}`);
+  }
+  if (age.months > 0 || age.years === 0) {
+    parts.push(`${age.months} ${t('months', language)}`);
+  }
+  return parts.join(' ');
+}
 

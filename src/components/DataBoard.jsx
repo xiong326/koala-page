@@ -16,9 +16,10 @@ import {
   computeFounderStats,
   computeBirthsPerYear,
 } from '../utils/statsHelpers';
+import { formatAgeForDisplay } from '../utils/ageUtils';
 
 const PIE_COLORS = ['#3b82f6', '#ec4899'];
-const BAR_COLOR = '#6366f1';
+const BAR_COLOR = '#64748b';
 const BAR_COLOR_ALT = '#f59e0b';
 
 const MONTH_KEYS = [
@@ -31,9 +32,10 @@ function KoalaLink({ name, koalaId, onClick }) {
     <button
       type="button"
       onClick={() => onClick(koalaId)}
-      className="font-medium text-blue-600 hover:text-blue-800 hover:underline cursor-pointer text-left"
+      className="inline-flex items-center gap-1 rounded-md border border-slate-200 bg-slate-50 px-1.5 py-0.5 text-left font-semibold text-slate-700 shadow-sm hover:border-slate-300 hover:bg-slate-100 hover:text-slate-950 focus:outline-none focus:ring-2 focus:ring-slate-400"
     >
       {name}
+      <span aria-hidden="true" className="text-[10px] leading-none text-slate-400">›</span>
     </button>
   );
 }
@@ -44,6 +46,31 @@ function StatCard({ label, value, sub, className = '' }) {
       <p className="text-xs sm:text-sm text-gray-500 mb-1">{label}</p>
       <p className="text-xl sm:text-2xl font-bold text-gray-800">{value}</p>
       {sub && <p className="text-xs text-gray-400 mt-1">{sub}</p>}
+    </div>
+  );
+}
+
+function SegmentedFilter({ label, value, options, onChange }) {
+  return (
+    <div className="flex items-center gap-1">
+      <span className="text-[11px] font-semibold text-gray-500 sm:text-xs">{label}</span>
+      <div className="flex overflow-hidden rounded-md border border-gray-300 bg-gray-100 p-0.5">
+        {options.map(option => (
+          <button
+            key={option.value}
+            type="button"
+            onClick={() => onChange(option.value)}
+            className={`px-2 py-1 text-xs font-medium transition-colors sm:text-sm ${
+              value === option.value
+                ? 'rounded bg-white text-gray-900 shadow-sm'
+                : 'text-gray-600 hover:bg-white/70'
+            }`}
+            aria-pressed={value === option.value}
+          >
+            {option.label}
+          </button>
+        ))}
+      </div>
     </div>
   );
 }
@@ -78,7 +105,7 @@ function GenerationMultiSelect({ generations, selected, onChange, language }) {
       <button
         type="button"
         onClick={() => setOpen(!open)}
-        className="px-2 py-1.5 text-xs sm:text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white flex items-center gap-1 min-w-[100px]"
+        className="px-2 py-1.5 text-xs sm:text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-slate-500 focus:border-transparent bg-white flex items-center gap-1 min-w-[100px]"
       >
         <span className="flex-1 text-left truncate">{label}</span>
         <svg className={`w-3 h-3 transition-transform ${open ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -93,7 +120,7 @@ function GenerationMultiSelect({ generations, selected, onChange, language }) {
                 type="checkbox"
                 checked={selected.has(g)}
                 onChange={() => toggle(g)}
-                className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                className="rounded border-gray-300 text-slate-600 focus:ring-slate-500"
               />
               {language === 'zh' ? `第${g}代` : `${t('generation', language)} ${g}`}
             </label>
@@ -219,8 +246,6 @@ export default function DataBoard({ koalas, isOpen, onClose, onKoalaClick }) {
 
   if (!isOpen) return null;
 
-  const selectCls = 'px-2 py-1.5 text-xs sm:text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white';
-
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
       <div className="bg-gray-50 w-[95vw] max-w-5xl max-h-[90vh] rounded-xl shadow-2xl flex flex-col overflow-hidden">
@@ -239,11 +264,16 @@ export default function DataBoard({ koalas, isOpen, onClose, onKoalaClick }) {
 
         {/* Filters */}
         <div className="flex flex-wrap items-center gap-2 sm:gap-3 px-4 sm:px-5 py-3 border-b border-gray-200 bg-white">
-          <select value={filters.sex} onChange={e => handleChange('sex', e.target.value)} className={selectCls}>
-            <option value="all">{t('filterBySex', language)}: {t('all', language)}</option>
-            <option value="male">{t('male', language)}</option>
-            <option value="female">{t('female', language)}</option>
-          </select>
+          <SegmentedFilter
+            label={t('filterBySex', language)}
+            value={filters.sex}
+            onChange={(value) => handleChange('sex', value)}
+            options={[
+              { value: 'all', label: t('all', language) },
+              { value: 'male', label: t('male', language) },
+              { value: 'female', label: t('female', language) },
+            ]}
+          />
 
           <GenerationMultiSelect
             generations={generations}
@@ -252,11 +282,16 @@ export default function DataBoard({ koalas, isOpen, onClose, onKoalaClick }) {
             language={language}
           />
 
-          <select value={filters.deceased} onChange={e => handleChange('deceased', e.target.value)} className={selectCls}>
-            <option value="all">{t('filterByDeceased', language)}: {t('all', language)}</option>
-            <option value="no">{t('alive', language)}</option>
-            <option value="yes">{t('deceased', language)}</option>
-          </select>
+          <SegmentedFilter
+            label={t('filterByDeceased', language)}
+            value={filters.deceased}
+            onChange={(value) => handleChange('deceased', value)}
+            options={[
+              { value: 'all', label: t('all', language) },
+              { value: 'no', label: t('alive', language) },
+              { value: 'yes', label: t('deceased', language) },
+            ]}
+          />
 
           <div className="flex items-center gap-1">
             <input
@@ -265,7 +300,7 @@ export default function DataBoard({ koalas, isOpen, onClose, onKoalaClick }) {
               placeholder={birthYearRange.min}
               value={filters.birthYearMin}
               onChange={e => handleBirthYearChange('birthYearMin', e.target.value)}
-              className="w-16 px-2 py-1.5 text-xs sm:text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent text-center"
+              className="w-16 px-2 py-1.5 text-xs sm:text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-slate-500 focus:border-transparent text-center"
               maxLength="4"
             />
             <span className="text-gray-400 text-xs">-</span>
@@ -275,14 +310,14 @@ export default function DataBoard({ koalas, isOpen, onClose, onKoalaClick }) {
               placeholder={birthYearRange.max}
               value={filters.birthYearMax}
               onChange={e => handleBirthYearChange('birthYearMax', e.target.value)}
-              className="w-16 px-2 py-1.5 text-xs sm:text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent text-center"
+              className="w-16 px-2 py-1.5 text-xs sm:text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-slate-500 focus:border-transparent text-center"
               maxLength="4"
             />
             <span className="text-gray-400 text-xs ml-0.5">{t('dbYear', language)}</span>
           </div>
 
           {hasActiveFilters && (
-            <button onClick={clearFilters} className="text-xs text-blue-600 hover:text-blue-800 underline ml-auto">
+            <button onClick={clearFilters} className="text-xs text-slate-600 hover:text-slate-900 underline ml-auto">
               {t('clearFilters', language)}
             </button>
           )}
@@ -339,7 +374,7 @@ export default function DataBoard({ koalas, isOpen, onClose, onKoalaClick }) {
                         ? <KoalaLink name={age.oldest.name} koalaId={age.oldest.id} onClick={handleKoalaNav} />
                         : '-'}
                     </p>
-                    {age.oldest && <p className="text-xs text-gray-400 mt-1">{age.oldest.ageForDisplay ? `${age.oldest.ageForDisplay.value} ${t(age.oldest.ageForDisplay.unit, language)}` : `${age.oldest.ageInYears} ${t('years', language)}`}</p>}
+                    {age.oldest && <p className="text-xs text-gray-400 mt-1">{age.oldest.ageForDisplay ? formatAgeForDisplay(age.oldest.ageForDisplay, t, language) : `${age.oldest.ageInYears} ${t('years', language)}`}</p>}
                   </div>
                   <div className="bg-white rounded-lg border border-gray-200 p-3 sm:p-4">
                     <p className="text-xs sm:text-sm text-gray-500 mb-1">{t('dbYoungest', language)}</p>
@@ -348,7 +383,7 @@ export default function DataBoard({ koalas, isOpen, onClose, onKoalaClick }) {
                         ? <KoalaLink name={age.youngest.name} koalaId={age.youngest.id} onClick={handleKoalaNav} />
                         : '-'}
                     </p>
-                    {age.youngest && <p className="text-xs text-gray-400 mt-1">{age.youngest.ageForDisplay ? `${age.youngest.ageForDisplay.value} ${t(age.youngest.ageForDisplay.unit, language)}` : `${age.youngest.ageInYears} ${t('years', language)}`}</p>}
+                    {age.youngest && <p className="text-xs text-gray-400 mt-1">{age.youngest.ageForDisplay ? formatAgeForDisplay(age.youngest.ageForDisplay, t, language) : `${age.youngest.ageInYears} ${t('years', language)}`}</p>}
                   </div>
                   <StatCard
                     label={t('dbAvgLifespan', language)}
@@ -400,7 +435,7 @@ export default function DataBoard({ koalas, isOpen, onClose, onKoalaClick }) {
                       <ol className="space-y-1.5">
                         {topParents.map((p, i) => (
                           <li key={p.id} className="flex items-center gap-2 text-sm">
-                            <span className="w-5 h-5 rounded-full bg-indigo-100 text-indigo-700 text-xs font-bold flex items-center justify-center shrink-0">{i + 1}</span>
+                            <span className="w-5 h-5 rounded-full bg-slate-100 text-slate-700 text-xs font-bold flex items-center justify-center shrink-0">{i + 1}</span>
                             <KoalaLink name={p.name} koalaId={p.id} onClick={handleKoalaNav} />
                             <span className="text-gray-400 ml-auto">{p.count} {t('dbOffspring', language)}</span>
                           </li>
