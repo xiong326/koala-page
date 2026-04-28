@@ -200,7 +200,7 @@ export default function ImageCropper({ file, onCrop, onCancel }) {
           step={0.01}
           value={sliderValue}
           onChange={handleSliderChange}
-          className="w-32 accent-blue-500"
+          className="w-32 accent-slate-600"
         />
         <button
           type="button"
@@ -230,7 +230,7 @@ export default function ImageCropper({ file, onCrop, onCancel }) {
         <button
           type="button"
           onClick={handleCrop}
-          className="px-3 py-1.5 text-sm bg-blue-500 text-white rounded-md hover:bg-blue-600"
+          className="px-3 py-1.5 text-sm bg-slate-700 text-white rounded-md hover:bg-slate-800"
         >
           {t('cropConfirm', language)}
         </button>

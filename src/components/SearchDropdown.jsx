@@ -64,7 +64,7 @@ export default function SearchDropdown({ koalas, onSelectKoala }) {
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           placeholder={t('searchPlaceholder', language)}
-          className="w-full px-3 py-1.5 sm:px-4 sm:py-2 pr-8 sm:pr-10 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          className="w-full px-3 py-1.5 sm:px-4 sm:py-2 pr-8 sm:pr-10 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-transparent"
         />
         {searchTerm && (
           <button
@@ -83,7 +83,7 @@ export default function SearchDropdown({ koalas, onSelectKoala }) {
             <button
               key={koala.id}
               onClick={() => handleSelectKoala(koala)}
-              className="w-full px-4 py-2 text-left hover:bg-blue-50 focus:bg-blue-50 focus:outline-none border-b border-gray-100 last:border-b-0"
+              className="w-full px-4 py-2 text-left hover:bg-slate-50 focus:bg-slate-50 focus:outline-none border-b border-gray-100 last:border-b-0"
             >
               <div className="font-semibold text-gray-800">{koala.name}</div>
               <TagChips tags={koala.tags} size="xs" className="mt-1" />

@@ -1,7 +1,7 @@
 import { useLanguage } from '../i18n/LanguageContext';
 import { t } from '../i18n/translations';
 import { parseKoalaDateString } from '../utils/dateUtils';
-import { getAgeForDisplay } from '../utils/ageUtils';
+import { formatAgeForDisplay, getAgeForDisplay } from '../utils/ageUtils';
 import { getPhotoUrl } from '../utils/imageUtils';
 import TagChips from './TagChips';
 
@@ -49,7 +49,7 @@ export default function KoalaCard({ koala, onClose, allKoalas = [], onKoalaClick
   const formatAge = (birthDate, endDate = null) => {
     const age = getAgeForDisplay(birthDate, endDate);
     if (!age) return t('unknown', language);
-    return `${age.value} ${t(age.unit, language)}`;
+    return formatAgeForDisplay(age, t, language);
   };
 
   const sexAccent = koala.sex === 'female'
@@ -71,7 +71,7 @@ export default function KoalaCard({ koala, onClose, allKoalas = [], onKoalaClick
       <div className="flex items-center justify-between border-b border-gray-200 bg-white px-2.5 py-1.5 sm:px-3 sm:py-2">
         <button
           onClick={() => onOpenDetail && onOpenDetail(koala)}
-          className="min-w-0 flex-1 cursor-pointer truncate text-left text-xs font-bold leading-tight text-gray-800 hover:text-blue-600 sm:text-sm"
+          className="min-w-0 flex-1 cursor-pointer truncate text-left text-xs font-bold leading-tight text-gray-800 hover:text-slate-600 sm:text-sm"
         >
           {koala.name}
           <span className="ml-1 text-[10px] sm:text-xs font-normal text-gray-400">
@@ -157,9 +157,10 @@ export default function KoalaCard({ koala, onClose, allKoalas = [], onKoalaClick
                 {koala.mother ? (
                   <button
                     onClick={() => onKoalaClick && onKoalaClick(koala.mother)}
-                    className="ml-0.5 min-w-0 truncate font-medium text-blue-600 hover:text-blue-800 hover:underline cursor-pointer"
+                    className="ml-1 inline-flex min-w-0 items-center gap-0.5 truncate rounded border border-slate-200 bg-slate-50 px-1 py-0.5 font-semibold text-slate-700 shadow-sm hover:border-slate-300 hover:bg-slate-100 hover:text-slate-950 focus:outline-none focus:ring-1 focus:ring-slate-400"
                   >
-                    {getKoalaName(koala.mother)}
+                    <span className="truncate">{getKoalaName(koala.mother)}</span>
+                    <span aria-hidden="true" className="text-[9px] leading-none text-slate-400">›</span>
                   </button>
                 ) : (
                   <span className="ml-0.5 truncate text-gray-400">{t('unknown', language)}</span>
@@ -170,9 +171,10 @@ export default function KoalaCard({ koala, onClose, allKoalas = [], onKoalaClick
                 {koala.father ? (
                   <button
                     onClick={() => onKoalaClick && onKoalaClick(koala.father)}
-                    className="ml-0.5 min-w-0 truncate font-medium text-blue-600 hover:text-blue-800 hover:underline cursor-pointer"
+                    className="ml-1 inline-flex min-w-0 items-center gap-0.5 truncate rounded border border-slate-200 bg-slate-50 px-1 py-0.5 font-semibold text-slate-700 shadow-sm hover:border-slate-300 hover:bg-slate-100 hover:text-slate-950 focus:outline-none focus:ring-1 focus:ring-slate-400"
                   >
-                    {getKoalaName(koala.father)}
+                    <span className="truncate">{getKoalaName(koala.father)}</span>
+                    <span aria-hidden="true" className="text-[9px] leading-none text-slate-400">›</span>
                   </button>
                 ) : (
                   <span className="ml-0.5 truncate text-gray-400">{t('unknown', language)}</span>

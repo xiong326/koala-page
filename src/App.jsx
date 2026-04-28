@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import KoalaGraph from './components/KoalaGraph';
 import KoalaCard from './components/KoalaCard';
 import SearchDropdown from './components/SearchDropdown';
@@ -33,6 +33,10 @@ const fallbackData = {
 
 const availableBoards = ['board2', 'board1'];
 
+const KOALA_FIREWORK_PARTICLES = [
+  0, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330,
+];
+
 const boardToContributionName = {
   'board1': 'Hongshan',
   'board2': 'Chimelong'
@@ -47,9 +51,9 @@ const contributionTypeKeys = {
 const contributionStyles = {
   'Koala Photo': {
     icon: 'P',
-    accent: 'from-pink-500 to-rose-400',
-    badge: 'bg-pink-50 text-pink-700 ring-pink-100',
-    link: 'text-pink-700 hover:text-pink-900',
+    accent: 'from-slate-500 to-zinc-400',
+    badge: 'bg-slate-50 text-slate-700 ring-slate-100',
+    link: 'text-slate-700 hover:text-slate-900',
   },
   'Family Tree': {
     icon: 'F',
@@ -59,9 +63,9 @@ const contributionStyles = {
   },
   'Web Design & Development': {
     icon: 'W',
-    accent: 'from-indigo-500 to-sky-400',
-    badge: 'bg-indigo-50 text-indigo-700 ring-indigo-100',
-    link: 'text-indigo-700 hover:text-indigo-900',
+    accent: 'from-stone-500 to-slate-400',
+    badge: 'bg-stone-50 text-stone-700 ring-stone-100',
+    link: 'text-stone-700 hover:text-stone-900',
   },
 };
 
@@ -88,6 +92,8 @@ function App() {
   const [loginModalOpen, setLoginModalOpen] = useState(false);
   const [adminPanelOpen, setAdminPanelOpen] = useState(false);
   const [createModalOpen, setCreateModalOpen] = useState(false);
+  const [koalaFireworkId, setKoalaFireworkId] = useState(null);
+  const lastBadgeTapRef = useRef(0);
 
   const loadKoalas = useCallback(async (board) => {
     try {
@@ -101,6 +107,12 @@ function App() {
   useEffect(() => {
     loadKoalas(currentBoard);
   }, [currentBoard, loadKoalas]);
+
+  useEffect(() => {
+    if (!koalaFireworkId) return undefined;
+    const timeout = setTimeout(() => setKoalaFireworkId(null), 3000);
+    return () => clearTimeout(timeout);
+  }, [koalaFireworkId]);
 
   const handleBoardChange = (newBoard) => {
     setCurrentBoard(newBoard);
@@ -272,8 +284,36 @@ function App() {
     setSubFamilyOpen(false);
   }, []);
 
+  const handleBadgeTap = () => {
+    const now = Date.now();
+    if (now - lastBadgeTapRef.current <= 340) {
+      setKoalaFireworkId(now);
+      lastBadgeTapRef.current = 0;
+      return;
+    }
+    lastBadgeTapRef.current = now;
+  };
+
   return (
     <div className="h-dvh flex flex-col bg-gray-50">
+      {koalaFireworkId && (
+        <div key={koalaFireworkId} className="koala-firework" aria-hidden="true">
+          <div className="koala-firework-burst">
+            {KOALA_FIREWORK_PARTICLES.map((angle, index) => (
+              <span
+                key={angle}
+                style={{
+                  '--angle': `${angle}deg`,
+                  '--delay': `${index * 26}ms`,
+                  '--distance': `${5.6 + (index % 3) * 1.15}rem`,
+                }}
+              />
+            ))}
+            <img src="/images/koala-badge.png" alt="" />
+          </div>
+        </div>
+      )}
+
       {/* Header */}
       <header className="relative overflow-hidden bg-gradient-to-r from-slate-800 via-zinc-700 to-stone-600 text-white px-3 sm:px-4 py-1.5 shadow-lg ring-1 ring-black/10">
         <div className="absolute inset-0 opacity-35 bg-[radial-gradient(circle_at_14%_20%,rgba(255,255,255,0.24),transparent_24%),radial-gradient(circle_at_86%_0%,rgba(134,239,172,0.2),transparent_28%)]" />
@@ -283,7 +323,8 @@ function App() {
               src="/images/koala-badge.png"
               alt=""
               aria-hidden="true"
-              className="h-9 w-9 sm:h-11 sm:w-11 shrink-0 drop-shadow-md"
+              onPointerUp={handleBadgeTap}
+              className="h-9 w-9 sm:h-11 sm:w-11 shrink-0 cursor-pointer select-none drop-shadow-md touch-manipulation"
             />
             <div className="min-w-0">
               <h1 className="text-sm sm:text-lg font-bold leading-tight text-slate-50">{t('title', language)}</h1>
@@ -570,7 +611,7 @@ function App() {
                         icon: 'C',
                         accent: 'from-gray-500 to-gray-400',
                         badge: 'bg-gray-50 text-gray-700 ring-gray-100',
-                        link: 'text-blue-700 hover:text-blue-900',
+                        link: 'text-slate-700 hover:text-slate-900',
                       };
                       return (
                         <div key={idx} className="overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm">
@@ -622,7 +663,7 @@ function App() {
                 className="group flex w-full items-center justify-between px-3 py-1.5 text-xs font-semibold text-gray-600 transition-colors hover:bg-gray-50 hover:text-gray-800"
               >
                 <span className="flex items-center gap-2">
-                  <span className="h-1.5 w-1.5 rounded-full bg-gradient-to-r from-pink-500 via-emerald-500 to-blue-500" />
+                  <span className="h-1.5 w-1.5 rounded-full bg-gradient-to-r from-slate-500 via-emerald-500 to-stone-500" />
                   {t('contributionsTitle', language)}
                 </span>
                 <span className={`text-[10px] text-gray-400 transition-transform duration-200 group-hover:text-gray-600 ${contributionsOpen ? 'rotate-180' : ''}`}>

@@ -18,6 +18,8 @@ const SATELLITE_OFFSETS = [
   { dx: 50, dy: 15 },    // bottom-right
 ];
 
+const MOBILE_IMAGE_REFRESH_QUERY = '(hover: none), (pointer: coarse), (max-width: 767px)';
+
 function applyNodePhotoStyles(cy) {
   if (!cy || cy.destroyed()) return;
 
@@ -31,6 +33,12 @@ function applyNodePhotoStyles(cy) {
       }
     });
   });
+}
+
+function shouldRefreshImagesAfterResume() {
+  if (typeof window === 'undefined') return false;
+  if (document.visibilityState === 'hidden') return false;
+  return window.matchMedia?.(MOBILE_IMAGE_REFRESH_QUERY).matches ?? window.innerWidth < 768;
 }
 
 const KoalaGraph = forwardRef(function KoalaGraph({
@@ -320,9 +328,9 @@ const KoalaGraph = forwardRef(function KoalaGraph({
   useEffect(() => {
     if (!isReady) return;
 
-    const refreshImages = () => {
+    const refreshImagesAfterResume = () => {
       const cy = cyRef.current;
-      if (!cy || document.visibilityState === 'hidden') return;
+      if (!cy || !shouldRefreshImagesAfterResume()) return;
 
       const nodesWithPhotos = cy.nodes().filter(node => !!node.data('photo'));
       if (nodesWithPhotos.length === 0) {
@@ -330,24 +338,28 @@ const KoalaGraph = forwardRef(function KoalaGraph({
         return;
       }
 
-      applyNodePhotoStyles(cy);
+      cy.batch(() => {
+        nodesWithPhotos.forEach(node => node.removeStyle('background-image'));
+      });
       cy.elements().updateStyle();
       cy.resize();
 
       requestAnimationFrame(() => {
-        const latestCy = cyRef.current;
-        if (!latestCy || latestCy.destroyed()) return;
+        requestAnimationFrame(() => {
+          const latestCy = cyRef.current;
+          if (!latestCy || latestCy.destroyed()) return;
 
-        applyNodePhotoStyles(latestCy);
-        latestCy.elements().updateStyle();
-        latestCy.resize();
+          applyNodePhotoStyles(latestCy);
+          latestCy.elements().updateStyle();
+          latestCy.resize();
+        });
       });
     };
 
     const refreshSoon = () => {
-      if (document.visibilityState === 'hidden') return;
-      setTimeout(refreshImages, 50);
-      setTimeout(refreshImages, 300);
+      if (!shouldRefreshImagesAfterResume()) return;
+      setTimeout(refreshImagesAfterResume, 50);
+      setTimeout(refreshImagesAfterResume, 300);
     };
 
     window.addEventListener('pageshow', refreshSoon);

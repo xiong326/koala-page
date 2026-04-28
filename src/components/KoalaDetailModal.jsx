@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react';
 import { useLanguage } from '../i18n/LanguageContext';
 import { t } from '../i18n/translations';
 import { parseKoalaDateString } from '../utils/dateUtils';
-import { getAgeForDisplay } from '../utils/ageUtils';
+import { formatAgeForDisplay, getAgeForDisplay } from '../utils/ageUtils';
 import { getDescendants, getAncestors, calculateGeneration } from '../utils/graphHelpers';
 import { getPhotoUrl } from '../utils/imageUtils';
 import KoalaEditForm from './KoalaEditForm';
@@ -14,9 +14,10 @@ function KoalaLink({ name, koalaId, onClick }) {
     <button
       type="button"
       onClick={() => onClick(koalaId)}
-      className="cursor-pointer text-left text-xs font-medium text-blue-600 hover:text-blue-800 hover:underline sm:text-sm"
+      className="inline-flex cursor-pointer items-center gap-1 rounded-md border border-slate-200 bg-slate-50 px-1.5 py-0.5 text-left text-xs font-semibold text-slate-700 shadow-sm hover:border-slate-300 hover:bg-slate-100 hover:text-slate-950 focus:outline-none focus:ring-2 focus:ring-slate-400 sm:text-sm"
     >
       {name}
+      <span aria-hidden="true" className="text-[10px] leading-none text-slate-400">›</span>
     </button>
   );
 }
@@ -78,7 +79,7 @@ export default function KoalaDetailModal({ koala, allKoalas, onClose, onKoalaCli
   const formatAge = (birthDate, endDate = null) => {
     const age = getAgeForDisplay(birthDate, endDate);
     if (!age) return t('unknown', language);
-    return `${age.value} ${t(age.unit, language)}`;
+    return formatAgeForDisplay(age, t, language);
   };
 
   const generation = useMemo(
@@ -148,6 +149,55 @@ export default function KoalaDetailModal({ koala, allKoalas, onClose, onKoalaCli
       deepestDescGen,
     };
   }, [koala.id, allKoalas]);
+
+  const timelineEvents = useMemo(() => {
+    const events = [{
+      key: 'birth',
+      type: 'birth',
+      date: parseKoalaDateString(koala.birthDate),
+      title: t('detailBorn', language),
+      dateText: formatDate(koala.birthDate),
+    }];
+
+    offspring.forEach(child => {
+      events.push({
+        key: `child-${child.id}`,
+        type: 'baby',
+        date: parseKoalaDateString(child.birthDate),
+        title: t('detailBabyBorn', language),
+        dateText: formatDate(child.birthDate),
+        child,
+      });
+    });
+
+    if (koala.deceased) {
+      events.push({
+        key: 'death',
+        type: 'death',
+        date: parseKoalaDateString(koala.dateOfDeath),
+        title: t('detailDied', language),
+        dateText: koala.dateOfDeath ? formatDate(koala.dateOfDeath) : t('unknown', language),
+        detail: koala.dateOfDeath
+          ? `${t('detailAgeAtDeath', language)}: ${formatAge(koala.birthDate, koala.dateOfDeath)}`
+          : null,
+      });
+    } else {
+      events.push({
+        key: 'current-age',
+        type: 'current',
+        date: null,
+        title: t('age', language),
+        dateText: formatAge(koala.birthDate),
+      });
+    }
+
+    return events.sort((a, b) => {
+      if (!a.date && !b.date) return 0;
+      if (!a.date) return 1;
+      if (!b.date) return -1;
+      return a.date - b.date;
+    });
+  }, [koala, offspring, language]);
 
   const hasGrandparents = Object.values(grandparents).some(Boolean);
   const sexAccent = koala.sex === 'female'
@@ -254,7 +304,7 @@ export default function KoalaDetailModal({ koala, allKoalas, onClose, onKoalaCli
               <>
                 <button
                   onClick={() => setEditing(true)}
-                  className="p-1.5 rounded-md hover:bg-blue-50 text-blue-500 hover:text-blue-700 transition-colors"
+                  className="p-1.5 rounded-md hover:bg-slate-100 text-slate-500 hover:text-slate-800 transition-colors"
                   title={t('editEdit', language)}
                 >
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -533,34 +583,29 @@ export default function KoalaDetailModal({ koala, allKoalas, onClose, onKoalaCli
               <div className="relative space-y-3 pl-5 sm:space-y-4 sm:pl-6">
                 <div className="absolute left-2 top-1 bottom-1 w-0.5 bg-gray-200" />
 
-                {/* Birth */}
-                <div className="relative">
-                  <div className="absolute -left-[17px] top-0.5 w-3 h-3 rounded-full bg-green-500 border-2 border-white shadow" />
-                  <p className="text-sm font-semibold text-gray-700">{t('detailBorn', language)}</p>
-                  <p className="text-xs text-gray-500">{formatDate(koala.birthDate)}</p>
-                </div>
-
-                {/* Current age or death */}
-                {koala.deceased ? (
-                  <div className="relative">
-                    <div className="absolute -left-[17px] top-0.5 w-3 h-3 rounded-full bg-gray-400 border-2 border-white shadow" />
-                    <p className="text-sm font-semibold text-gray-700">{t('detailDied', language)}</p>
-                    <p className="text-xs text-gray-500">
-                      {koala.dateOfDeath ? formatDate(koala.dateOfDeath) : t('unknown', language)}
-                    </p>
-                    {koala.dateOfDeath && (
-                      <p className="text-xs text-gray-400">
-                        {t('detailAgeAtDeath', language)}: {formatAge(koala.birthDate, koala.dateOfDeath)}
+                {timelineEvents.map(event => (
+                  <div key={event.key} className="relative">
+                    <div className={`absolute -left-[17px] top-0.5 h-3 w-3 rounded-full border-2 border-white shadow ${
+                      event.type === 'birth'
+                        ? 'bg-green-500'
+                        : event.type === 'baby'
+                          ? 'bg-pink-500'
+                          : event.type === 'death'
+                            ? 'bg-gray-400'
+                            : 'bg-slate-500 animate-pulse'
+                    }`} />
+                    <p className="text-sm font-semibold text-gray-700">{event.title}</p>
+                    <p className="text-xs text-gray-500">{event.dateText}</p>
+                    {event.child && (
+                      <p className="mt-0.5 text-xs text-gray-500">
+                        <KoalaLink name={event.child.name} koalaId={event.child.id} onClick={onKoalaClick} />
                       </p>
                     )}
+                    {event.detail && (
+                      <p className="text-xs text-gray-400">{event.detail}</p>
+                    )}
                   </div>
-                ) : (
-                  <div className="relative">
-                    <div className="absolute -left-[17px] top-0.5 w-3 h-3 rounded-full bg-blue-500 border-2 border-white shadow animate-pulse" />
-                    <p className="text-sm font-semibold text-gray-700">{t('age', language)}</p>
-                    <p className="text-xs text-gray-500">{formatAge(koala.birthDate)}</p>
-                  </div>
-                )}
+                ))}
               </div>
             </div>
           </section>

@@ -184,13 +184,13 @@ export default function AdminPanel({ isOpen, onClose }) {
         <div className="flex border-b border-gray-200 bg-white px-4">
           <button
             onClick={() => setTab('passkeys')}
-            className={`px-4 py-2 text-sm font-medium border-b-2 ${tab === 'passkeys' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700'}`}
+            className={`px-4 py-2 text-sm font-medium border-b-2 ${tab === 'passkeys' ? 'border-slate-600 text-slate-700' : 'border-transparent text-gray-500 hover:text-gray-700'}`}
           >
             {t('adminPasskeys', language)}
           </button>
           <button
             onClick={() => setTab('audit')}
-            className={`px-4 py-2 text-sm font-medium border-b-2 ${tab === 'audit' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700'}`}
+            className={`px-4 py-2 text-sm font-medium border-b-2 ${tab === 'audit' ? 'border-slate-600 text-slate-700' : 'border-transparent text-gray-500 hover:text-gray-700'}`}
           >
             {t('adminAuditLog', language)}
           </button>
@@ -210,7 +210,7 @@ export default function AdminPanel({ isOpen, onClose }) {
                       value={newName}
                       onChange={(e) => setNewName(e.target.value)}
                       placeholder={t('adminPasskeyName', language)}
-                      className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-slate-500 focus:border-transparent"
                     />
                   </div>
                   <select
@@ -224,7 +224,7 @@ export default function AdminPanel({ isOpen, onClose }) {
                   <button
                     type="submit"
                     disabled={creating || !newName.trim()}
-                    className="px-3 py-1.5 text-sm bg-blue-500 text-white rounded-md hover:bg-blue-600 disabled:opacity-50"
+                    className="px-3 py-1.5 text-sm bg-slate-700 text-white rounded-md hover:bg-slate-800 disabled:opacity-50"
                   >
                     {t('editCreate', language)}
                   </button>
@@ -273,7 +273,7 @@ export default function AdminPanel({ isOpen, onClose }) {
                     <div key={entry.id} className="flex items-start gap-2 py-2 border-b border-gray-100 last:border-0">
                       <span className={`text-xs font-medium px-1.5 py-0.5 rounded ${
                         entry.action === 'create' ? 'bg-green-100 text-green-700' :
-                        entry.action === 'update' ? 'bg-blue-100 text-blue-700' :
+                        entry.action === 'update' ? 'bg-slate-100 text-slate-700' :
                         'bg-red-100 text-red-700'
                       }`}>
                         {entry.action}

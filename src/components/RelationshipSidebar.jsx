@@ -80,9 +80,9 @@ export default function RelationshipSidebar({ koalas, onKoalaClick, isOpen, onTo
   const getRelationshipColor = (type) => {
     switch (type) {
       case 'self': return 'text-gray-600';
-      case 'parent-child': return 'text-blue-600';
+      case 'parent-child': return 'text-slate-600';
       case 'siblings': return 'text-purple-600';
-      case 'grandparent': return 'text-indigo-600';
+      case 'grandparent': return 'text-stone-600';
       case 'aunt-niece': return 'text-pink-600';
       case 'cousins': return 'text-green-600';
       case 'related': return 'text-teal-600';
@@ -145,7 +145,7 @@ export default function RelationshipSidebar({ koalas, onKoalaClick, isOpen, onTo
           {(koala1Id || koala2Id) && (
             <button
               onClick={clearSelection}
-              className="text-xs text-blue-600 hover:text-blue-800 underline whitespace-nowrap"
+              className="text-xs text-slate-600 hover:text-slate-900 underline whitespace-nowrap"
             >
               {t('clearFilters', language)}
             </button>
@@ -176,7 +176,7 @@ export default function RelationshipSidebar({ koalas, onKoalaClick, isOpen, onTo
               }}
               onFocus={() => setShowDropdown1(true)}
               placeholder={t('searchPlaceholder', language)}
-              className="w-full px-2 py-1.5 sm:px-3 sm:py-2 text-xs sm:text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-2 py-1.5 sm:px-3 sm:py-2 text-xs sm:text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-slate-500 focus:border-transparent"
             />
             {showDropdown1 && filteredKoalas1.length > 0 && (
               <div className="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-32 sm:max-h-40 overflow-y-auto">
@@ -184,7 +184,7 @@ export default function RelationshipSidebar({ koalas, onKoalaClick, isOpen, onTo
                   <button
                     key={koala.id}
                     onClick={() => handleSelectKoala1(koala)}
-                    className="w-full px-2 py-1.5 sm:px-3 sm:py-2 text-left hover:bg-blue-50 text-xs sm:text-sm"
+                    className="w-full px-2 py-1.5 sm:px-3 sm:py-2 text-left hover:bg-slate-50 text-xs sm:text-sm"
                   >
                     <div className="font-semibold">{koala.name}</div>
                     <TagChips tags={koala.tags} size="xs" className="mt-1" />
@@ -224,7 +224,7 @@ export default function RelationshipSidebar({ koalas, onKoalaClick, isOpen, onTo
               }}
               onFocus={() => setShowDropdown2(true)}
               placeholder={t('searchPlaceholder', language)}
-              className="w-full px-2 py-1.5 sm:px-3 sm:py-2 text-xs sm:text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-2 py-1.5 sm:px-3 sm:py-2 text-xs sm:text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-slate-500 focus:border-transparent"
             />
             {showDropdown2 && filteredKoalas2.length > 0 && (
               <div className="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-32 sm:max-h-40 overflow-y-auto">
@@ -232,7 +232,7 @@ export default function RelationshipSidebar({ koalas, onKoalaClick, isOpen, onTo
                   <button
                     key={koala.id}
                     onClick={() => handleSelectKoala2(koala)}
-                    className="w-full px-2 py-1.5 sm:px-3 sm:py-2 text-left hover:bg-blue-50 text-xs sm:text-sm"
+                    className="w-full px-2 py-1.5 sm:px-3 sm:py-2 text-left hover:bg-slate-50 text-xs sm:text-sm"
                   >
                     <div className="font-semibold">{koala.name}</div>
                     <TagChips tags={koala.tags} size="xs" className="mt-1" />
@@ -266,7 +266,7 @@ export default function RelationshipSidebar({ koalas, onKoalaClick, isOpen, onTo
                   <button
                     type="button"
                     onClick={onOpenRelationshipGraph}
-                    className="mt-3 w-full px-2 py-1.5 text-xs sm:text-sm rounded-md bg-blue-600 text-white hover:bg-blue-700"
+                    className="mt-3 w-full px-2 py-1.5 text-xs sm:text-sm rounded-md bg-slate-700 text-white hover:bg-slate-800"
                   >
                     {t('relationshipOpenGraph', language)}
                   </button>
@@ -281,13 +281,13 @@ export default function RelationshipSidebar({ koalas, onKoalaClick, isOpen, onTo
                 </p>
                 <button
                   onClick={() => onKoalaClick(koalas.find(k => k.id === koala1Id))}
-                  className="w-full px-2 py-1.5 sm:px-3 sm:py-2 text-left bg-white border border-gray-300 rounded-md hover:bg-blue-50 text-xs sm:text-sm"
+                  className="w-full px-2 py-1.5 sm:px-3 sm:py-2 text-left bg-white border border-gray-300 rounded-md hover:bg-slate-50 text-xs sm:text-sm"
                 >
                   {koalas.find(k => k.id === koala1Id)?.name}
                 </button>
                 <button
                   onClick={() => onKoalaClick(koalas.find(k => k.id === koala2Id))}
-                  className="w-full px-2 py-1.5 sm:px-3 sm:py-2 text-left bg-white border border-gray-300 rounded-md hover:bg-blue-50 text-xs sm:text-sm"
+                  className="w-full px-2 py-1.5 sm:px-3 sm:py-2 text-left bg-white border border-gray-300 rounded-md hover:bg-slate-50 text-xs sm:text-sm"
                 >
                   {koalas.find(k => k.id === koala2Id)?.name}
                 </button>

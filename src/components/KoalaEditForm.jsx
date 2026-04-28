@@ -33,6 +33,11 @@ function normalizeDateForPrecision(value, precision) {
   return YEAR_RE.test(value) ? value : '';
 }
 
+function normalizeEnglishNameStart(name) {
+  if (!name || !/^[a-z]/.test(name)) return name;
+  return name.charAt(0).toUpperCase() + name.slice(1);
+}
+
 function PrecisionDateInput({ label, value, onChange, language }) {
   const [precision, setPrecision] = useState(() => getDatePrecision(value));
 
@@ -54,7 +59,7 @@ function PrecisionDateInput({ label, value, onChange, language }) {
             onClick={() => handlePrecisionChange(option)}
             className={`flex-1 px-2 py-1 text-xs font-medium ${
               precision === option
-                ? 'bg-blue-500 text-white'
+                ? 'bg-slate-700 text-white'
                 : 'bg-white text-gray-600 hover:bg-gray-50'
             }`}
           >
@@ -71,7 +76,7 @@ function PrecisionDateInput({ label, value, onChange, language }) {
         value={getDateValueForPrecision(value, precision)}
         onChange={(e) => onChange(normalizeDateForPrecision(e.target.value, precision))}
         placeholder={precision === 'year' ? 'YYYY' : undefined}
-        className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+        className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-slate-500 focus:border-transparent"
       />
       <p className="text-xs text-gray-400 mt-0.5">{t('editPartialDateHint', language)}</p>
     </div>
@@ -103,7 +108,7 @@ function SearchableSelect({ value, onChange, koalas, placeholder, language }) {
           onChange={(e) => { setSearch(e.target.value); setOpen(true); }}
           onFocus={() => setOpen(true)}
           placeholder={placeholder}
-          className="flex-1 px-2 py-1.5 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          className="flex-1 px-2 py-1.5 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-slate-500 focus:border-transparent"
         />
         {value && (
           <button
@@ -125,7 +130,7 @@ function SearchableSelect({ value, onChange, koalas, placeholder, language }) {
                 key={k.id}
                 type="button"
                 onClick={() => { onChange(k.id); setSearch(''); setOpen(false); }}
-                className="w-full text-left px-3 py-1.5 text-sm hover:bg-blue-50 truncate"
+                className="w-full text-left px-3 py-1.5 text-sm hover:bg-slate-50 truncate"
               >
                 {k.name} <span className="text-gray-400 text-xs">({k.id})</span>
               </button>
@@ -216,17 +221,18 @@ export default function KoalaEditForm({ koala, board, allKoalas, onSave, onCance
 
     try {
       let photo = koala?.photo || null;
+      const normalizedName = normalizeEnglishNameStart(form.name);
 
       if (croppedBlob) {
         const { thumb, medium } = await compressFromCrop(croppedBlob);
-        const baseName = form.id || form.name.toLowerCase().replace(/[^a-z0-9]/g, '_');
+        const baseName = form.id || normalizedName.toLowerCase().replace(/[^a-z0-9]/g, '_');
         const result = await api.uploadImage(thumb, medium, `${baseName}-${Date.now()}`);
         photo = result.photo;
       }
 
       const payload = {
         ...(!isNew ? {} : { board }),
-        name: form.name,
+        name: normalizedName,
         tags: normalizeTags(form.tags),
         birthDate: form.birthDate || null,
         sex: form.sex,
@@ -278,10 +284,10 @@ export default function KoalaEditForm({ koala, board, allKoalas, onSave, onCance
             type="text"
             value={form.name}
             onChange={(e) => handleChange('name', e.target.value)}
-            className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            onBlur={(e) => handleChange('name', normalizeEnglishNameStart(e.target.value))}
+            className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-slate-500 focus:border-transparent"
             required
           />
-          <p className="text-xs text-gray-400 mt-0.5">{t('editNameHint', language)}</p>
         </div>
 
         {/* Tags */}
@@ -294,12 +300,12 @@ export default function KoalaEditForm({ koala, board, allKoalas, onSave, onCance
               onChange={(e) => setTagInput(e.target.value)}
               onKeyDown={handleTagInputKeyDown}
               placeholder={t('editTagsPlaceholder', language)}
-              className="min-w-0 flex-1 px-2 py-1.5 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="min-w-0 flex-1 px-2 py-1.5 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-slate-500 focus:border-transparent"
             />
             <button
               type="button"
               onClick={addTag}
-              className="px-2.5 py-1.5 text-xs font-semibold rounded-md bg-blue-500 text-white hover:bg-blue-600"
+              className="px-2.5 py-1.5 text-xs font-semibold rounded-md bg-slate-700 text-white hover:bg-slate-800"
             >
               {t('editAddTag', language)}
             </button>
@@ -329,7 +335,7 @@ export default function KoalaEditForm({ koala, board, allKoalas, onSave, onCance
           <select
             value={form.sex}
             onChange={(e) => handleChange('sex', e.target.value)}
-            className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-slate-500 focus:border-transparent"
             required
           >
             <option value="" disabled>{t('editSelectSex', language)}</option>
@@ -377,7 +383,7 @@ export default function KoalaEditForm({ koala, board, allKoalas, onSave, onCance
               type="checkbox"
               checked={form.deceased}
               onChange={(e) => handleChange('deceased', e.target.checked)}
-              className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+              className="rounded border-gray-300 text-slate-600 focus:ring-slate-500"
             />
             <span className="font-semibold text-gray-600 text-xs">{t('deceased', language)}</span>
           </label>
@@ -434,7 +440,7 @@ export default function KoalaEditForm({ koala, board, allKoalas, onSave, onCance
         </button>
         <button
           type="submit"
-          className="px-4 py-2 text-sm bg-blue-500 text-white rounded-md hover:bg-blue-600 disabled:opacity-50"
+          className="px-4 py-2 text-sm bg-slate-700 text-white rounded-md hover:bg-slate-800 disabled:opacity-50"
           disabled={saving}
         >
           {saving ? '...' : (isNew ? t('editCreate', language) : t('editSave', language))}

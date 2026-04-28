@@ -98,7 +98,7 @@ export default function RelationshipPathGraph({ relationship, relationshipPath, 
             type="button"
             onClick={handleExport}
             disabled={!canExport}
-            className="px-2 py-1 text-xs rounded-md bg-blue-50 text-blue-700 hover:bg-blue-100 disabled:opacity-40 disabled:cursor-not-allowed"
+            className="px-2 py-1 text-xs rounded-md bg-slate-100 text-slate-700 hover:bg-slate-200 disabled:opacity-40 disabled:cursor-not-allowed"
             title={t('relationshipExportImage', language)}
           >
             {t('relationshipExportImage', language)}

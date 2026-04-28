@@ -40,7 +40,7 @@ export default function LoginModal({ onClose }) {
             value={code}
             onChange={(e) => setCode(e.target.value)}
             placeholder={t('loginPlaceholder', language)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-slate-500 focus:border-transparent text-sm"
             autoFocus
             disabled={loading}
           />
@@ -58,7 +58,7 @@ export default function LoginModal({ onClose }) {
             </button>
             <button
               type="submit"
-              className="px-4 py-2 text-sm bg-blue-500 text-white rounded-md hover:bg-blue-600 disabled:opacity-50"
+              className="px-4 py-2 text-sm bg-slate-700 text-white rounded-md hover:bg-slate-800 disabled:opacity-50"
               disabled={loading || !code.trim()}
             >
               {loading ? '...' : t('loginSubmit', language)}

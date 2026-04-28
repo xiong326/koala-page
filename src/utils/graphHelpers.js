@@ -11,7 +11,7 @@ const FATHER_GROUP_COLORS = [
   '#22c55e',
   '#a855f7',
   '#14b8a6',
-  '#6366f1',
+  '#f59e0b',
   '#84cc16',
   '#06b6d4',
   '#8b5cf6',
