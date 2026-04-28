@@ -5,8 +5,17 @@ pages_build_output_dir = "dist"
 [[d1_databases]]
 binding = "DB"
 database_name = "koala-db"
-database_id = "placeholder"
+database_id = "5f699652-c66e-4960-8fba-31e9905c9513"
 
 [[r2_buckets]]
 binding = "IMAGES"
 bucket_name = "koala-images"
+
+[[env.preview.d1_databases]]
+binding = "DB"
+database_name = "koala-db-preview"
+database_id = "2ecdade2-bd59-4192-876c-56c41f89ead0"
+
+[[env.preview.r2_buckets]]
+binding = "IMAGES"
+bucket_name = "koala-images-preview"
