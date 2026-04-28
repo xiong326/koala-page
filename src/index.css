@@ -4,3 +4,76 @@ body {
   margin: 0;
   font-family: system-ui, -apple-system, sans-serif;
 }
+
+button:not(.absolute):not(.fixed) {
+  position: relative;
+}
+
+button:not(:disabled)::after {
+  content: "";
+  position: absolute;
+  top: -0.55rem;
+  right: -0.5rem;
+  z-index: 20;
+  width: 1.45rem;
+  height: 1.45rem;
+  pointer-events: none;
+  background: url("/images/koala-badge.png") center / contain no-repeat;
+  filter: drop-shadow(0 2px 3px rgb(15 23 42 / 0.22));
+  opacity: 0;
+  transform: translateY(0.2rem) rotate(10deg) scale(0.72);
+  transform-origin: 65% 75%;
+  transition:
+    opacity 150ms ease,
+    transform 150ms ease;
+}
+
+button.koala-bite-inset::after {
+  top: -0.35rem;
+  right: 0;
+}
+
+button:not(:disabled):hover::after,
+button:not(:disabled):focus-visible::after {
+  opacity: 1;
+  transform: translateY(0) rotate(10deg) scale(1);
+}
+
+button:not(:disabled):active::after {
+  opacity: 1;
+  transform: translateY(0.08rem) rotate(16deg) scale(0.94);
+}
+
+.forecast-ticker {
+  overflow: hidden;
+}
+
+.forecast-ticker-track {
+  display: inline-flex;
+  width: max-content;
+  min-width: 100%;
+  gap: 1.75rem;
+  white-space: nowrap;
+  animation: forecast-roll 12s linear infinite;
+}
+
+.forecast-ticker:hover .forecast-ticker-track,
+.forecast-ticker:focus-within .forecast-ticker-track {
+  animation-play-state: paused;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .forecast-ticker-track {
+    animation: none;
+  }
+}
+
+@keyframes forecast-roll {
+  from {
+    transform: translateX(0);
+  }
+
+  to {
+    transform: translateX(calc(-50% - 0.875rem));
+  }
+}

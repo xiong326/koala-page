@@ -41,7 +41,8 @@ function PasskeyRow({ passkey, onRevoke }) {
 
 const AUDIT_FIELD_LABELS = {
   name: 'name',
-  nicknames: 'nicknames',
+  tags: 'tags',
+  nicknames: 'tags',
   birth_date: 'birthDate',
   sex: 'sex',
   photo: 'editPhoto',
@@ -73,7 +74,7 @@ function formatAuditValue(value, field, language) {
     return t(value, language);
   }
 
-  if (field === 'nicknames') {
+  if (field === 'tags' || field === 'nicknames') {
     try {
       const parsed = typeof value === 'string' ? JSON.parse(value) : value;
       return Array.isArray(parsed) && parsed.length > 0

@@ -1,8 +1,14 @@
+function normalizeTags(tags) {
+  if (!Array.isArray(tags)) return [];
+  return tags.map(tag => String(tag || '').trim()).filter(Boolean);
+}
+
 function dbRowToKoala(row) {
+  const tags = row.tags || row.nicknames;
   return {
     id: row.id,
     name: row.name,
-    nicknames: row.nicknames ? JSON.parse(row.nicknames) : [],
+    tags: tags ? normalizeTags(JSON.parse(tags)) : [],
     birthDate: row.birth_date,
     sex: row.sex,
     photo: row.photo,
@@ -37,7 +43,7 @@ export async function onRequestPut(context) {
   }
 
   const body = await request.json();
-  const { name, nicknames, birthDate, sex, photo, mother, father, deceased, dateOfDeath } = body;
+  const { name, tags, birthDate, sex, photo, mother, father, deceased, dateOfDeath } = body;
 
   if (name !== undefined && !name) {
     return Response.json({ error: 'name cannot be empty' }, { status: 400 });
@@ -48,7 +54,10 @@ export async function onRequestPut(context) {
 
   const updates = {};
   if (name !== undefined) updates.name = name;
-  if (nicknames !== undefined) updates.nicknames = nicknames && nicknames.length > 0 ? JSON.stringify(nicknames) : null;
+  if (tags !== undefined) {
+    const normalizedTags = normalizeTags(tags);
+    updates.tags = normalizedTags.length > 0 ? JSON.stringify(normalizedTags) : null;
+  }
   if (birthDate !== undefined) updates.birth_date = birthDate || null;
   if (sex !== undefined) updates.sex = sex;
   if (photo !== undefined) updates.photo = photo || null;

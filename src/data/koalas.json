@@ -3,88 +3,112 @@
     {
       "id": "k001",
       "name": "茉莉",
-      "nicknames": ["茉莉妈妈", "茉莉女士", "Merindah"],
       "birthDate": "2015-03",
       "sex": "female",
       "photo": "/images/koalas/moli.jpg",
       "mother": null,
       "father": null,
       "deceased": true,
-      "dateOfDeath": "2025-01-14"
+      "dateOfDeath": "2025-01-14",
+      "tags": [
+        "茉莉妈妈",
+        "茉莉女士",
+        "Merindah"
+      ]
     },
     {
       "id": "k002",
       "name": "梧桐",
-      "nicknames": ["梧桐爸爸", "Pinpen"],
       "birthDate": "2014-11",
       "sex": "male",
       "photo": "/images/koalas/wutong.jpg",
       "mother": null,
-      "father": null
+      "father": null,
+      "tags": [
+        "梧桐爸爸",
+        "Pinpen"
+      ]
     },
     {
       "id": "k003",
       "name": "柠檬",
-      "nicknames": ["柠檬公主", "11", "Matilda"],
       "birthDate": "2018-02",
       "sex": "female",
       "photo": "/images/koalas/ningmeng.jpg",
       "mother": "k001",
-      "father": "k002"
+      "father": "k002",
+      "tags": [
+        "柠檬公主",
+        "11",
+        "Matilda"
+      ]
     },
     {
       "id": "k004",
       "name": "柚子",
-      "nicknames": ["Banjo"],
       "birthDate": "2019-02-24",
       "sex": "male",
       "photo": "/images/koalas/youzi.jpg",
       "mother": "k001",
       "father": "k002",
       "deceased": true,
-      "dateOfDeath": "2023-06-08"
+      "dateOfDeath": "2023-06-08",
+      "tags": [
+        "Banjo"
+      ]
     },
     {
       "id": "k005",
       "name": "金桔",
-      "nicknames": ["Opal"],
       "birthDate": "2020-06-17",
       "sex": "female",
       "photo": "/images/koalas/jinju.jpg",
       "mother": "k001",
       "father": "k002",
       "deceased": true,
-      "dateOfDeath": "2024-02-28"
+      "dateOfDeath": "2024-02-28",
+      "tags": [
+        "Opal"
+      ]
     },
     {
       "id": "k006",
       "name": "橙子",
-      "nicknames": ["Jarrah"],
       "birthDate": "2021-11-06",
       "sex": "male",
       "photo": "/images/koalas/chengzi.jpg",
       "mother": "k001",
-      "father": "k002"
+      "father": "k002",
+      "tags": [
+        "Jarrah"
+      ]
     },
     {
       "id": "k007",
       "name": "青柑",
-      "nicknames": ["五宝", "55", "Kirra"],
       "birthDate": "2022-12-14",
       "sex": "female",
       "photo": "/images/koalas/qinggan.jpg",
       "mother": "k001",
-      "father": "k002"
+      "father": "k002",
+      "tags": [
+        "五宝",
+        "55",
+        "Kirra"
+      ]
     },
     {
       "id": "k008",
       "name": "青柠",
-      "nicknames": ["六宝", "66"],
       "birthDate": "2024-05-04",
       "sex": "female",
       "photo": "/images/koalas/liubao.jpg",
       "mother": "k001",
-      "father": "k002"
+      "father": "k002",
+      "tags": [
+        "六宝",
+        "66"
+      ]
     }
   ]
 }

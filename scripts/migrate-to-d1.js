@@ -21,8 +21,8 @@ async function main() {
 
   function addKoalas(koalas, board) {
     for (const k of koalas) {
-      const nicknames = k.nicknames && k.nicknames.length > 0
-        ? escSQL(JSON.stringify(k.nicknames))
+      const tags = k.tags && k.tags.length > 0
+        ? escSQL(JSON.stringify(k.tags.filter(Boolean)))
         : 'NULL';
       const photo = k.photo ? escSQL(k.photo) : 'NULL';
       const mother = k.mother ? escSQL(k.mother) : 'NULL';
@@ -32,7 +32,7 @@ async function main() {
       const birthDate = k.birthDate ? escSQL(k.birthDate) : 'NULL';
 
       lines.push(
-        `INSERT INTO koalas (id, board, name, nicknames, birth_date, sex, photo, mother, father, deceased, date_of_death) VALUES (${escSQL(k.id)}, ${escSQL(board)}, ${escSQL(k.name)}, ${nicknames}, ${birthDate}, ${escSQL(k.sex)}, ${photo}, ${mother}, ${father}, ${deceased}, ${dateOfDeath});`
+        `INSERT INTO koalas (id, board, name, nicknames, birth_date, sex, photo, mother, father, deceased, date_of_death) VALUES (${escSQL(k.id)}, ${escSQL(board)}, ${escSQL(k.name)}, ${tags}, ${birthDate}, ${escSQL(k.sex)}, ${photo}, ${mother}, ${father}, ${deceased}, ${dateOfDeath});`
       );
     }
   }

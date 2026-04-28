@@ -18,6 +18,21 @@ const SATELLITE_OFFSETS = [
   { dx: 50, dy: 15 },    // bottom-right
 ];
 
+function applyNodePhotoStyles(cy) {
+  if (!cy || cy.destroyed()) return;
+
+  cy.batch(() => {
+    cy.nodes().forEach((node) => {
+      const photo = node.data('photo');
+      if (photo) {
+        node.style('background-image', photo);
+      } else {
+        node.removeStyle('background-image');
+      }
+    });
+  });
+}
+
 const KoalaGraph = forwardRef(function KoalaGraph({
   primaryElements,
   proxyElements,
@@ -99,7 +114,6 @@ const KoalaGraph = forwardRef(function KoalaGraph({
         {
           selector: 'node[photo]',
           style: {
-            'background-image': 'data(photo)',
             'background-fit': 'contain',
             'background-width': '60%',
             'background-height': '60%',
@@ -261,6 +275,7 @@ const KoalaGraph = forwardRef(function KoalaGraph({
         cy.add(proxyElements);
         positionSatellites(cy);
       }
+      applyNodePhotoStyles(cy);
 
       defaultViewportRef.current = {
         zoom: cy.zoom(),
@@ -315,14 +330,7 @@ const KoalaGraph = forwardRef(function KoalaGraph({
         return;
       }
 
-      const photos = nodesWithPhotos.map(node => ({
-        node,
-        photo: node.data('photo'),
-      }));
-
-      cy.batch(() => {
-        photos.forEach(({ node }) => node.removeData('photo'));
-      });
+      applyNodePhotoStyles(cy);
       cy.elements().updateStyle();
       cy.resize();
 
@@ -330,13 +338,7 @@ const KoalaGraph = forwardRef(function KoalaGraph({
         const latestCy = cyRef.current;
         if (!latestCy || latestCy.destroyed()) return;
 
-        latestCy.batch(() => {
-          photos.forEach(({ node, photo }) => {
-            if (!node.removed()) {
-              node.data('photo', photo);
-            }
-          });
-        });
+        applyNodePhotoStyles(latestCy);
         latestCy.elements().updateStyle();
         latestCy.resize();
       });

@@ -1,8 +1,14 @@
+function normalizeTags(tags) {
+  if (!Array.isArray(tags)) return [];
+  return tags.map(tag => String(tag || '').trim()).filter(Boolean);
+}
+
 function dbRowToKoala(row) {
+  const tags = row.tags || row.nicknames;
   return {
     id: row.id,
     name: row.name,
-    nicknames: row.nicknames ? JSON.parse(row.nicknames) : [],
+    tags: tags ? normalizeTags(JSON.parse(tags)) : [],
     birthDate: row.birth_date,
     sex: row.sex,
     photo: row.photo,
@@ -52,7 +58,7 @@ export async function onRequestPost(context) {
   }
 
   const body = await request.json();
-  const { board, name, nicknames, birthDate, sex, photo, mother, father, deceased, dateOfDeath } = body;
+  const { board, name, tags, birthDate, sex, photo, mother, father, deceased, dateOfDeath } = body;
 
   if (!board || !name || !sex) {
     return Response.json({ error: 'Missing required fields: board, name, sex' }, { status: 400 });
@@ -69,11 +75,11 @@ export async function onRequestPost(context) {
     id = await getNextKoalaId(env, board);
     try {
       await env.DB.prepare(
-        `INSERT INTO koalas (id, board, name, nicknames, birth_date, sex, photo, mother, father, deceased, date_of_death, created_at, updated_at)
+        `INSERT INTO koalas (id, board, name, tags, birth_date, sex, photo, mother, father, deceased, date_of_death, created_at, updated_at)
          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
       ).bind(
         id, board, name,
-        nicknames && nicknames.length > 0 ? JSON.stringify(nicknames) : null,
+        normalizeTags(tags).length > 0 ? JSON.stringify(normalizeTags(tags)) : null,
         birthDate || null, sex, photo || null,
         mother || null, father || null,
         deceased ? 1 : 0, dateOfDeath || null,

@@ -153,7 +153,7 @@ export default function FilterSidebar({ koalas, onKoalaClick, isOpen, onToggle }
       {!isOpen && (
         <button
           onClick={onToggle}
-          className="absolute top-2 left-2 z-20 px-2 py-1 sm:px-3 sm:py-1.5 text-xs sm:text-sm rounded-md bg-white/90 border border-gray-300 shadow hover:bg-white flex items-center gap-1 sm:gap-2"
+          className="koala-bite-inset absolute top-2 left-2 z-20 px-2 py-1 sm:px-3 sm:py-1.5 text-xs sm:text-sm rounded-md bg-white/90 border border-gray-300 shadow hover:bg-white flex items-center gap-1 sm:gap-2"
         >
           <svg
             className="w-3 h-3 sm:w-4 sm:h-4"

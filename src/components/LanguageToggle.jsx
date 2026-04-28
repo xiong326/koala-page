@@ -6,7 +6,7 @@ export default function LanguageToggle() {
   return (
     <button
       onClick={toggleLanguage}
-      className="px-2 py-0.5 h-7 bg-white/20 hover:bg-white/30 rounded text-white text-xs font-medium transition-colors"
+      className="px-2 py-0.5 h-7 bg-white/14 hover:bg-white/24 rounded text-white text-xs font-medium transition-colors border border-white/20 shadow-sm"
       title="Toggle Language / 切换语言"
     >
       {language === 'en' ? '中文' : 'English'}

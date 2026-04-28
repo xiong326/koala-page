@@ -1,6 +1,8 @@
 import { useState, useRef, useEffect } from 'react';
 import { useLanguage } from '../i18n/LanguageContext';
 import { t } from '../i18n/translations';
+import TagChips from './TagChips';
+import { tagMatches } from '../utils/tagUtils';
 
 export default function SearchDropdown({ koalas, onSelectKoala }) {
   const { language } = useLanguage();
@@ -20,12 +22,10 @@ export default function SearchDropdown({ koalas, onSelectKoala }) {
     const term = searchTerm.toLowerCase();
     const matches = koalas.filter(koala => {
       const nameMatch = koala.name?.toLowerCase().includes(term);
-      const nicknameMatch = Array.isArray(koala.nicknames)
-        ? koala.nicknames.some(nickname => nickname?.toLowerCase().includes(term))
-        : false;
+      const tagMatch = tagMatches(koala.tags, term);
       const idMatch = koala.id?.toLowerCase().includes(term);
 
-      return nameMatch || nicknameMatch || idMatch;
+      return nameMatch || tagMatch || idMatch;
     });
 
     setFilteredKoalas(matches);
@@ -86,11 +86,7 @@ export default function SearchDropdown({ koalas, onSelectKoala }) {
               className="w-full px-4 py-2 text-left hover:bg-blue-50 focus:bg-blue-50 focus:outline-none border-b border-gray-100 last:border-b-0"
             >
               <div className="font-semibold text-gray-800">{koala.name}</div>
-              {koala.nicknames && koala.nicknames.length > 0 && (
-                <div className="text-xs text-gray-500">
-                  {koala.nicknames.join(', ')}
-                </div>
-              )}
+              <TagChips tags={koala.tags} size="xs" className="mt-1" />
             </button>
           ))}
         </div>

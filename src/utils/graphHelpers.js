@@ -1,6 +1,7 @@
 import { localDateToISODateString } from './dateUtils';
 import { calculateAgeInYears } from './ageUtils';
 import { getPhotoUrl } from './imageUtils';
+import { tagMatches } from './tagUtils';
 
 // Backwards-compatible re-export (older callers may import from graphHelpers)
 export { calculateAgeInYears } from './ageUtils';
@@ -252,15 +253,13 @@ export function searchKoalas(koalas, searchTerm) {
     // Safe check for name
     const nameMatch = koala.name?.toLowerCase().includes(term) || false;
 
-    // Safe check for nicknames array
-    const nicknameMatch = Array.isArray(koala.nicknames)
-      ? koala.nicknames.some(nickname => nickname?.toLowerCase().includes(term))
-      : false;
+    // Safe check for tags array
+    const tagMatch = tagMatches(koala.tags, term);
 
     // Safe check for id
     const idMatch = koala.id?.toLowerCase().includes(term) || false;
 
-    return nameMatch || nicknameMatch || idMatch;
+    return nameMatch || tagMatch || idMatch;
   });
 }
 

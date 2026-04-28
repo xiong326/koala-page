@@ -6,7 +6,7 @@ export const translations = {
     birthdayForecast: "Birthday forecast",
 
     // Search
-    searchPlaceholder: "Search by name, nickname, or ID...",
+    searchPlaceholder: "Search by name, tag, or ID...",
     showingCount: "Showing {{filtered}} of {{total}} koalas",
     noResults: "No koalas found",
 
@@ -15,12 +15,12 @@ export const translations = {
     instructionClick: "Click on a koala to view details and highlight their family",
     instructionZoom: "Use mouse wheel or pinch to zoom in/out",
     instructionPan: "Click and drag to pan around the graph",
-    instructionSearch: "Search by name, nickname, or ID to find a specific koala",
+    instructionSearch: "Search by name, tag, or ID to find a specific koala",
     instructionFilter: "Use filters to view koalas by age, sex, or generation",
 
     // Koala Card
     id: "ID",
-    nicknames: "Nicknames",
+    tags: "Tags",
     sex: "Sex",
     birthDate: "Birth Date",
     age: "Age",
@@ -143,6 +143,7 @@ export const translations = {
 
     // Detail Modal
     moreInfo: "More Info",
+    viewFullProfile: "View Full Profile",
     detailBasicInfo: "Basic Info",
     detailFamily: "Family",
     detailFamilyStats: "Family Stats",
@@ -213,8 +214,10 @@ export const translations = {
     datePrecisionYear: "Year",
     datePrecisionMonth: "Month",
     datePrecisionDay: "Day",
-    editNicknames: "Nicknames",
-    editNicknamesPlaceholder: "Comma-separated nicknames",
+    editTags: "Tags",
+    editTagsPlaceholder: "Add one tag at a time",
+    editAddTag: "Add",
+    editRemoveTag: "Remove {{tag}}",
     editDateHint: "YYYY, YYYY-MM, or YYYY-MM-DD",
     editSelectParent: "Search for a koala...",
     editPhoto: "Photo",
@@ -252,7 +255,7 @@ export const translations = {
     birthdayForecast: "生日预告",
 
     // Search - ADD CHINESE HERE
-    searchPlaceholder: "按名字、昵称或ID搜索...",  // REPLACE WITH CHINESE
+    searchPlaceholder: "按名字、标签或ID搜索...",  // REPLACE WITH CHINESE
     showingCount: "显示 {{filtered}} / {{total}} 只考拉",  // REPLACE WITH CHINESE
     noResults: "未找到考拉",  // REPLACE WITH CHINESE
 
@@ -261,12 +264,12 @@ export const translations = {
     instructionClick: "点击考拉查看详情并高亮其家族",  // REPLACE WITH CHINESE
     instructionZoom: "使用鼠标滚轮或捏合手势进行缩放",  // REPLACE WITH CHINESE
     instructionPan: "点击并拖动以平移图表",  // REPLACE WITH CHINESE
-    instructionSearch: "按名字、昵称或ID查找特定考拉",  // REPLACE WITH CHINESE
+    instructionSearch: "按名字、标签或ID查找特定考拉",  // REPLACE WITH CHINESE
     instructionFilter: "使用筛选器按年龄、性别或世代查看考拉",  // REPLACE WITH CHINESE
 
     // Koala Card - ADD CHINESE HERE
     id: "编号",  // REPLACE WITH CHINESE
-    nicknames: "昵称",  // REPLACE WITH CHINESE
+    tags: "标签",  // REPLACE WITH CHINESE
     sex: "性别",  // REPLACE WITH CHINESE
     birthDate: "出生日期",  // REPLACE WITH CHINESE
     age: "年龄",  // REPLACE WITH CHINESE
@@ -303,7 +306,7 @@ export const translations = {
     generation: "第",
     gen: "代",
     filterByDeceased: "状态",
-    alive: "在世",
+    alive: "地球服役中",
     generationFormat: "第{{gen}}代",
     generationShortFormat: "第{{gen}}代",
     familyLabel: "家族：",
@@ -360,7 +363,7 @@ export const translations = {
     dataBoard: "数据看板",
     dbPopulation: "种群概况",
     dbTotal: "总数",
-    dbAlive: "在世",
+    dbAlive: "地球服役中",
     dbDeceased: "已回考拉星",
     dbSexRatio: "性别比例",
     dbAgeAnalytics: "年龄分析",
@@ -389,6 +392,7 @@ export const translations = {
 
     // Detail Modal
     moreInfo: "详细资料",
+    viewFullProfile: "查看完整档案",
     detailBasicInfo: "基本信息",
     detailFamily: "家庭关系",
     detailFamilyStats: "家族统计",
@@ -459,8 +463,10 @@ export const translations = {
     datePrecisionYear: "年",
     datePrecisionMonth: "月",
     datePrecisionDay: "日",
-    editNicknames: "昵称",
-    editNicknamesPlaceholder: "用逗号分隔多个昵称",
+    editTags: "标签",
+    editTagsPlaceholder: "一次添加一个标签",
+    editAddTag: "添加",
+    editRemoveTag: "移除 {{tag}}",
     editDateHint: "年份、年-月 或 年-月-日",
     editSelectParent: "搜索考拉...",
     editPhoto: "照片",

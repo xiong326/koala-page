@@ -5,6 +5,7 @@ import { compressFromCrop } from '../utils/imageCompression';
 import ImageCropper from './ImageCropper';
 import * as api from '../api/koalaApi';
 import { getPhotoUrl } from '../utils/imageUtils';
+import { normalizeTags, tagMatches } from '../utils/tagUtils';
 
 const YEAR_RE = /^\d{4}$/;
 const MONTH_RE = /^\d{4}-\d{2}$/;
@@ -87,7 +88,7 @@ function SearchableSelect({ value, onChange, koalas, placeholder, language }) {
     return koalas.filter(k =>
       k.name.toLowerCase().includes(term) ||
       k.id.toLowerCase().includes(term) ||
-      (k.nicknames || []).some(n => n.toLowerCase().includes(term))
+      tagMatches(k.tags, term)
     );
   }, [koalas, search]);
 
@@ -144,7 +145,7 @@ export default function KoalaEditForm({ koala, board, allKoalas, onSave, onCance
   const [form, setForm] = useState(() => ({
     id: koala?.id || '',
     name: koala?.name || '',
-    nicknames: (koala?.nicknames || []).join(', '),
+    tags: normalizeTags(koala?.tags),
     birthDate: koala?.birthDate || '',
     sex: koala?.sex || '',
     mother: koala?.mother || null,
@@ -158,6 +159,7 @@ export default function KoalaEditForm({ koala, board, allKoalas, onSave, onCance
   const [photoPreview, setPhotoPreview] = useState(
     koala?.photo ? getPhotoUrl(koala.photo, 'medium') : null
   );
+  const [tagInput, setTagInput] = useState('');
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState(null);
 
@@ -168,6 +170,30 @@ export default function KoalaEditForm({ koala, board, allKoalas, onSave, onCance
 
   const handleChange = (field, value) => {
     setForm(prev => ({ ...prev, [field]: value }));
+  };
+
+  const addTag = () => {
+    const nextTag = tagInput.trim();
+    if (!nextTag) return;
+    setForm(prev => {
+      if (prev.tags.some(tag => tag === nextTag)) return prev;
+      return { ...prev, tags: [...prev.tags, nextTag] };
+    });
+    setTagInput('');
+  };
+
+  const removeTag = (tagToRemove) => {
+    setForm(prev => ({
+      ...prev,
+      tags: prev.tags.filter(tag => tag !== tagToRemove),
+    }));
+  };
+
+  const handleTagInputKeyDown = (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      addTag();
+    }
   };
 
   const handlePhotoSelect = (e) => {
@@ -198,15 +224,10 @@ export default function KoalaEditForm({ koala, board, allKoalas, onSave, onCance
         photo = result.photo;
       }
 
-      const nicknames = form.nicknames
-        .split(',')
-        .map(n => n.trim())
-        .filter(Boolean);
-
       const payload = {
         ...(!isNew ? {} : { board }),
         name: form.name,
-        nicknames,
+        tags: normalizeTags(form.tags),
         birthDate: form.birthDate || null,
         sex: form.sex,
         photo,
@@ -263,16 +284,43 @@ export default function KoalaEditForm({ koala, board, allKoalas, onSave, onCance
           <p className="text-xs text-gray-400 mt-0.5">{t('editNameHint', language)}</p>
         </div>
 
-        {/* Nicknames */}
+        {/* Tags */}
         <div>
-          <label className="block text-xs font-semibold text-gray-600 mb-1">{t('editNicknames', language)}</label>
-          <input
-            type="text"
-            value={form.nicknames}
-            onChange={(e) => handleChange('nicknames', e.target.value)}
-            placeholder={t('editNicknamesPlaceholder', language)}
-            className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-          />
+          <label className="block text-xs font-semibold text-gray-600 mb-1">{t('editTags', language)}</label>
+          <div className="flex gap-1">
+            <input
+              type="text"
+              value={tagInput}
+              onChange={(e) => setTagInput(e.target.value)}
+              onKeyDown={handleTagInputKeyDown}
+              placeholder={t('editTagsPlaceholder', language)}
+              className="min-w-0 flex-1 px-2 py-1.5 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            />
+            <button
+              type="button"
+              onClick={addTag}
+              className="px-2.5 py-1.5 text-xs font-semibold rounded-md bg-blue-500 text-white hover:bg-blue-600"
+            >
+              {t('editAddTag', language)}
+            </button>
+          </div>
+          {form.tags.length > 0 && (
+            <div className="mt-2 flex flex-wrap gap-1">
+              {form.tags.map(tag => (
+                <span key={tag} className="inline-flex items-center gap-1 rounded-full bg-gray-50 px-2 py-1 text-xs font-semibold text-gray-600 ring-1 ring-gray-200">
+                  {tag}
+                  <button
+                    type="button"
+                    onClick={() => removeTag(tag)}
+                    className="text-gray-400 hover:text-red-500"
+                    aria-label={t('editRemoveTag', language, { tag })}
+                  >
+                    ×
+                  </button>
+                </span>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Sex */}

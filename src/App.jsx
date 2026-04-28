@@ -44,6 +44,27 @@ const contributionTypeKeys = {
   'Web Design & Development': 'contributionWebDesign',
 };
 
+const contributionStyles = {
+  'Koala Photo': {
+    icon: 'P',
+    accent: 'from-pink-500 to-rose-400',
+    badge: 'bg-pink-50 text-pink-700 ring-pink-100',
+    link: 'text-pink-700 hover:text-pink-900',
+  },
+  'Family Tree': {
+    icon: 'F',
+    accent: 'from-emerald-500 to-teal-400',
+    badge: 'bg-emerald-50 text-emerald-700 ring-emerald-100',
+    link: 'text-emerald-700 hover:text-emerald-900',
+  },
+  'Web Design & Development': {
+    icon: 'W',
+    accent: 'from-indigo-500 to-sky-400',
+    badge: 'bg-indigo-50 text-indigo-700 ring-indigo-100',
+    link: 'text-indigo-700 hover:text-indigo-900',
+  },
+};
+
 function App() {
   const { language } = useLanguage();
   const { isAuthenticated, role, logout } = useAuth();
@@ -254,28 +275,44 @@ function App() {
   return (
     <div className="h-dvh flex flex-col bg-gray-50">
       {/* Header */}
-      <header className="bg-blue-600 text-white px-4 py-1.5 shadow-lg">
-        <div className="container mx-auto flex flex-wrap justify-between items-center gap-x-3 gap-y-1.5">
-          <div className="flex-1 min-w-0 basis-0">
-            <h1 className="text-base sm:text-lg font-bold leading-tight">{t('title', language)}</h1>
-            {upcomingBirthdays.length > 0 && (() => {
-              const nearest = upcomingBirthdays[0];
-              return (
-                <p className="text-blue-100 text-xs leading-tight truncate">
-                  {t('birthdayForecast', language)}: {nearest.koala.name} {t('ageYearsFormat', language, { age: nearest.upcomingAge })} - {nearest.monthDay}
-                </p>
-              );
-            })()}
+      <header className="relative overflow-hidden bg-gradient-to-r from-slate-800 via-zinc-700 to-stone-600 text-white px-3 sm:px-4 py-1.5 shadow-lg ring-1 ring-black/10">
+        <div className="absolute inset-0 opacity-35 bg-[radial-gradient(circle_at_14%_20%,rgba(255,255,255,0.24),transparent_24%),radial-gradient(circle_at_86%_0%,rgba(134,239,172,0.2),transparent_28%)]" />
+        <div className="container relative mx-auto flex flex-wrap justify-between items-center gap-x-3 gap-y-1.5">
+          <div className="flex flex-1 min-w-0 basis-0 items-center gap-2">
+            <img
+              src="/images/koala-badge.png"
+              alt=""
+              aria-hidden="true"
+              className="h-9 w-9 sm:h-11 sm:w-11 shrink-0 drop-shadow-md"
+            />
+            <div className="min-w-0">
+              <h1 className="text-sm sm:text-lg font-bold leading-tight text-slate-50">{t('title', language)}</h1>
+              {upcomingBirthdays.length > 0 && (() => {
+                const nearest = upcomingBirthdays[0];
+                const forecastText = `${t('birthdayForecast', language)}: ${nearest.koala.name} ${t('ageYearsFormat', language, { age: nearest.upcomingAge })} - ${nearest.monthDay}`;
+                return (
+                  <p
+                    className="forecast-ticker mt-0.5 inline-flex max-w-full items-center rounded-full border border-emerald-200/25 bg-white/12 px-1.5 sm:px-2 py-0.5 text-[10px] sm:text-xs leading-tight text-slate-100 shadow-sm backdrop-blur-sm"
+                    aria-label={forecastText}
+                  >
+                    <span className="forecast-ticker-track">
+                      <span>{forecastText}</span>
+                      <span aria-hidden="true">{forecastText}</span>
+                    </span>
+                  </p>
+                );
+              })()}
+            </div>
           </div>
           <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
             {isAuthenticated && (
               <div className="hidden sm:flex items-center gap-2">
-                <span className="text-xs bg-green-500 text-white px-1.5 py-0.5 rounded hidden sm:inline">
+                <span className="text-xs bg-emerald-400/90 text-slate-900 px-1.5 py-0.5 rounded hidden sm:inline font-semibold">
                   {t('editMode', language)}
                 </span>
                 <button
                   onClick={() => setCreateModalOpen(true)}
-                  className="px-2 py-1 text-xs rounded-md bg-white/20 hover:bg-white/30 text-white"
+                  className="px-2 py-1 text-xs rounded-md bg-white/15 hover:bg-white/25 text-white border border-white/10"
                   title={t('editAdd', language)}
                 >
                   + {t('editAdd', language)}
@@ -283,7 +320,7 @@ function App() {
                 {role === 'admin' && (
                   <button
                     onClick={() => setAdminPanelOpen(true)}
-                    className="p-1 rounded-md hover:bg-white/20 text-white"
+                    className="p-1 rounded-md hover:bg-white/20 text-white border border-transparent hover:border-white/10"
                     title={t('adminTitle', language)}
                   >
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -294,7 +331,7 @@ function App() {
                 )}
                 <button
                   onClick={logout}
-                  className="px-2 py-1 text-xs rounded-md bg-white/20 hover:bg-white/30 text-white"
+                  className="px-2 py-1 text-xs rounded-md bg-white/15 hover:bg-white/25 text-white border border-white/10"
                 >
                   {t('editModeLogout', language)}
                 </button>
@@ -303,7 +340,7 @@ function App() {
             {!isAuthenticated && (
               <button
                 onClick={() => setLoginModalOpen(true)}
-                className="p-1 rounded-md hover:bg-white/20 text-white"
+                className="p-1 rounded-md hover:bg-white/20 text-white border border-transparent hover:border-white/10"
                 title={t('loginTitle', language)}
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -320,12 +357,12 @@ function App() {
           </div>
           {isAuthenticated && (
             <div className="w-full flex sm:hidden items-center justify-end gap-1.5">
-              <span className="text-[11px] bg-green-500 text-white px-1.5 py-0.5 rounded mr-auto">
+              <span className="text-[11px] bg-emerald-400/90 text-slate-900 px-1.5 py-0.5 rounded mr-auto font-semibold">
                 {t('editMode', language)}
               </span>
               <button
                 onClick={() => setCreateModalOpen(true)}
-                className="px-2 py-1 text-xs rounded-md bg-white/20 hover:bg-white/30 text-white"
+                className="px-2 py-1 text-xs rounded-md bg-white/15 hover:bg-white/25 text-white border border-white/10"
                 title={t('editAdd', language)}
               >
                 + {t('editAdd', language)}
@@ -333,7 +370,7 @@ function App() {
               {role === 'admin' && (
                 <button
                   onClick={() => setAdminPanelOpen(true)}
-                  className="p-1 rounded-md hover:bg-white/20 text-white"
+                  className="p-1 rounded-md hover:bg-white/20 text-white border border-transparent hover:border-white/10"
                   title={t('adminTitle', language)}
                 >
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -344,7 +381,7 @@ function App() {
               )}
               <button
                 onClick={logout}
-                className="px-2 py-1 text-xs rounded-md bg-white/20 hover:bg-white/30 text-white"
+                className="px-2 py-1 text-xs rounded-md bg-white/15 hover:bg-white/25 text-white border border-white/10"
               >
                 {t('editModeLogout', language)}
               </button>
@@ -515,34 +552,60 @@ function App() {
         );
         if (!boardContributions) return null;
         return (
-          <footer className="relative bg-white border-t border-gray-200 shrink-0">
+          <footer className="relative bg-white/95 border-t border-gray-200 shrink-0 backdrop-blur">
             {contributionsOpen && (
-              <div className="absolute bottom-full left-0 right-0 bg-gray-50 border border-gray-200 rounded-t-xl shadow-2xl z-10 max-h-[60vh] overflow-y-auto">
-                <div className="px-3 sm:px-4 py-2 sm:py-3 space-y-2">
-                  <h3 className="text-xs font-semibold text-gray-600 uppercase tracking-wider">{t('contributionsTitle', language)}</h3>
-                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+              <div className="absolute bottom-full left-0 right-0 z-10 max-h-[54vh] overflow-y-auto border border-gray-200 bg-white/95 shadow-2xl backdrop-blur rounded-t-2xl">
+                <div className="container mx-auto px-3 py-3 sm:px-4">
+                  <div className="mb-2 flex items-center justify-between gap-3">
+                    <h3 className="text-[11px] font-bold uppercase tracking-[0.16em] text-gray-500">{t('contributionsTitle', language)}</h3>
+                    <span className="rounded-full bg-gray-100 px-2 py-0.5 text-[10px] font-semibold text-gray-500">
+                      {boardName}
+                    </span>
+                  </div>
+                  <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
                     {boardContributions.contributions.map((item, idx) => {
                       const typeKey = contributionTypeKeys[item.contribution];
                       const translatedType = typeKey ? t(typeKey, language) : item.contribution;
+                      const style = contributionStyles[item.contribution] || {
+                        icon: 'C',
+                        accent: 'from-gray-500 to-gray-400',
+                        badge: 'bg-gray-50 text-gray-700 ring-gray-100',
+                        link: 'text-blue-700 hover:text-blue-900',
+                      };
                       return (
-                        <div key={idx} className="bg-white rounded border border-gray-200 px-2 py-1.5">
-                          <p className="text-xs text-gray-500 font-semibold mb-1">{translatedType}</p>
-                          <div className="space-y-0.5">
+                        <div key={idx} className="overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm">
+                          <div className={`h-1 bg-gradient-to-r ${style.accent}`} />
+                          <div className="px-2.5 py-2">
+                            <div className="mb-1.5 flex items-center justify-between gap-2">
+                              <div className="flex min-w-0 items-center gap-1.5">
+                                <span className={`inline-flex size-5 shrink-0 items-center justify-center rounded-full text-[11px] ring-1 ${style.badge}`}>
+                                  {style.icon}
+                                </span>
+                                <p className="truncate text-xs font-bold text-gray-700">{translatedType}</p>
+                              </div>
+                              <span className="shrink-0 rounded-full bg-gray-100 px-1.5 py-0.5 text-[10px] font-semibold text-gray-500">
+                                {item.names.length}
+                              </span>
+                            </div>
+                            <div className="flex flex-wrap gap-1">
                             {item.names.map((entry, ni) => (
-                              <p key={ni} className="text-xs text-gray-700 leading-tight">
-                                {entry.name}@{entry.platforms.map((p, pi) => (
-                                  <span key={pi}>
-                                    {pi > 0 && ', '}
+                              <span key={ni} className="inline-flex max-w-full items-center rounded-full bg-gray-50 px-2 py-1 text-[11px] leading-none text-gray-700 ring-1 ring-gray-200">
+                                <span className="truncate font-semibold">{entry.name}</span>
+                                <span className="mx-1 text-gray-300">@</span>
+                                <span className="flex shrink-0 items-center gap-1">
+                                  {entry.platforms.map((p, pi) => (
                                     <a
+                                      key={pi}
                                       href={p.link}
                                       target="_blank"
                                       rel="noopener noreferrer"
-                                      className="text-blue-600 hover:text-blue-800 underline"
+                                      className={`font-semibold underline decoration-current/30 underline-offset-2 transition-colors ${style.link}`}
                                     >{p.name}</a>
-                                  </span>
-                                ))}
-                              </p>
+                                  ))}
+                                </span>
+                              </span>
                             ))}
+                            </div>
                           </div>
                         </div>
                       );
@@ -555,10 +618,14 @@ function App() {
               <button
                 type="button"
                 onClick={() => setContributionsOpen(!contributionsOpen)}
-                className="w-full flex items-center justify-between py-1 px-3 text-xs font-semibold text-gray-600 hover:text-gray-800 hover:bg-gray-50 transition-colors"
+                aria-expanded={contributionsOpen}
+                className="group flex w-full items-center justify-between px-3 py-1.5 text-xs font-semibold text-gray-600 transition-colors hover:bg-gray-50 hover:text-gray-800"
               >
-                {t('contributionsTitle', language)}
-                <span className={`text-[10px] transition-transform duration-200 ${contributionsOpen ? 'rotate-180' : ''}`}>
+                <span className="flex items-center gap-2">
+                  <span className="h-1.5 w-1.5 rounded-full bg-gradient-to-r from-pink-500 via-emerald-500 to-blue-500" />
+                  {t('contributionsTitle', language)}
+                </span>
+                <span className={`text-[10px] text-gray-400 transition-transform duration-200 group-hover:text-gray-600 ${contributionsOpen ? 'rotate-180' : ''}`}>
                   ▲
                 </span>
               </button>

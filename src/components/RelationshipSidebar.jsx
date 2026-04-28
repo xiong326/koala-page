@@ -3,6 +3,8 @@ import { useLanguage } from '../i18n/LanguageContext';
 import { t } from '../i18n/translations';
 import { calculateRelationship } from '../utils/relationshipCalculator';
 import { getRelationshipDescription } from '../utils/relationshipDisplay';
+import TagChips from './TagChips';
+import { tagMatches } from '../utils/tagUtils';
 
 export default function RelationshipSidebar({ koalas, onKoalaClick, isOpen, onToggle, onRelationshipCalculated, onOpenRelationshipGraph }) {
   const { language } = useLanguage();
@@ -21,7 +23,7 @@ export default function RelationshipSidebar({ koalas, onKoalaClick, isOpen, onTo
     return koalas.filter(k =>
       k.name?.toLowerCase().includes(lowerTerm) ||
       k.id?.toLowerCase().includes(lowerTerm) ||
-      k.nicknames?.some(n => n.toLowerCase().includes(lowerTerm))
+      tagMatches(k.tags, lowerTerm)
     ).slice(0, 5); // Limit to 5 results
   };
 
@@ -118,7 +120,7 @@ export default function RelationshipSidebar({ koalas, onKoalaClick, isOpen, onTo
       {!isOpen && (
         <button
           onClick={onToggle}
-          className="absolute top-2 right-2 z-20 px-2 py-1 sm:px-3 sm:py-1.5 text-xs sm:text-sm rounded-md bg-white/90 border border-gray-300 shadow hover:bg-white flex items-center gap-1 sm:gap-2"
+          className="koala-bite-inset absolute top-2 right-2 z-20 px-2 py-1 sm:px-3 sm:py-1.5 text-xs sm:text-sm rounded-md bg-white/90 border border-gray-300 shadow hover:bg-white flex items-center gap-1 sm:gap-2"
         >
           <svg
             className="w-3 h-3 sm:w-4 sm:h-4"
@@ -185,11 +187,7 @@ export default function RelationshipSidebar({ koalas, onKoalaClick, isOpen, onTo
                     className="w-full px-2 py-1.5 sm:px-3 sm:py-2 text-left hover:bg-blue-50 text-xs sm:text-sm"
                   >
                     <div className="font-semibold">{koala.name}</div>
-                    {koala.nicknames && koala.nicknames.length > 0 && (
-                      <div className="text-xs text-gray-500">
-                        {koala.nicknames.join(', ')}
-                      </div>
-                    )}
+                    <TagChips tags={koala.tags} size="xs" className="mt-1" />
                   </button>
                 ))}
               </div>
@@ -237,11 +235,7 @@ export default function RelationshipSidebar({ koalas, onKoalaClick, isOpen, onTo
                     className="w-full px-2 py-1.5 sm:px-3 sm:py-2 text-left hover:bg-blue-50 text-xs sm:text-sm"
                   >
                     <div className="font-semibold">{koala.name}</div>
-                    {koala.nicknames && koala.nicknames.length > 0 && (
-                      <div className="text-xs text-gray-500">
-                        {koala.nicknames.join(', ')}
-                      </div>
-                    )}
+                    <TagChips tags={koala.tags} size="xs" className="mt-1" />
                   </button>
                 ))}
               </div>

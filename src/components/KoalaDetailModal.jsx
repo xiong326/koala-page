@@ -6,6 +6,7 @@ import { getAgeForDisplay } from '../utils/ageUtils';
 import { getDescendants, getAncestors, calculateGeneration } from '../utils/graphHelpers';
 import { getPhotoUrl } from '../utils/imageUtils';
 import KoalaEditForm from './KoalaEditForm';
+import TagChips from './TagChips';
 import * as api from '../api/koalaApi';
 
 function KoalaLink({ name, koalaId, onClick }) {
@@ -13,7 +14,7 @@ function KoalaLink({ name, koalaId, onClick }) {
     <button
       type="button"
       onClick={() => onClick(koalaId)}
-      className="font-medium text-blue-600 hover:text-blue-800 hover:underline cursor-pointer text-left"
+      className="cursor-pointer text-left text-xs font-medium text-blue-600 hover:text-blue-800 hover:underline sm:text-sm"
     >
       {name}
     </button>
@@ -22,15 +23,15 @@ function KoalaLink({ name, koalaId, onClick }) {
 
 function SectionHeader({ children }) {
   return (
-    <h3 className="text-sm font-semibold text-gray-600 uppercase tracking-wider mb-3">{children}</h3>
+    <h3 className="mb-1.5 text-[11px] font-semibold uppercase tracking-wider text-gray-500 sm:mb-3 sm:text-sm sm:text-gray-600">{children}</h3>
   );
 }
 
 function InfoRow({ label, children }) {
   return (
-    <div className="flex items-start gap-2 text-sm">
-      <span className="font-semibold text-gray-500 whitespace-nowrap min-w-[100px]">{label}</span>
-      <span className="text-gray-800">{children}</span>
+    <div className="grid grid-cols-[58px_minmax(0,1fr)] items-start gap-x-1.5 text-xs sm:grid-cols-[100px_1fr] sm:gap-x-2 sm:text-sm">
+      <span className="min-w-0 font-semibold text-gray-500">{label}</span>
+      <span className="min-w-0 break-words text-gray-800">{children}</span>
     </div>
   );
 }
@@ -149,6 +150,11 @@ export default function KoalaDetailModal({ koala, allKoalas, onClose, onKoalaCli
   }, [koala.id, allKoalas]);
 
   const hasGrandparents = Object.values(grandparents).some(Boolean);
+  const sexAccent = koala.sex === 'female'
+    ? 'from-pink-500 to-rose-400'
+    : koala.sex === 'male'
+      ? 'from-blue-500 to-sky-400'
+      : 'from-gray-500 to-gray-400';
 
   const handleNav = (targetKoala) => {
     if (targetKoala && onKoalaClick) {
@@ -171,8 +177,8 @@ export default function KoalaDetailModal({ koala, allKoalas, onClose, onKoalaCli
   if (editing) {
     return (
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onClick={() => setEditing(false)}>
-        <div className="bg-white rounded-xl shadow-2xl w-[90vw] max-w-2xl max-h-[85vh] overflow-y-auto p-6" onClick={e => e.stopPropagation()}>
-          <h2 className="text-lg font-bold text-gray-800 mb-4">{t('editEdit', language)}: {koala.name}</h2>
+        <div className="max-h-[92dvh] w-[96vw] max-w-2xl overflow-y-auto rounded-lg bg-white p-3 shadow-2xl sm:max-h-[85vh] sm:w-[90vw] sm:rounded-xl sm:p-6" onClick={e => e.stopPropagation()}>
+          <h2 className="mb-3 text-base font-bold text-gray-800 sm:mb-4 sm:text-lg">{t('editEdit', language)}: {koala.name}</h2>
           <KoalaEditForm
             koala={koala}
             board={currentBoard}
@@ -189,16 +195,16 @@ export default function KoalaDetailModal({ koala, allKoalas, onClose, onKoalaCli
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onClick={onClose}>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4 py-8 sm:px-0 sm:py-0" onClick={onClose}>
       <div
-        className="bg-gray-50 w-[90vw] max-w-3xl max-h-[85vh] rounded-xl shadow-2xl flex flex-col overflow-hidden"
+        className="flex max-h-[82dvh] w-[88vw] max-w-3xl flex-col overflow-hidden rounded-lg bg-gray-50 shadow-2xl sm:max-h-[85vh] sm:w-[90vw] sm:rounded-xl"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Delete confirmation */}
         {deleting && (
-          <div className="absolute inset-0 z-10 flex items-center justify-center bg-black/30 rounded-xl">
-            <div className="bg-white rounded-lg shadow-xl p-6 max-w-sm mx-4">
-              <p className="text-sm text-gray-700 mb-4">{t('editDeleteConfirm', language, { name: koala.name })}</p>
+          <div className="absolute inset-0 z-10 flex items-center justify-center rounded-lg bg-black/30 sm:rounded-xl">
+            <div className="mx-4 max-w-sm rounded-lg bg-white p-4 shadow-xl sm:p-6">
+              <p className="mb-4 text-sm text-gray-700">{t('editDeleteConfirm', language, { name: koala.name })}</p>
               <div className="flex justify-end gap-2">
                 <button onClick={() => setDeleting(false)} className="px-3 py-1.5 text-sm text-gray-600 hover:text-gray-800">{t('cancel', language)}</button>
                 <button onClick={handleDelete} className="px-3 py-1.5 text-sm bg-red-500 text-white rounded-md hover:bg-red-600">{t('editDelete', language)}</button>
@@ -208,44 +214,42 @@ export default function KoalaDetailModal({ koala, allKoalas, onClose, onKoalaCli
         )}
 
         {/* Header */}
-        <div className="flex items-center justify-between p-4 sm:p-5 border-b border-gray-200 bg-white">
-          <div className="flex items-center gap-3 min-w-0 flex-1">
+        <div className="flex items-center justify-between border-b border-gray-200 bg-white p-2.5 sm:p-5">
+          <div className="flex min-w-0 flex-1 items-center gap-1.5 sm:gap-3">
             <button
               type="button"
               onClick={() => handleNav(prevKoala)}
               disabled={!prevKoala}
-              className="p-1.5 rounded-md hover:bg-gray-100 text-gray-500 hover:text-gray-800 transition-colors disabled:opacity-30 disabled:cursor-not-allowed flex-shrink-0"
+              className="flex-shrink-0 rounded-md p-1.5 text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-800 disabled:cursor-not-allowed disabled:opacity-30"
               title={t('detailPrev', language)}
             >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="h-4 w-4 sm:h-5 sm:w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
               </svg>
             </button>
             <div className="min-w-0 flex-1">
-              <h2 className="text-lg sm:text-xl font-bold text-gray-800 truncate">
+              <h2 className="truncate text-base font-bold text-gray-800 sm:text-xl">
                 {koala.name}
-                <span className="ml-1.5 text-base font-normal text-gray-400">
+                <span className="ml-1 text-sm font-normal text-gray-400 sm:ml-1.5 sm:text-base">
                   {koala.sex === 'female' ? '♀' : koala.sex === 'male' ? '♂' : ''}
                 </span>
-                {koala.deceased && <span className="ml-1 text-base font-normal text-gray-400">†</span>}
+                {koala.deceased && <span className="ml-1 text-sm font-normal text-gray-400 sm:text-base">†</span>}
               </h2>
-              {koala.nicknames && koala.nicknames.length > 0 && (
-                <p className="text-xs text-gray-500 truncate">{koala.nicknames.join(', ')}</p>
-              )}
+              <TagChips tags={koala.tags} size="xs" className="mt-0.5" />
             </div>
             <button
               type="button"
               onClick={() => handleNav(nextKoala)}
               disabled={!nextKoala}
-              className="p-1.5 rounded-md hover:bg-gray-100 text-gray-500 hover:text-gray-800 transition-colors disabled:opacity-30 disabled:cursor-not-allowed flex-shrink-0"
+              className="flex-shrink-0 rounded-md p-1.5 text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-800 disabled:cursor-not-allowed disabled:opacity-30"
               title={t('detailNext', language)}
             >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="h-4 w-4 sm:h-5 sm:w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
               </svg>
             </button>
           </div>
-          <div className="flex items-center gap-1 ml-3 flex-shrink-0">
+          <div className="ml-1.5 flex flex-shrink-0 items-center gap-0.5 sm:ml-3 sm:gap-1">
             {isAuthenticated && (
               <>
                 <button
@@ -272,7 +276,7 @@ export default function KoalaDetailModal({ koala, allKoalas, onClose, onKoalaCli
               onClick={onClose}
               className="p-1.5 rounded-md hover:bg-gray-100 text-gray-500 hover:text-gray-800 transition-colors"
             >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="h-4 w-4 sm:h-5 sm:w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
               </svg>
             </button>
@@ -280,50 +284,77 @@ export default function KoalaDetailModal({ koala, allKoalas, onClose, onKoalaCli
         </div>
 
         {/* Scrollable content */}
-        <div className="flex-1 overflow-y-auto p-4 sm:p-5 space-y-6">
+        <div className="flex-1 space-y-3 overflow-y-auto p-2.5 sm:space-y-6 sm:p-5">
 
           {/* Photo + Basic Info row */}
           <section>
             <SectionHeader>{t('detailBasicInfo', language)}</SectionHeader>
-            <div className="bg-white rounded-lg border border-gray-200 p-4 flex gap-4">
-              <div className="flex-shrink-0">
-                {koala.photo ? (
-                  <div className="w-24 h-24 sm:w-32 sm:h-32 bg-gray-100 rounded-lg overflow-hidden flex items-center justify-center">
-                    <img src={getPhotoUrl(koala.photo, 'medium')} alt={koala.name} loading="lazy" width={128} height={128} className="w-full h-full object-contain" />
-                  </div>
-                ) : (
-                  <div className="w-24 h-24 sm:w-32 sm:h-32 bg-gray-200 rounded-lg flex items-center justify-center">
-                    <span className="text-gray-400 text-4xl">🐨</span>
-                  </div>
-                )}
-              </div>
-              <div className="flex-1 space-y-1.5">
-                <InfoRow label={`${t('sex', language)}:`}>
-                  {t(koala.sex, language)}
-                </InfoRow>
-                <InfoRow label={`${t('birthDate', language)}:`}>
-                  {formatDate(koala.birthDate)}
-                </InfoRow>
-                <InfoRow label={`${t('age', language)}:`}>
-                  {koala.deceased
-                    ? (koala.dateOfDeath
-                      ? formatAge(koala.birthDate, koala.dateOfDeath)
-                      : t('unknown', language))
-                    : formatAge(koala.birthDate)}
-                </InfoRow>
-                <InfoRow label={`${t('detailGeneration', language)}:`}>
-                  {language === 'zh' ? `第${generation}代` : `${t('generation', language)} ${generation}`}
-                </InfoRow>
-                <InfoRow label={`${t('detailStatus', language)}:`}>
-                  {koala.deceased ? (
-                    <span className="text-gray-500">
-                      {t('deceased', language)}
-                      {koala.dateOfDeath && ` (${formatDate(koala.dateOfDeath)})`}
-                    </span>
+            <div className="overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm">
+              <div className={`h-1 bg-gradient-to-r ${sexAccent}`} />
+              <div className="flex gap-2 p-2.5 sm:gap-4 sm:p-4">
+                <div className="flex-shrink-0">
+                  {koala.photo ? (
+                    <div className="flex h-16 w-16 items-center justify-center overflow-hidden rounded-md bg-gray-100 ring-1 ring-gray-200 sm:h-28 sm:w-28 sm:rounded-lg">
+                      <img src={getPhotoUrl(koala.photo, 'medium')} alt={koala.name} loading="lazy" width={128} height={128} className="h-full w-full object-cover" />
+                    </div>
                   ) : (
-                    <span className="text-green-600">{t('alive', language)}</span>
+                    <div className="flex h-16 w-16 items-center justify-center rounded-md bg-gray-100 ring-1 ring-gray-200 sm:h-28 sm:w-28 sm:rounded-lg">
+                      <span className="text-2xl text-gray-400 sm:text-4xl">🐨</span>
+                    </div>
                   )}
-                </InfoRow>
+                </div>
+                <div className="min-w-0 flex-1">
+                  <div className="mb-2 flex flex-wrap items-center gap-1.5">
+                    <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold ring-1 sm:text-xs ${
+                      koala.sex === 'female'
+                        ? 'bg-pink-50 text-pink-700 ring-pink-100'
+                        : koala.sex === 'male'
+                          ? 'bg-blue-50 text-blue-700 ring-blue-100'
+                          : 'bg-gray-50 text-gray-700 ring-gray-100'
+                    }`}>
+                      {t(koala.sex, language)}
+                    </span>
+                    <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold ring-1 sm:text-xs ${
+                      koala.deceased
+                        ? 'bg-gray-100 text-gray-600 ring-gray-200'
+                        : 'bg-green-50 text-green-700 ring-green-100'
+                    }`}>
+                      {koala.deceased ? t('deceased', language) : t('alive', language)}
+                    </span>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-x-2 gap-y-1.5 text-xs sm:text-sm">
+                    <div className="min-w-0">
+                      <p className="text-[10px] font-semibold uppercase tracking-wide text-gray-400 sm:text-xs">{t('birthDate', language)}</p>
+                      <p className="break-words font-semibold text-gray-800">{formatDate(koala.birthDate)}</p>
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-[10px] font-semibold uppercase tracking-wide text-gray-400 sm:text-xs">{t('age', language)}</p>
+                      <p className="font-semibold text-gray-800">
+                        {koala.deceased
+                          ? (koala.dateOfDeath
+                            ? formatAge(koala.birthDate, koala.dateOfDeath)
+                            : t('unknown', language))
+                          : formatAge(koala.birthDate)}
+                      </p>
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-[10px] font-semibold uppercase tracking-wide text-gray-400 sm:text-xs">{t('detailGeneration', language)}</p>
+                      <p className="font-semibold text-gray-800">
+                        {language === 'zh' ? `第${generation}代` : `${t('generation', language)} ${generation}`}
+                      </p>
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-[10px] font-semibold uppercase tracking-wide text-gray-400 sm:text-xs">
+                        {koala.deceased ? t('dateOfDeath', language) : t('detailStatus', language)}
+                      </p>
+                      <p className={koala.deceased ? 'break-words font-semibold text-gray-600' : 'font-semibold text-green-600'}>
+                        {koala.deceased && koala.dateOfDeath ? formatDate(koala.dateOfDeath) : (koala.deceased ? t('unknown', language) : t('alive', language))}
+                      </p>
+                    </div>
+                  </div>
+                  <TagChips tags={koala.tags} className="mt-2" />
+                </div>
               </div>
             </div>
           </section>
@@ -331,12 +362,12 @@ export default function KoalaDetailModal({ koala, allKoalas, onClose, onKoalaCli
           {/* Family Links */}
           <section>
             <SectionHeader>{t('detailFamily', language)}</SectionHeader>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 gap-2 sm:gap-4 md:grid-cols-2">
 
               {/* Parents */}
-              <div className="bg-white rounded-lg border border-gray-200 p-4 space-y-2">
-                <p className="text-xs sm:text-sm text-gray-500 font-semibold mb-2">{t('mother', language)} / {t('father', language)}</p>
-                <div className="space-y-1.5">
+              <div className="space-y-1.5 rounded-lg border border-gray-200 bg-white p-2.5 sm:space-y-2 sm:p-4">
+                <p className="mb-1.5 text-xs font-semibold text-gray-500 sm:mb-2 sm:text-sm">{t('mother', language)} / {t('father', language)}</p>
+                <div className="space-y-1 sm:space-y-1.5">
                   <InfoRow label={`${t('mother', language)}:`}>
                     {motherKoala
                       ? <KoalaLink name={motherKoala.name} koalaId={motherKoala.id} onClick={onKoalaClick} />
@@ -351,10 +382,10 @@ export default function KoalaDetailModal({ koala, allKoalas, onClose, onKoalaCli
               </div>
 
               {/* Grandparents */}
-              <div className="bg-white rounded-lg border border-gray-200 p-4 space-y-2">
-                <p className="text-xs sm:text-sm text-gray-500 font-semibold mb-2">{t('detailGrandparents', language)}</p>
+              <div className="space-y-1.5 rounded-lg border border-gray-200 bg-white p-2.5 sm:space-y-2 sm:p-4">
+                <p className="mb-1.5 text-xs font-semibold text-gray-500 sm:mb-2 sm:text-sm">{t('detailGrandparents', language)}</p>
                 {hasGrandparents ? (
-                  <div className="space-y-1.5">
+                  <div className="space-y-1 sm:space-y-1.5">
                     {(grandparents.maternalGrandmother || motherKoala) && (
                       <InfoRow label={`${t('detailMaternalGrandmother', language)}:`}>
                         {grandparents.maternalGrandmother
@@ -385,35 +416,35 @@ export default function KoalaDetailModal({ koala, allKoalas, onClose, onKoalaCli
                     )}
                   </div>
                 ) : (
-                  <p className="text-sm text-gray-400">{t('detailNone', language)}</p>
+                  <p className="text-xs text-gray-400 sm:text-sm">{t('detailNone', language)}</p>
                 )}
               </div>
 
               {/* Mates */}
-              <div className="bg-white rounded-lg border border-gray-200 p-4">
-                <p className="text-xs sm:text-sm text-gray-500 font-semibold mb-2">{t('detailMates', language)}</p>
+              <div className="rounded-lg border border-gray-200 bg-white p-2.5 sm:p-4">
+                <p className="mb-1.5 text-xs font-semibold text-gray-500 sm:mb-2 sm:text-sm">{t('detailMates', language)}</p>
                 {mates.length > 0 ? (
-                  <div className="flex flex-wrap gap-x-3 gap-y-1">
+                  <div className="flex flex-wrap gap-x-2 gap-y-0.5 sm:gap-x-3 sm:gap-y-1">
                     {mates.map(mate => (
                       <KoalaLink key={mate.id} name={mate.name} koalaId={mate.id} onClick={onKoalaClick} />
                     ))}
                   </div>
                 ) : (
-                  <p className="text-sm text-gray-400">{t('detailNoMates', language)}</p>
+                  <p className="text-xs text-gray-400 sm:text-sm">{t('detailNoMates', language)}</p>
                 )}
               </div>
 
               {/* Siblings */}
-              <div className="bg-white rounded-lg border border-gray-200 p-4">
-                <p className="text-xs sm:text-sm text-gray-500 font-semibold mb-2">{t('detailSiblings', language)}</p>
+              <div className="rounded-lg border border-gray-200 bg-white p-2.5 sm:p-4">
+                <p className="mb-1.5 text-xs font-semibold text-gray-500 sm:mb-2 sm:text-sm">{t('detailSiblings', language)}</p>
                 {siblings.full.length === 0 && siblings.half.length === 0 ? (
-                  <p className="text-sm text-gray-400">{t('detailNoSiblings', language)}</p>
+                  <p className="text-xs text-gray-400 sm:text-sm">{t('detailNoSiblings', language)}</p>
                 ) : (
-                  <div className="space-y-2">
+                  <div className="space-y-1.5 sm:space-y-2">
                     {siblings.full.length > 0 && (
                       <div>
                         <p className="text-xs text-gray-400 mb-1">{t('detailFullSiblings', language)}</p>
-                        <div className="flex flex-wrap gap-x-3 gap-y-1">
+                        <div className="flex flex-wrap gap-x-2 gap-y-0.5 sm:gap-x-3 sm:gap-y-1">
                           {siblings.full.map(s => (
                             <KoalaLink key={s.id} name={s.name} koalaId={s.id} onClick={onKoalaClick} />
                           ))}
@@ -423,7 +454,7 @@ export default function KoalaDetailModal({ koala, allKoalas, onClose, onKoalaCli
                     {siblings.half.length > 0 && (
                       <div>
                         <p className="text-xs text-gray-400 mb-1">{t('detailHalfSiblings', language)}</p>
-                        <div className="flex flex-wrap gap-x-3 gap-y-1">
+                        <div className="flex flex-wrap gap-x-2 gap-y-0.5 sm:gap-x-3 sm:gap-y-1">
                           {siblings.half.map(s => (
                             <KoalaLink key={s.id} name={s.name} koalaId={s.id} onClick={onKoalaClick} />
                           ))}
@@ -438,18 +469,18 @@ export default function KoalaDetailModal({ koala, allKoalas, onClose, onKoalaCli
 
           {/* Offspring */}
           <section>
-            <div className="bg-white rounded-lg border border-gray-200 p-4">
-              <p className="text-xs sm:text-sm text-gray-500 font-semibold mb-2">
+            <div className="rounded-lg border border-gray-200 bg-white p-2.5 sm:p-4">
+              <p className="mb-1.5 text-xs font-semibold text-gray-500 sm:mb-2 sm:text-sm">
                 {t('detailOffspring', language)}
                 {offspring.length > 0 && <span className="ml-1 text-gray-400">({offspring.length})</span>}
               </p>
               {offspring.length > 0 ? (
-                <div className="space-y-1.5">
+                <div className="space-y-1 sm:space-y-1.5">
                   {offspring.map(child => {
                     const otherParentId = child.mother === koala.id ? child.father : child.mother;
                     const otherParent = otherParentId ? getKoala(otherParentId) : null;
                     return (
-                      <div key={child.id} className="flex items-center gap-2 text-sm">
+                      <div key={child.id} className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs sm:text-sm">
                         <KoalaLink name={child.name} koalaId={child.id} onClick={onKoalaClick} />
                         <span className="text-gray-400 text-xs">
                           {child.sex === 'female' ? '♀' : '♂'}
@@ -458,7 +489,7 @@ export default function KoalaDetailModal({ koala, allKoalas, onClose, onKoalaCli
                           {child.birthDate ? child.birthDate.split('-')[0] : ''}
                         </span>
                         {otherParent && (
-                          <span className="text-gray-400 text-xs ml-auto">
+                          <span className="text-xs text-gray-400 sm:ml-auto">
                             × <KoalaLink name={otherParent.name} koalaId={otherParent.id} onClick={onKoalaClick} />
                           </span>
                         )}
@@ -467,7 +498,7 @@ export default function KoalaDetailModal({ koala, allKoalas, onClose, onKoalaCli
                   })}
                 </div>
               ) : (
-                <p className="text-sm text-gray-400">{t('detailNoOffspring', language)}</p>
+                <p className="text-xs text-gray-400 sm:text-sm">{t('detailNoOffspring', language)}</p>
               )}
             </div>
           </section>
@@ -475,18 +506,18 @@ export default function KoalaDetailModal({ koala, allKoalas, onClose, onKoalaCli
           {/* Family Stats */}
           <section>
             <SectionHeader>{t('detailFamilyStats', language)}</SectionHeader>
-            <div className="grid grid-cols-3 gap-3">
-              <div className="bg-white rounded-lg border border-gray-200 p-3 sm:p-4">
-                <p className="text-xs sm:text-sm text-gray-500 mb-1">{t('detailTotalDescendants', language)}</p>
-                <p className="text-xl sm:text-2xl font-bold text-gray-800">{familyStats.descendantCount}</p>
+            <div className="grid grid-cols-3 gap-1.5 sm:gap-3">
+              <div className="rounded-lg border border-gray-200 bg-white p-2 sm:p-4">
+                <p className="mb-1 text-[10px] leading-tight text-gray-500 sm:text-sm">{t('detailTotalDescendants', language)}</p>
+                <p className="text-lg font-bold text-gray-800 sm:text-2xl">{familyStats.descendantCount}</p>
               </div>
-              <div className="bg-white rounded-lg border border-gray-200 p-3 sm:p-4">
-                <p className="text-xs sm:text-sm text-gray-500 mb-1">{t('detailTotalAncestors', language)}</p>
-                <p className="text-xl sm:text-2xl font-bold text-gray-800">{familyStats.ancestorCount}</p>
+              <div className="rounded-lg border border-gray-200 bg-white p-2 sm:p-4">
+                <p className="mb-1 text-[10px] leading-tight text-gray-500 sm:text-sm">{t('detailTotalAncestors', language)}</p>
+                <p className="text-lg font-bold text-gray-800 sm:text-2xl">{familyStats.ancestorCount}</p>
               </div>
-              <div className="bg-white rounded-lg border border-gray-200 p-3 sm:p-4">
-                <p className="text-xs sm:text-sm text-gray-500 mb-1">{t('detailDeepestDescGen', language)}</p>
-                <p className="text-xl sm:text-2xl font-bold text-gray-800">
+              <div className="rounded-lg border border-gray-200 bg-white p-2 sm:p-4">
+                <p className="mb-1 text-[10px] leading-tight text-gray-500 sm:text-sm">{t('detailDeepestDescGen', language)}</p>
+                <p className="text-lg font-bold text-gray-800 sm:text-2xl">
                   {familyStats.deepestDescGen > 0
                     ? (language === 'zh' ? `第${familyStats.deepestDescGen}代` : `Gen ${familyStats.deepestDescGen}`)
                     : '-'}
@@ -498,8 +529,8 @@ export default function KoalaDetailModal({ koala, allKoalas, onClose, onKoalaCli
           {/* Timeline */}
           <section>
             <SectionHeader>{t('detailTimeline', language)}</SectionHeader>
-            <div className="bg-white rounded-lg border border-gray-200 p-4">
-              <div className="relative pl-6 space-y-4">
+            <div className="rounded-lg border border-gray-200 bg-white p-2.5 sm:p-4">
+              <div className="relative space-y-3 pl-5 sm:space-y-4 sm:pl-6">
                 <div className="absolute left-2 top-1 bottom-1 w-0.5 bg-gray-200" />
 
                 {/* Birth */}
