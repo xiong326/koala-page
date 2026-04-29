@@ -46,12 +46,26 @@ function PrecisionDateInput({ label, value, onChange, language }) {
     onChange(normalizeDateForPrecision(value, nextPrecision));
   };
 
-  const inputType = precision === 'day' ? 'date' : precision === 'month' ? 'month' : 'number';
+  const handleInputChange = (nextValue) => {
+    if (precision === 'year') {
+      if (/^\d{0,4}$/.test(nextValue)) onChange(nextValue);
+      return;
+    }
+    onChange(normalizeDateForPrecision(nextValue, precision));
+  };
+
+  const handleInputBlur = () => {
+    if (precision === 'year') {
+      onChange(normalizeDateForPrecision(value, precision));
+    }
+  };
+
+  const inputType = precision === 'day' ? 'date' : precision === 'month' ? 'month' : 'text';
 
   return (
     <div>
       <label className="block text-xs font-semibold text-gray-600 mb-1">{label}</label>
-      <div className="flex rounded-md border border-gray-300 overflow-hidden mb-2">
+      <div className="flex rounded-md border border-gray-300 overflow-visible mb-2">
         {['year', 'month', 'day'].map(option => (
           <button
             key={option}
@@ -70,11 +84,10 @@ function PrecisionDateInput({ label, value, onChange, language }) {
       <input
         type={inputType}
         inputMode={precision === 'year' ? 'numeric' : undefined}
-        min={precision === 'year' ? '1900' : undefined}
-        max={precision === 'year' ? '2100' : undefined}
-        step={precision === 'year' ? '1' : undefined}
-        value={getDateValueForPrecision(value, precision)}
-        onChange={(e) => onChange(normalizeDateForPrecision(e.target.value, precision))}
+        maxLength={precision === 'year' ? 4 : undefined}
+        value={precision === 'year' ? (value || '') : getDateValueForPrecision(value, precision)}
+        onChange={(e) => handleInputChange(e.target.value)}
+        onBlur={handleInputBlur}
         placeholder={precision === 'year' ? 'YYYY' : undefined}
         className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-slate-500 focus:border-transparent"
       />

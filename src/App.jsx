@@ -305,7 +305,7 @@ function App() {
                 style={{
                   '--angle': `${angle}deg`,
                   '--delay': `${index * 26}ms`,
-                  '--distance': `${5.6 + (index % 3) * 1.15}rem`,
+                  '--distance': `${7.5 + (index % 3) * 1.55}rem`,
                 }}
               />
             ))}
@@ -324,21 +324,25 @@ function App() {
               alt=""
               aria-hidden="true"
               onPointerUp={handleBadgeTap}
-              className="h-9 w-9 sm:h-11 sm:w-11 shrink-0 cursor-pointer select-none drop-shadow-md touch-manipulation"
+              className="h-10 w-10 sm:h-12 sm:w-12 shrink-0 cursor-pointer select-none drop-shadow-md touch-manipulation"
             />
             <div className="min-w-0">
-              <h1 className="text-sm sm:text-lg font-bold leading-tight text-slate-50">{t('title', language)}</h1>
+              <h1 className="text-xs sm:text-lg font-bold leading-tight text-slate-50">{t('title', language)}</h1>
               {upcomingBirthdays.length > 0 && (() => {
                 const nearest = upcomingBirthdays[0];
-                const forecastText = `${t('birthdayForecast', language)}: ${nearest.koala.name} ${t('ageYearsFormat', language, { age: nearest.upcomingAge })} - ${nearest.monthDay}`;
+                const nearestBirthdays = upcomingBirthdays.filter(birthday => birthday.daysUntil === nearest.daysUntil);
+                const forecastNames = nearestBirthdays
+                  .map(birthday => `${birthday.koala.name} ${t('ageYearsFormat', language, { age: birthday.upcomingAge })}`)
+                  .join(language === 'zh' ? '、' : ', ');
+                const forecastText = `${t('birthdayForecast', language)}: ${forecastNames} - ${nearest.monthDay}`;
                 return (
                   <p
                     className="forecast-ticker mt-0.5 inline-flex max-w-full items-center rounded-full border border-emerald-200/25 bg-white/12 px-1.5 sm:px-2 py-0.5 text-[10px] sm:text-xs leading-tight text-slate-100 shadow-sm backdrop-blur-sm"
                     aria-label={forecastText}
                   >
                     <span className="forecast-ticker-track">
-                      <span>{forecastText}</span>
-                      <span aria-hidden="true">{forecastText}</span>
+                      <span className="forecast-ticker-item">{forecastText}</span>
+                      <span className="forecast-ticker-item" aria-hidden="true">{forecastText}</span>
                     </span>
                   </p>
                 );

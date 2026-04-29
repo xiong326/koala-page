@@ -35,6 +35,21 @@ function applyNodePhotoStyles(cy) {
   });
 }
 
+function applyNodeLabelStyles(cy) {
+  if (!cy || cy.destroyed()) return;
+
+  cy.batch(() => {
+    cy.nodes().forEach((node) => {
+      const label = node.data('label');
+      if (label) {
+        node.style('label', label);
+      } else {
+        node.removeStyle('label');
+      }
+    });
+  });
+}
+
 function shouldRefreshImagesAfterResume() {
   if (typeof window === 'undefined') return false;
   if (document.visibilityState === 'hidden') return false;
@@ -54,7 +69,10 @@ const KoalaGraph = forwardRef(function KoalaGraph({
   const defaultViewportRef = useRef(null);
   const onNodeClickRef = useRef(onNodeClick);
   const centeredByClickRef = useRef(false);
+  const resumeViewportRef = useRef(null);
+  const resumeRemountTimeoutRef = useRef(null);
   const [isReady, setIsReady] = useState(false);
+  const [resumeKey, setResumeKey] = useState(0);
 
   useImperativeHandle(ref, () => ({
     exportPng(options = {}) {
@@ -92,6 +110,7 @@ const KoalaGraph = forwardRef(function KoalaGraph({
 
   useEffect(() => {
     if (!containerRef.current || primaryElements.length === 0) return;
+    setIsReady(false);
 
     // Phase 1: dagre on the maternal tree only
     cyRef.current = cytoscape({
@@ -289,6 +308,12 @@ const KoalaGraph = forwardRef(function KoalaGraph({
         zoom: cy.zoom(),
         pan: { ...cy.pan() },
       };
+
+      if (resumeViewportRef.current) {
+        cy.zoom(resumeViewportRef.current.zoom);
+        cy.pan(resumeViewportRef.current.pan);
+        resumeViewportRef.current = null;
+      }
     });
 
     cyRef.current.layout(layoutOptions).run();
@@ -323,7 +348,7 @@ const KoalaGraph = forwardRef(function KoalaGraph({
         cyRef.current.destroy();
       }
     };
-  }, [primaryElements, proxyElements]);
+  }, [primaryElements, proxyElements, resumeKey]);
 
   useEffect(() => {
     if (!isReady) return;
@@ -339,6 +364,7 @@ const KoalaGraph = forwardRef(function KoalaGraph({
       }
 
       cy.batch(() => {
+        cy.nodes().forEach(node => node.removeStyle('label'));
         nodesWithPhotos.forEach(node => node.removeStyle('background-image'));
       });
       cy.elements().updateStyle();
@@ -350,8 +376,10 @@ const KoalaGraph = forwardRef(function KoalaGraph({
           if (!latestCy || latestCy.destroyed()) return;
 
           applyNodePhotoStyles(latestCy);
+          applyNodeLabelStyles(latestCy);
           latestCy.elements().updateStyle();
           latestCy.resize();
+          latestCy.pan(latestCy.pan());
         });
       });
     };
@@ -360,6 +388,19 @@ const KoalaGraph = forwardRef(function KoalaGraph({
       if (!shouldRefreshImagesAfterResume()) return;
       setTimeout(refreshImagesAfterResume, 50);
       setTimeout(refreshImagesAfterResume, 300);
+
+      if (resumeRemountTimeoutRef.current) return;
+      const cy = cyRef.current;
+      if (cy && !cy.destroyed()) {
+        resumeViewportRef.current = {
+          zoom: cy.zoom(),
+          pan: { ...cy.pan() },
+        };
+      }
+      resumeRemountTimeoutRef.current = setTimeout(() => {
+        resumeRemountTimeoutRef.current = null;
+        setResumeKey(key => key + 1);
+      }, 450);
     };
 
     window.addEventListener('pageshow', refreshSoon);
@@ -370,6 +411,10 @@ const KoalaGraph = forwardRef(function KoalaGraph({
       window.removeEventListener('pageshow', refreshSoon);
       window.removeEventListener('focus', refreshSoon);
       document.removeEventListener('visibilitychange', refreshSoon);
+      if (resumeRemountTimeoutRef.current) {
+        clearTimeout(resumeRemountTimeoutRef.current);
+        resumeRemountTimeoutRef.current = null;
+      }
     };
   }, [isReady]);
 
