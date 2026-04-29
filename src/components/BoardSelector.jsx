@@ -21,7 +21,7 @@ const BoardSelector = ({ currentBoard, onBoardChange, boards }) => {
         {t('familyLabel', language)}
       </label>
       <div
-        className="flex h-7 overflow-hidden rounded border border-white/20 bg-white/12 p-0.5 shadow-sm"
+        className="flex h-7 overflow-visible rounded border border-white/20 bg-white/12 p-0.5 shadow-sm"
         role="group"
         aria-label={t('familyLabel', language)}
       >

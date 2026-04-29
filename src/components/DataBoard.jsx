@@ -54,7 +54,7 @@ function SegmentedFilter({ label, value, options, onChange }) {
   return (
     <div className="flex items-center gap-1">
       <span className="text-[11px] font-semibold text-gray-500 sm:text-xs">{label}</span>
-      <div className="flex overflow-hidden rounded-md border border-gray-300 bg-gray-100 p-0.5">
+      <div className="flex overflow-visible rounded-md border border-gray-300 bg-gray-100 p-0.5">
         {options.map(option => (
           <button
             key={option.value}
