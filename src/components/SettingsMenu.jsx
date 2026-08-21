@@ -68,18 +68,18 @@ export default function SettingsMenu() {
 
       {isOpen && createPortal((
         <div
-          className="fixed inset-0 z-[70] flex items-end justify-center bg-slate-950/45 p-0 backdrop-blur-sm sm:items-center sm:p-5"
+          className="forest-skin fixed inset-0 z-[70] flex items-end justify-center bg-[#344438]/45 p-0 sm:items-center sm:p-5"
           onClick={closeSettings}
           role="presentation"
         >
           <section
-            className="w-full max-w-md overflow-hidden rounded-t-3xl border border-white/80 bg-[#fffdf9] text-slate-800 shadow-2xl sm:rounded-3xl"
+            className="forest-modal w-full max-w-md overflow-hidden rounded-t-3xl bg-[#fffdf9] text-slate-800 sm:rounded-3xl"
             role="dialog"
             aria-modal="true"
             aria-labelledby="settings-title"
             onClick={(event) => event.stopPropagation()}
           >
-            <header className="flex items-center gap-2 border-b border-emerald-100 bg-gradient-to-r from-emerald-50 via-white to-amber-50 px-4 py-3">
+            <header className="flex items-center gap-2 border-b-2 border-[#d8cfb8] bg-[#e4ecd7] px-4 py-3">
               {page !== PAGES.MAIN && (
                 <button
                   type="button"

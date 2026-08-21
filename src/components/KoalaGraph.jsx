@@ -60,6 +60,7 @@ const KoalaGraph = forwardRef(function KoalaGraph({
   primaryElements,
   proxyElements,
   onNodeClick,
+  onBackgroundClick,
   highlightedNodes = [],
   selectedKoalaId = null,
   relationshipPath = [],
@@ -68,6 +69,7 @@ const KoalaGraph = forwardRef(function KoalaGraph({
   const cyRef = useRef(null);
   const defaultViewportRef = useRef(null);
   const onNodeClickRef = useRef(onNodeClick);
+  const onBackgroundClickRef = useRef(onBackgroundClick);
   const centeredByClickRef = useRef(false);
   const resumeViewportRef = useRef(null);
   const resumeRemountTimeoutRef = useRef(null);
@@ -80,7 +82,7 @@ const KoalaGraph = forwardRef(function KoalaGraph({
       return cyRef.current.png({
         full: true,
         scale: 2,
-        bg: '#ffffff',
+        bg: '#fffdf4',
         ...options,
       });
     },
@@ -90,6 +92,10 @@ const KoalaGraph = forwardRef(function KoalaGraph({
   useEffect(() => {
     onNodeClickRef.current = onNodeClick;
   }, [onNodeClick]);
+
+  useEffect(() => {
+    onBackgroundClickRef.current = onBackgroundClick;
+  }, [onBackgroundClick]);
 
   // Listen for reset view event
   useEffect(() => {
@@ -121,17 +127,18 @@ const KoalaGraph = forwardRef(function KoalaGraph({
           selector: 'node',
           style: {
             'shape': 'roundrectangle',
-            'background-color': '#ffffff',
+            'background-color': '#fffdf4',
             'label': 'data(label)',
-            'color': '#1f2937',
+            'color': '#344438',
             'text-valign': 'bottom',
             'text-halign': 'center',
             'font-size': '9px',
             'font-weight': '600',
+            'font-family': 'Nunito Variable, Chill Round Gothic, PingFang SC, Microsoft YaHei, sans-serif',
             'width': `${NODE_SIZE}px`,
             'height': `${NODE_SIZE}px`,
-            'border-width': '2px',
-            'border-color': '#9ca3af',
+            'border-width': '3px',
+            'border-color': '#8f927e',
             'text-wrap': 'wrap',
             'text-max-width': '65px',
             'text-margin-y': 3,
@@ -152,22 +159,22 @@ const KoalaGraph = forwardRef(function KoalaGraph({
         {
           selector: 'node[sex="female"]',
           style: {
-            'border-color': '#ec4899',
+            'border-color': '#c7818d',
           }
         },
         {
           selector: 'node[sex="male"]',
           style: {
-            'border-color': '#3b82f6',
+            'border-color': '#4c7f97',
           }
         },
         {
           selector: 'node[deceased="true"]',
           style: {
-            'background-color': '#f3f4f6',
-            'border-color': '#6b7280',
+            'background-color': '#e9e5d8',
+            'border-color': '#85877c',
             'border-style': 'dashed',
-            'color': '#6b7280',
+            'color': '#74776e',
             'opacity': 0.7,
           }
         },
@@ -194,21 +201,21 @@ const KoalaGraph = forwardRef(function KoalaGraph({
         {
           selector: 'node[sex="female"].highlighted',
           style: {
-            'border-color': '#be185d',
+            'border-color': '#a65363',
             'border-width': '5px',
           }
         },
         {
           selector: 'node[sex="male"].highlighted',
           style: {
-            'border-color': '#1d4ed8',
+            'border-color': '#2f667f',
             'border-width': '5px',
           }
         },
         {
           selector: 'node.selected',
           style: {
-            'border-color': '#f59e0b',
+            'border-color': '#b8793c',
             'border-width': '6px',
             'border-style': 'solid',
           }
@@ -216,7 +223,7 @@ const KoalaGraph = forwardRef(function KoalaGraph({
         {
           selector: 'node.selected[photo]',
           style: {
-            'border-color': '#f59e0b',
+            'border-color': '#b8793c',
             'border-width': '6px',
           }
         },
@@ -225,8 +232,8 @@ const KoalaGraph = forwardRef(function KoalaGraph({
           selector: 'edge',
           style: {
             'width': 2,
-            'line-color': '#94a3b8',
-            'target-arrow-color': '#94a3b8',
+            'line-color': '#a99f88',
+            'target-arrow-color': '#a99f88',
             'target-arrow-shape': 'triangle',
             'curve-style': 'taxi',
             'taxi-direction': 'downward',
@@ -248,7 +255,7 @@ const KoalaGraph = forwardRef(function KoalaGraph({
           selector: 'edge.mate-edge',
           style: {
             'width': 1.5,
-            'line-color': '#f472b6',
+            'line-color': '#bd8d92',
             'line-style': 'dashed',
             'target-arrow-shape': 'none',
             'curve-style': 'straight',
@@ -265,8 +272,8 @@ const KoalaGraph = forwardRef(function KoalaGraph({
         {
           selector: 'edge.highlighted',
           style: {
-            'line-color': '#f59e0b',
-            'target-arrow-color': '#f59e0b',
+            'line-color': '#b8793c',
+            'target-arrow-color': '#b8793c',
             'width': 5,
             'z-index': 999,
           }
@@ -274,7 +281,7 @@ const KoalaGraph = forwardRef(function KoalaGraph({
         {
           selector: 'edge.mate-edge.highlighted',
           style: {
-            'line-color': '#f59e0b',
+            'line-color': '#b8793c',
             'target-arrow-shape': 'none',
             'width': 4,
             'z-index': 999,
@@ -341,6 +348,12 @@ const KoalaGraph = forwardRef(function KoalaGraph({
       });
     });
 
+    cyRef.current.on('tap', (evt) => {
+      if (evt.target === cyRef.current && onBackgroundClickRef.current) {
+        onBackgroundClickRef.current();
+      }
+    });
+
     setIsReady(true);
 
     return () => {
@@ -349,6 +362,22 @@ const KoalaGraph = forwardRef(function KoalaGraph({
       }
     };
   }, [primaryElements, proxyElements, resumeKey]);
+
+  useEffect(() => {
+    if (!isReady || !document.fonts?.ready) return undefined;
+
+    let cancelled = false;
+    document.fonts.ready.then(() => {
+      const cy = cyRef.current;
+      if (cancelled || !cy || cy.destroyed()) return;
+      cy.elements().updateStyle();
+      cy.resize();
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [isReady]);
 
   useEffect(() => {
     if (!isReady) return;
@@ -501,7 +530,7 @@ const KoalaGraph = forwardRef(function KoalaGraph({
   }, [selectedKoalaId, isReady, relationshipPath]);
 
   return (
-    <div className="w-full h-full border border-gray-300 rounded-lg bg-white relative">
+    <div className="forest-panel forest-graph w-full h-full border rounded-[18px] bg-white relative overflow-hidden">
       <div ref={containerRef} className="w-full h-full" />
     </div>
   );

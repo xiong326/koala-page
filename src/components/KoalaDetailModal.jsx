@@ -15,7 +15,7 @@ function KoalaLink({ name, koalaId, onClick }) {
     <button
       type="button"
       onClick={() => onClick(koalaId)}
-      className="inline-flex cursor-pointer items-center gap-1 rounded-md border border-slate-200 bg-slate-50 px-1.5 py-0.5 text-left text-xs font-semibold text-slate-700 shadow-sm hover:border-slate-300 hover:bg-slate-100 hover:text-slate-950 focus:outline-none focus:ring-2 focus:ring-slate-400 sm:text-sm"
+      className="forest-link-chip inline-flex cursor-pointer items-center gap-1 border px-1.5 py-0.5 text-left text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-[#91aa83] sm:text-sm"
     >
       {name}
       <span aria-hidden="true" className="text-[10px] leading-none text-slate-400">›</span>
@@ -202,12 +202,6 @@ export default function KoalaDetailModal({ koala, allKoalas, onClose, onKoalaCli
   }, [koala, offspring, language]);
 
   const hasGrandparents = Object.values(grandparents).some(Boolean);
-  const sexAccent = koala.sex === 'female'
-    ? 'from-pink-500 to-rose-400'
-    : koala.sex === 'male'
-      ? 'from-blue-500 to-sky-400'
-      : 'from-gray-500 to-gray-400';
-
   const handleNav = (targetKoala) => {
     if (targetKoala && onKoalaClick) {
       setEditing(false);
@@ -247,9 +241,9 @@ export default function KoalaDetailModal({ koala, allKoalas, onClose, onKoalaCli
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4 py-8 sm:px-0 sm:py-0" onClick={onClose}>
+    <div className="forest-skin fixed inset-0 z-50 flex items-center justify-center bg-[#344438]/45 px-4 py-8 sm:px-0 sm:py-0" onClick={onClose}>
       <div
-        className="flex max-h-[82dvh] w-[88vw] max-w-3xl flex-col overflow-hidden rounded-lg bg-gray-50 shadow-2xl sm:max-h-[85vh] sm:w-[90vw] sm:rounded-xl"
+        className="forest-modal flex max-h-[82dvh] w-[88vw] max-w-3xl flex-col overflow-hidden bg-gray-50 sm:max-h-[85vh] sm:w-[90vw]"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Delete confirmation */}
@@ -342,7 +336,7 @@ export default function KoalaDetailModal({ koala, allKoalas, onClose, onKoalaCli
           <section>
             <SectionHeader>{t('detailBasicInfo', language)}</SectionHeader>
             <div className="overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm">
-              <div className={`h-1 bg-gradient-to-r ${sexAccent}`} />
+              <div className={`h-1.5 ${koala.sex === 'female' ? 'bg-[#c7818d]' : koala.sex === 'male' ? 'bg-[#4c7f97]' : 'bg-[#8b8b7a]'}`} />
               <div className="flex gap-2 p-2.5 sm:gap-4 sm:p-4">
                 <div className="flex-shrink-0">
                   {koala.photo ? (
@@ -361,7 +355,7 @@ export default function KoalaDetailModal({ koala, allKoalas, onClose, onKoalaCli
                       koala.sex === 'female'
                         ? 'bg-pink-50 text-pink-700 ring-pink-100'
                         : koala.sex === 'male'
-                          ? 'bg-blue-50 text-blue-700 ring-blue-100'
+                          ? 'bg-[#d6e5eb] text-[#2f667f] ring-[#8fb2c2]'
                           : 'bg-gray-50 text-gray-700 ring-gray-100'
                     }`}>
                       {t(koala.sex, language)}
@@ -589,12 +583,12 @@ export default function KoalaDetailModal({ koala, allKoalas, onClose, onKoalaCli
                   <div key={event.key} className="relative">
                     <div className={`absolute -left-[17px] top-0.5 h-3 w-3 rounded-full border-2 border-white shadow ${
                       event.type === 'birth'
-                        ? 'bg-green-500'
+                        ? 'bg-[#6f8a70]'
                         : event.type === 'baby'
-                          ? 'bg-pink-500'
+                          ? 'bg-[#c7818d]'
                           : event.type === 'death'
-                            ? 'bg-gray-400'
-                            : 'bg-slate-500 animate-pulse'
+                            ? 'bg-[#85877c]'
+                            : 'bg-[#4c7f97] animate-pulse'
                     }`} />
                     <p className="text-sm font-semibold text-gray-700">{event.title}</p>
                     <p className="text-xs text-gray-500">{event.dateText}</p>

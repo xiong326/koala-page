@@ -44,6 +44,22 @@ export default function BirthdayCalendar({ koalas, isOpen, onClose, onKoalaClick
     return result;
   }, [koalas, language, visibleMonth]);
 
+  const monthOnlyBirthdays = useMemo(() => {
+    const visibleYear = visibleMonth.getFullYear();
+    const visibleMonthNumber = visibleMonth.getMonth() + 1;
+    return koalas
+      .filter((koala) => {
+        if (koala.deceased || !/^\d{4}-\d{2}$/.test(koala.birthDate || '')) return false;
+        const [birthYear, birthMonth] = koala.birthDate.split('-').map(Number);
+        return birthMonth === visibleMonthNumber && birthYear <= visibleYear;
+      })
+      .map((koala) => ({
+        koala,
+        age: visibleYear - Number(koala.birthDate.slice(0, 4)),
+      }))
+      .sort((a, b) => a.koala.name.localeCompare(b.koala.name, language === 'zh' ? 'zh-CN' : 'en'));
+  }, [koalas, language, visibleMonth]);
+
   const calendarDays = useMemo(() => {
     const year = visibleMonth.getFullYear();
     const month = visibleMonth.getMonth();
@@ -72,73 +88,103 @@ export default function BirthdayCalendar({ koalas, isOpen, onClose, onKoalaClick
 
   return (
     <div
-      className="fixed inset-0 z-[60] flex items-center justify-center bg-rose-950/45 p-2 backdrop-blur-sm sm:p-6"
+      className="forest-skin fixed inset-0 z-[60] flex items-center justify-center bg-[#344438]/45 p-2 sm:p-6"
       onClick={onClose}
       role="presentation"
     >
       <section
-        className="flex max-h-[94dvh] w-full max-w-4xl flex-col overflow-hidden rounded-[1.4rem] border-2 border-white/80 bg-[#fffdf9] shadow-[0_24px_80px_rgba(76,29,46,0.3)] sm:rounded-[2rem]"
+        className="forest-modal flex max-h-[94dvh] w-full max-w-4xl flex-col overflow-hidden bg-[#fffdf9]"
         role="dialog"
         aria-modal="true"
         aria-labelledby="birthday-calendar-title"
         onClick={(event) => event.stopPropagation()}
       >
-        <header className="relative flex shrink-0 items-start justify-between gap-3 overflow-hidden border-b border-rose-100 bg-gradient-to-r from-rose-100 via-amber-50 to-emerald-100 px-3 py-3 sm:px-5 sm:py-4">
-          <span aria-hidden="true" className="absolute -left-2 -top-3 text-4xl opacity-20 sm:text-5xl">🎈</span>
-          <span aria-hidden="true" className="absolute bottom-0 right-14 text-3xl opacity-20 sm:right-20 sm:text-4xl">🎉</span>
+        <header className="relative flex shrink-0 items-start justify-between gap-3 overflow-hidden border-b-2 border-[#d8cfb8] bg-[#e4ecd7] px-3 py-3 sm:px-5 sm:py-4">
+          <span aria-hidden="true" className="absolute -left-2 -top-3 text-4xl opacity-20 sm:text-5xl">🌿</span>
+          <span aria-hidden="true" className="absolute bottom-0 right-14 text-3xl opacity-20 sm:right-20 sm:text-4xl">🐨</span>
           <div className="relative min-w-0">
-            <h2 id="birthday-calendar-title" className="flex items-center gap-2 text-base font-extrabold text-rose-950 sm:text-xl">
+            <h2 id="birthday-calendar-title" className="flex items-center gap-2 text-base font-extrabold text-[#344438] sm:text-xl">
               <span aria-hidden="true" className="text-xl sm:text-2xl">🎂</span>
               {t('birthdayCalendarTitle', language)}
             </h2>
             <div className="mt-1 flex flex-wrap items-center gap-1.5 text-[11px] sm:gap-2 sm:text-sm">
-              <span className="rounded-full bg-white/80 px-2 py-0.5 font-semibold text-rose-700 shadow-sm ring-1 ring-rose-100">
+              <span className="rounded-full bg-[#fffdf4] px-2 py-0.5 font-semibold text-[#557b5f] shadow-sm ring-1 ring-[#c3d0b6]">
                 {t('birthdayCalendarToday', language, { date: todayText })}
               </span>
-              <span className="hidden text-rose-800/65 sm:inline">{t('birthdayCalendarSubtitle', language)}</span>
+              <span className="hidden text-[#718073] sm:inline">{t('birthdayCalendarSubtitle', language)}</span>
             </div>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="relative flex size-9 shrink-0 items-center justify-center rounded-full border border-rose-200 bg-white/90 text-xl text-rose-500 shadow-sm transition-transform hover:rotate-6 hover:bg-white hover:text-rose-700"
+            className="relative flex size-9 shrink-0 items-center justify-center rounded-full border border-[#cbbd9e] bg-[#fffdf4] text-xl text-[#8a6947] shadow-sm transition-transform hover:rotate-6 hover:bg-[#f4eedc] hover:text-[#684c31]"
             aria-label={t('close', language)}
           >
             ×
           </button>
         </header>
 
-        <div className="flex min-h-0 flex-1 flex-col bg-[radial-gradient(circle_at_10%_10%,rgba(251,207,232,0.18),transparent_24%),radial-gradient(circle_at_90%_90%,rgba(167,243,208,0.18),transparent_26%)] p-2 sm:p-5">
+        <div className="flex min-h-0 flex-1 flex-col bg-[#fffdf4] p-2 sm:p-5">
           <div className="mb-2 flex shrink-0 items-center justify-between gap-2 sm:mb-4">
             <button
               type="button"
               onClick={() => changeMonth(-1)}
-              className="rounded-full border border-rose-200 bg-rose-50 px-3 py-1.5 text-sm font-bold text-rose-700 shadow-sm transition-transform hover:-translate-x-0.5 hover:bg-rose-100"
+              className="rounded-full border border-[#cbbd9e] bg-[#f8f3e4] px-3 py-1.5 text-sm font-bold text-[#557b5f] shadow-sm transition-transform hover:-translate-x-0.5 hover:bg-[#eee8d4]"
               aria-label={t('birthdayCalendarPreviousMonth', language)}
             >
               ‹ <span className="hidden sm:inline">{t('birthdayCalendarPreviousMonth', language)}</span>
             </button>
-            <h3 className="rounded-full bg-white px-3 py-1 text-sm font-extrabold text-slate-800 shadow-sm ring-1 ring-amber-100 sm:text-lg">
-              <span aria-hidden="true">🌼 </span>{monthTitle}
+            <h3 className="rounded-full bg-white px-3 py-1 text-sm font-extrabold text-slate-800 shadow-sm ring-1 ring-[#c3d0b6] sm:text-lg">
+              <span aria-hidden="true">🌿 </span>{monthTitle}
             </h3>
             <button
               type="button"
               onClick={() => changeMonth(1)}
-              className="rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-sm font-bold text-emerald-700 shadow-sm transition-transform hover:translate-x-0.5 hover:bg-emerald-100"
+              className="rounded-full border border-[#afc3a3] bg-[#e7efdc] px-3 py-1.5 text-sm font-bold text-[#42614d] shadow-sm transition-transform hover:translate-x-0.5 hover:bg-[#dce8ce]"
               aria-label={t('birthdayCalendarNextMonth', language)}
             >
               <span className="hidden sm:inline">{t('birthdayCalendarNextMonth', language)}</span> ›
             </button>
           </div>
 
+          {monthOnlyBirthdays.length > 0 && (
+            <section className="mb-2 shrink-0 rounded-xl border border-[#c3d0b6] bg-[#edf2e4] p-2 sm:mb-3 sm:rounded-2xl sm:p-3" aria-labelledby="month-only-birthdays-title">
+              <div className="mb-1.5 flex items-center gap-2 sm:mb-2">
+                <span aria-hidden="true" className="text-base sm:text-lg">🌿</span>
+                <div className="min-w-0">
+                  <h4 id="month-only-birthdays-title" className="text-xs font-extrabold text-[#42614d] sm:text-sm">
+                    {t('birthdayCalendarMonthOnlyTitle', language)}
+                  </h4>
+                  <p className="text-[9px] font-semibold text-[#718073] sm:text-[11px]">
+                    {t('birthdayCalendarMonthOnlyHint', language)}
+                  </p>
+                </div>
+              </div>
+              <div className="flex gap-1.5 overflow-x-auto pb-0.5 sm:flex-wrap sm:overflow-visible">
+                {monthOnlyBirthdays.map(({ koala, age }) => (
+                  <button
+                    key={koala.id}
+                    type="button"
+                    onClick={() => onKoalaClick(koala)}
+                    className={`flex shrink-0 items-center gap-2 rounded-xl px-2.5 py-1.5 text-left shadow-sm ring-1 transition-transform hover:-translate-y-px focus:outline-none focus:ring-2 ${koala.sex === 'female' ? 'bg-[#f6e2e5] text-[#8a4051] ring-[#dcb1ba] focus:ring-[#c7818d]' : koala.sex === 'male' ? 'bg-[#e0ebef] text-[#2f667f] ring-[#a9c4cf] focus:ring-[#4c7f97]' : 'bg-[#eee9dc] text-[#665f52] ring-[#d1c8b2] focus:ring-[#8b8b7a]'}`}
+                    title={`${koala.name} · ${t('birthdayCalendarMonthUnknown', language)} · ${t('birthdayCalendarAge', language, { age })}`}
+                  >
+                    <span className="font-extrabold text-[11px] sm:text-xs">{koala.name}</span>
+                    <span className="text-[9px] font-bold opacity-75 sm:text-[10px]">{t('birthdayCalendarAge', language, { age })}</span>
+                  </button>
+                ))}
+              </div>
+            </section>
+          )}
+
           <div className="grid shrink-0 grid-cols-7 px-1">
             {WEEKDAYS[language].map((weekday) => (
-              <div key={weekday} className="py-1.5 text-center text-[10px] font-extrabold uppercase text-rose-400 sm:text-xs">
+              <div key={weekday} className="py-1.5 text-center text-[10px] font-extrabold uppercase text-[#6f8a70] sm:text-xs">
                 {weekday}
               </div>
             ))}
           </div>
-          <div className="grid min-h-0 flex-1 auto-rows-max content-start grid-cols-7 gap-1 overflow-y-auto rounded-xl bg-gradient-to-br from-rose-100/80 via-amber-100/70 to-emerald-100/80 p-1 sm:gap-1.5 sm:rounded-2xl sm:p-1.5">
+          <div className="forest-calendar-grid grid min-h-0 flex-1 auto-rows-max content-start grid-cols-7 gap-1 overflow-y-auto rounded-xl p-1 sm:gap-1.5 sm:rounded-2xl sm:p-1.5">
             {calendarDays.map(({ key, day, date }) => {
               if (!day) return <div key={key} className="min-h-14 rounded-lg bg-white/35 sm:min-h-16 sm:rounded-xl" />;
               const birthdays = birthdaysByDay.get(day) || [];
@@ -146,21 +192,21 @@ export default function BirthdayCalendar({ koalas, isOpen, onClose, onKoalaClick
               return (
                 <div
                   key={key}
-                  className={`min-h-14 rounded-lg p-1 shadow-sm sm:min-h-16 sm:rounded-xl sm:p-1.5 ${isToday ? 'bg-amber-50 ring-2 ring-inset ring-amber-400' : birthdays.length > 0 ? 'bg-white' : 'bg-white/75'}`}
+                  className={`min-h-14 rounded-lg p-1 shadow-sm sm:min-h-16 sm:rounded-xl sm:p-1.5 ${isToday ? 'bg-[#fff8e5] ring-2 ring-inset ring-[#b78944]' : birthdays.length > 0 ? 'bg-white' : 'bg-white/75'}`}
                 >
                   <div className="mb-0.5 flex items-center justify-between gap-1">
-                    <span className={`flex size-5 items-center justify-center rounded-full text-[10px] font-bold sm:size-6 sm:text-xs ${isToday ? 'bg-amber-500 text-white' : 'text-slate-600'}`}>
+                    <span className={`flex size-5 items-center justify-center rounded-full text-[10px] font-bold sm:size-6 sm:text-xs ${isToday ? 'bg-[#b78944] text-white' : 'text-slate-600'}`}>
                       {day}
                     </span>
                     {birthdays.length > 0 && <span aria-hidden="true" className="animate-pulse text-[10px] sm:text-xs">🎂</span>}
                   </div>
                   <div className="space-y-0.5">
-                    {birthdays.map(({ koala, age }, index) => (
+                    {birthdays.map(({ koala, age }) => (
                       <button
                         key={koala.id}
                         type="button"
                         onClick={() => onKoalaClick(koala)}
-                        className={`block w-full overflow-hidden rounded-md px-1 py-0.5 text-left leading-tight shadow-sm transition-transform hover:-translate-y-px focus:outline-none focus:ring-2 sm:flex sm:items-center sm:justify-between sm:gap-1 sm:rounded-lg sm:px-1.5 sm:py-1 ${index % 3 === 0 ? 'bg-rose-100 text-rose-900 hover:bg-rose-200 focus:ring-rose-400' : index % 3 === 1 ? 'bg-sky-100 text-sky-900 hover:bg-sky-200 focus:ring-sky-400' : 'bg-emerald-100 text-emerald-900 hover:bg-emerald-200 focus:ring-emerald-400'}`}
+                        className={`block w-full overflow-hidden rounded-md px-1 py-0.5 text-left leading-tight shadow-sm transition-transform hover:-translate-y-px focus:outline-none focus:ring-2 sm:flex sm:items-center sm:justify-between sm:gap-1 sm:rounded-lg sm:px-1.5 sm:py-1 ${koala.sex === 'female' ? 'bg-[#f0d2d8] text-[#8a4051] hover:bg-[#e9c1ca] focus:ring-[#c7818d]' : koala.sex === 'male' ? 'bg-[#d6e5eb] text-[#2f667f] hover:bg-[#c5dce5] focus:ring-[#4c7f97]' : 'bg-[#e8e3d5] text-[#665f52] hover:bg-[#ddd5c2] focus:ring-[#8b8b7a]'}`}
                         title={`${koala.name} · ${t('birthdayCalendarAge', language, { age })}`}
                       >
                         <span className="block min-w-0 truncate text-[10px] font-extrabold sm:text-xs">{koala.name}</span>

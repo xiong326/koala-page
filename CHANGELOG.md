@@ -2,6 +2,20 @@
 
 ## Recent Updates (2026-08-20)
 
+### Forest Notebook UI
+- Added the first unified “forest notebook” visual pass across the main graph, header, toolbars, sidebars, data board, birthday calendar, settings, and koala profile surfaces
+- Replaced prominent gradients and glass effects with warm paper surfaces, forest green, muted natural accents, outlined cards, and softer shadows
+- Updated graph nodes, edges, selections, and dashboard chart colors to match the shared visual language
+- Added locally hosted Chill Round Gothic for Chinese and Nunito for Latin text and numbers, including explicit Cytoscape canvas font rendering
+- Split the complete Chill Round Gothic family into a small core and on-demand Unicode shards, allowing production users to add names with new Chinese characters without rebuilding the frontend
+- Added fingerprinted Vite font assets and immutable Cloudflare Pages caching while keeping first-page font loading limited to the three core files
+- Kept the existing information architecture and responsive layouts intact so the theme can be refined screen by screen
+
+### Birthday Celebration
+- Added an automatic forest-themed celebration when one or more koalas have a birthday today
+- Shows the birthday koalas' photos and ages with sex-colored portrait borders, confetti, sparkles, and eucalyptus leaves
+- Plays once per family board and browser session, closes automatically, supports Escape/click dismissal, and respects reduced-motion preferences
+
 ### Generation Calculation
 - Changed the default generation method to maternal lineage (`mother generation + 1`)
 - Preserved the legacy calculation (`max(mother, father) + 1`) as a selectable option

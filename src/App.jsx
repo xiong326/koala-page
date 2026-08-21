@@ -14,6 +14,7 @@ import AdminPanel from './components/AdminPanel';
 import KoalaEditForm from './components/KoalaEditForm';
 import BirthdayCalendar from './components/BirthdayCalendar';
 import SettingsMenu from './components/SettingsMenu';
+import BirthdayCelebration from './components/BirthdayCelebration';
 import koalasDataBoard1 from './data/koalas.json';
 import koalasDataBoard2 from './data/koalas-board2.json';
 import contributionData from './data/contribution.json';
@@ -52,23 +53,48 @@ const contributionTypeKeys = {
 const contributionStyles = {
   'Koala Photo': {
     icon: 'P',
-    accent: 'from-slate-500 to-zinc-400',
+    accent: 'bg-[#7890a0]',
     badge: 'bg-slate-50 text-slate-700 ring-slate-100',
     link: 'text-slate-700 hover:text-slate-900',
   },
   'Family Tree': {
     icon: 'F',
-    accent: 'from-emerald-500 to-teal-400',
+    accent: 'bg-[#6f8a70]',
     badge: 'bg-emerald-50 text-emerald-700 ring-emerald-100',
     link: 'text-emerald-700 hover:text-emerald-900',
   },
   'Web Design & Development': {
     icon: 'W',
-    accent: 'from-stone-500 to-slate-400',
+    accent: 'bg-[#a07c57]',
     badge: 'bg-stone-50 text-stone-700 ring-stone-100',
     link: 'text-stone-700 hover:text-stone-900',
   },
 };
+
+function getMonthOnlyBirthdayCelebrants(koalas, date = new Date()) {
+  if (date.getDate() !== 1) return [];
+
+  const currentYear = date.getFullYear();
+  const currentMonth = date.getMonth() + 1;
+  return koalas
+    .filter((koala) => {
+      if (koala.deceased || !/^\d{4}-\d{2}$/.test(koala.birthDate || '')) return false;
+      const [birthYear, birthMonth] = koala.birthDate.split('-').map(Number);
+      return birthMonth === currentMonth && birthYear <= currentYear;
+    })
+    .map((koala) => ({
+      koala,
+      upcomingAge: currentYear - Number(koala.birthDate.slice(0, 4)),
+      monthOnly: true,
+    }));
+}
+
+function getTodayCelebrationBirthdays(upcomingBirthdays, koalas, date = new Date()) {
+  return [
+    ...upcomingBirthdays.filter((birthday) => birthday.daysUntil === 0),
+    ...getMonthOnlyBirthdayCelebrants(koalas, date),
+  ];
+}
 
 function App() {
   const { language } = useLanguage();
@@ -95,7 +121,10 @@ function App() {
   const [createModalOpen, setCreateModalOpen] = useState(false);
   const [koalaFireworkId, setKoalaFireworkId] = useState(null);
   const [birthdayCalendarOpen, setBirthdayCalendarOpen] = useState(false);
+  const [birthdayCelebration, setBirthdayCelebration] = useState(null);
   const lastBadgeTapRef = useRef(0);
+  const birthdayCelebrationCheckedRef = useRef(false);
+  const birthdayForecastClickTimeoutRef = useRef(null);
 
   const loadKoalas = useCallback(async (board) => {
     try {
@@ -116,8 +145,73 @@ function App() {
     return () => clearTimeout(timeout);
   }, [koalaFireworkId]);
 
+  useEffect(() => {
+    if (birthdayCelebrationCheckedRef.current) return undefined;
+
+    const todayBirthdays = getTodayCelebrationBirthdays(upcomingBirthdays, koalas);
+    if (todayBirthdays.length === 0) return undefined;
+
+    const today = new Date();
+    const dateKey = `${today.getFullYear()}-${today.getMonth() + 1}-${today.getDate()}`;
+    const storageKey = `birthdayCelebration:${currentBoard}:${dateKey}`;
+    try {
+      if (window.sessionStorage.getItem(storageKey)) {
+        birthdayCelebrationCheckedRef.current = true;
+        return undefined;
+      }
+    } catch {
+      // The celebration can still run when storage is unavailable.
+    }
+
+    const timeout = window.setTimeout(() => {
+      birthdayCelebrationCheckedRef.current = true;
+      try {
+        window.sessionStorage.setItem(storageKey, 'shown');
+      } catch {
+        // Ignore storage failures after the animation starts.
+      }
+      setBirthdayCelebration(todayBirthdays);
+    }, 450);
+    return () => window.clearTimeout(timeout);
+  }, [currentBoard, koalas, upcomingBirthdays]);
+
+  const handleCloseBirthdayCelebration = useCallback(() => {
+    setBirthdayCelebration(null);
+  }, []);
+
+  const handleBoardBackgroundClick = useCallback(() => {
+    setFilterSidebarOpen(false);
+    setRelationshipSidebarOpen(false);
+    setContributionsOpen(false);
+  }, []);
+
+  const handleBirthdayForecastClick = useCallback(() => {
+    window.clearTimeout(birthdayForecastClickTimeoutRef.current);
+    birthdayForecastClickTimeoutRef.current = window.setTimeout(() => {
+      setBirthdayCalendarOpen(true);
+    }, 240);
+  }, []);
+
+  const handleBirthdayForecastDoubleClick = useCallback(() => {
+    window.clearTimeout(birthdayForecastClickTimeoutRef.current);
+    birthdayForecastClickTimeoutRef.current = null;
+    const todayBirthdays = getTodayCelebrationBirthdays(upcomingBirthdays, koalas);
+    if (todayBirthdays.length > 0) {
+      setBirthdayCalendarOpen(false);
+      setBirthdayCelebration(todayBirthdays);
+    } else {
+      setBirthdayCalendarOpen(true);
+    }
+  }, [koalas, upcomingBirthdays]);
+
+  useEffect(() => () => {
+    window.clearTimeout(birthdayForecastClickTimeoutRef.current);
+  }, []);
+
   const handleBoardChange = (newBoard) => {
     setCurrentBoard(newBoard);
+    birthdayCelebrationCheckedRef.current = false;
+    setBirthdayCelebration(null);
 
     setSelectedKoala(null);
     setHighlightedNodes([]);
@@ -303,7 +397,7 @@ function App() {
   };
 
   return (
-    <div className="h-dvh flex flex-col bg-gray-50">
+    <div className="forest-skin forest-shell h-dvh flex flex-col bg-gray-50">
       {koalaFireworkId && (
         <div key={koalaFireworkId} className="koala-firework" aria-hidden="true">
           <div className="koala-firework-burst">
@@ -322,9 +416,15 @@ function App() {
         </div>
       )}
 
+      {birthdayCelebration && (
+        <BirthdayCelebration
+          birthdays={birthdayCelebration}
+          onClose={handleCloseBirthdayCelebration}
+        />
+      )}
+
       {/* Header */}
-      <header className="relative overflow-hidden bg-gradient-to-r from-slate-800 via-zinc-700 to-stone-600 text-white px-3 sm:px-4 py-1.5 shadow-lg ring-1 ring-black/10">
-        <div className="absolute inset-0 opacity-35 bg-[radial-gradient(circle_at_14%_20%,rgba(255,255,255,0.24),transparent_24%),radial-gradient(circle_at_86%_0%,rgba(134,239,172,0.2),transparent_28%)]" />
+      <header className="forest-header relative text-white px-3 sm:px-4 py-1.5">
         <div className="container relative mx-auto flex flex-wrap justify-between items-center gap-x-3 gap-y-1.5">
           <div className="flex w-full min-w-0 items-center gap-2 sm:w-auto sm:flex-1 sm:basis-0">
             <img
@@ -338,6 +438,7 @@ function App() {
               <h1 className="text-xs sm:text-lg font-bold leading-tight text-slate-50">{t('title', language)}</h1>
               {upcomingBirthdays.length > 0 && (() => {
                 const todayBirthdays = upcomingBirthdays.filter(birthday => birthday.daysUntil === 0);
+                const celebrationBirthdays = getTodayCelebrationBirthdays(upcomingBirthdays, koalas);
                 const nextBirthday = upcomingBirthdays.find(birthday => birthday.daysUntil > 0);
                 const forecastGroups = [];
                 if (todayBirthdays.length > 0) forecastGroups.push(todayBirthdays);
@@ -357,10 +458,13 @@ function App() {
                 return (
                   <button
                     type="button"
-                    onClick={() => setBirthdayCalendarOpen(true)}
-                    className="forecast-ticker koala-bite-inset mt-0.5 inline-flex max-w-full items-center rounded-full border border-emerald-200/25 bg-white/12 px-1.5 py-0.5 text-[10px] leading-tight text-slate-100 shadow-sm backdrop-blur-sm transition-colors hover:bg-white/20 focus:outline-none focus:ring-2 focus:ring-emerald-300 sm:px-2 sm:text-xs"
+                    onClick={handleBirthdayForecastClick}
+                    onDoubleClick={handleBirthdayForecastDoubleClick}
+                    className="forecast-ticker koala-bite-inset mt-0.5 inline-flex max-w-full touch-manipulation items-center rounded-full border border-emerald-200/25 bg-white/12 px-1.5 py-0.5 text-[10px] leading-tight text-slate-100 shadow-sm backdrop-blur-sm transition-colors hover:bg-white/20 focus:outline-none focus:ring-2 focus:ring-emerald-300 sm:px-2 sm:text-xs"
                     aria-label={forecastText}
-                    title={t('birthdayCalendarOpen', language)}
+                    title={celebrationBirthdays.length > 0
+                      ? `${t('birthdayCalendarOpen', language)} · ${t('birthdayCelebrationReplay', language)}`
+                      : t('birthdayCalendarOpen', language)}
                   >
                     <span className="forecast-ticker-track">
                       <span className="forecast-ticker-item">{forecastText}</span>
@@ -461,7 +565,7 @@ function App() {
       <div className="flex-1 min-h-0 container mx-auto p-2 sm:p-4 flex gap-2 sm:gap-4 overflow-hidden">
         {/* Left Panel - Graph */}
         <div className="flex-1 min-w-0 min-h-0 flex flex-col gap-2 sm:gap-4">
-          <div className="bg-white p-2 sm:p-4 rounded-lg shadow flex items-center gap-2 sm:gap-3">
+          <div className="forest-toolbar bg-white p-2 sm:p-3 flex items-center gap-2 sm:gap-3">
             <div className="flex-1">
               <SearchDropdown
                 koalas={koalas}
@@ -471,7 +575,7 @@ function App() {
             <button
               type="button"
               onClick={() => setDataBoardOpen(true)}
-              className="px-2 py-1.5 sm:px-3 sm:py-2 text-sm rounded-md bg-white border border-gray-300 shadow-sm hover:bg-gray-50 whitespace-nowrap"
+              className="forest-action px-2 py-1.5 sm:px-3 sm:py-2 text-sm whitespace-nowrap"
             >
               <span className="hidden sm:inline">{t('dataBoard', language)}</span>
               <span className="sm:hidden">
@@ -484,7 +588,7 @@ function App() {
               type="button"
               onClick={() => setSubFamilyOpen(true)}
               disabled={!selectedKoala}
-              className="px-2 py-1.5 sm:px-3 sm:py-2 text-sm rounded-md bg-white border border-gray-300 shadow-sm hover:bg-gray-50 whitespace-nowrap disabled:opacity-40 disabled:cursor-not-allowed"
+              className="forest-action px-2 py-1.5 sm:px-3 sm:py-2 text-sm whitespace-nowrap disabled:opacity-40 disabled:cursor-not-allowed"
               title={selectedKoala ? t('subFamilyGraph', language) : t('subFamilySelectFirst', language)}
             >
               <span className="hidden sm:inline">{t('subFamilyGraph', language)}</span>
@@ -500,7 +604,7 @@ function App() {
                 const event = new CustomEvent('resetGraphView');
                 window.dispatchEvent(event);
               }}
-              className="px-2 py-1.5 sm:px-3 sm:py-2 text-sm rounded-md bg-white border border-gray-300 shadow-sm hover:bg-gray-50 whitespace-nowrap"
+              className="forest-action px-2 py-1.5 sm:px-3 sm:py-2 text-sm whitespace-nowrap"
             >
               <span className="hidden sm:inline">{t('resetView', language)}</span>
               <span className="sm:hidden">↺</span>
@@ -512,6 +616,7 @@ function App() {
               primaryElements={primaryElements}
               proxyElements={proxyElements}
               onNodeClick={handleNodeClick}
+              onBackgroundClick={handleBoardBackgroundClick}
               highlightedNodes={highlightedNodes}
               selectedKoalaId={selectedKoalaId}
               relationshipPath={relationshipPath}
@@ -628,7 +733,7 @@ function App() {
         return (
           <footer className="relative bg-white/95 border-t border-gray-200 shrink-0 backdrop-blur">
             {contributionsOpen && (
-              <div className="absolute bottom-full left-0 right-0 z-10 max-h-[54vh] overflow-y-auto border border-gray-200 bg-white/95 shadow-2xl backdrop-blur rounded-t-2xl">
+              <div className="absolute bottom-full left-0 right-0 z-10 max-h-[54vh] overflow-y-auto border-t border-gray-200 bg-white/95 shadow-2xl rounded-t-2xl">
                 <div className="container mx-auto px-3 py-3 sm:px-4">
                   <div className="mb-2 flex items-center justify-between gap-3">
                     <h3 className="text-[11px] font-bold uppercase tracking-[0.16em] text-gray-500">{t('contributionsTitle', language)}</h3>
@@ -642,13 +747,13 @@ function App() {
                       const translatedType = typeKey ? t(typeKey, language) : item.contribution;
                       const style = contributionStyles[item.contribution] || {
                         icon: 'C',
-                        accent: 'from-gray-500 to-gray-400',
+                        accent: 'bg-[#8b8b7a]',
                         badge: 'bg-gray-50 text-gray-700 ring-gray-100',
                         link: 'text-slate-700 hover:text-slate-900',
                       };
                       return (
                         <div key={idx} className="overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm">
-                          <div className={`h-1 bg-gradient-to-r ${style.accent}`} />
+                          <div className={`h-1 ${style.accent}`} />
                           <div className="px-2.5 py-2">
                             <div className="mb-1.5 flex items-center justify-between gap-2">
                               <div className="flex min-w-0 items-center gap-1.5">
@@ -696,7 +801,7 @@ function App() {
                 className="group flex w-full items-center justify-between px-3 py-1.5 text-xs font-semibold text-gray-600 transition-colors hover:bg-gray-50 hover:text-gray-800"
               >
                 <span className="flex items-center gap-2">
-                  <span className="h-1.5 w-1.5 rounded-full bg-gradient-to-r from-slate-500 via-emerald-500 to-stone-500" />
+                  <span className="h-1.5 w-1.5 rounded-full bg-[#6f8a70]" />
                   {t('contributionsTitle', language)}
                 </span>
                 <span className={`text-[10px] text-gray-400 transition-transform duration-200 group-hover:text-gray-600 ${contributionsOpen ? 'rotate-180' : ''}`}>

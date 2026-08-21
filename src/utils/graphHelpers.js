@@ -7,17 +7,17 @@ import { tagMatches } from './tagUtils';
 export { calculateAgeInYears } from './ageUtils';
 
 const FATHER_GROUP_COLORS = [
-  '#0ea5e9',
-  '#22c55e',
-  '#a855f7',
-  '#14b8a6',
-  '#f59e0b',
-  '#84cc16',
-  '#06b6d4',
-  '#8b5cf6',
-  '#10b981',
-  '#3b82f6',
-  '#ec4899',
+  '#4f8eaa',
+  '#559060',
+  '#81649a',
+  '#4b8f84',
+  '#b1783e',
+  '#7e914c',
+  '#4e8f98',
+  '#765a91',
+  '#468464',
+  '#537ca4',
+  '#af6077',
 ];
 
 function buildKoalaLabel(koala) {
