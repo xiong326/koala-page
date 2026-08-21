@@ -13,6 +13,7 @@ import KoalaDetailModal from './components/KoalaDetailModal';
 import LoginModal from './components/LoginModal';
 import AdminPanel from './components/AdminPanel';
 import KoalaEditForm from './components/KoalaEditForm';
+import BirthdayCalendar from './components/BirthdayCalendar';
 import koalasDataBoard1 from './data/koalas.json';
 import koalasDataBoard2 from './data/koalas-board2.json';
 import contributionData from './data/contribution.json';
@@ -93,6 +94,7 @@ function App() {
   const [adminPanelOpen, setAdminPanelOpen] = useState(false);
   const [createModalOpen, setCreateModalOpen] = useState(false);
   const [koalaFireworkId, setKoalaFireworkId] = useState(null);
+  const [birthdayCalendarOpen, setBirthdayCalendarOpen] = useState(false);
   const lastBadgeTapRef = useRef(0);
 
   const loadKoalas = useCallback(async (board) => {
@@ -127,6 +129,7 @@ function App() {
     setRelationshipSidebarOpen(false);
     setDetailModalKoala(null);
     setSubFamilyOpen(false);
+    setBirthdayCalendarOpen(false);
 
     setTimeout(() => {
       const event = new CustomEvent('resetGraphView');
@@ -294,6 +297,11 @@ function App() {
     lastBadgeTapRef.current = now;
   };
 
+  const handleBirthdayKoalaClick = (koala) => {
+    setBirthdayCalendarOpen(false);
+    handleDetailKoalaClick(koala.id);
+  };
+
   return (
     <div className="h-dvh flex flex-col bg-gray-50">
       {koalaFireworkId && (
@@ -329,22 +337,36 @@ function App() {
             <div className="min-w-0">
               <h1 className="text-xs sm:text-lg font-bold leading-tight text-slate-50">{t('title', language)}</h1>
               {upcomingBirthdays.length > 0 && (() => {
-                const nearest = upcomingBirthdays[0];
-                const nearestBirthdays = upcomingBirthdays.filter(birthday => birthday.daysUntil === nearest.daysUntil);
-                const forecastNames = nearestBirthdays
-                  .map(birthday => `${birthday.koala.name} ${t('ageYearsFormat', language, { age: birthday.upcomingAge })}`)
-                  .join(language === 'zh' ? '、' : ', ');
-                const forecastText = `${t('birthdayForecast', language)}: ${forecastNames} - ${nearest.monthDay}`;
+                const todayBirthdays = upcomingBirthdays.filter(birthday => birthday.daysUntil === 0);
+                const nextBirthday = upcomingBirthdays.find(birthday => birthday.daysUntil > 0);
+                const forecastGroups = [];
+                if (todayBirthdays.length > 0) forecastGroups.push(todayBirthdays);
+                if (nextBirthday) {
+                  forecastGroups.push(upcomingBirthdays.filter(birthday => birthday.daysUntil === nextBirthday.daysUntil));
+                } else if (todayBirthdays.length === 0) {
+                  const nearest = upcomingBirthdays[0];
+                  forecastGroups.push(upcomingBirthdays.filter(birthday => birthday.daysUntil === nearest.daysUntil));
+                }
+                const forecastText = `${t('birthdayForecast', language)}: ${forecastGroups.map(group => {
+                  const names = group
+                    .map(birthday => `${birthday.koala.name} ${t('ageYearsFormat', language, { age: birthday.upcomingAge })}`)
+                    .join(language === 'zh' ? '、' : ', ');
+                  const dateLabel = group[0].daysUntil === 0 ? t('birthdayToday', language) : group[0].monthDay;
+                  return `${names} - ${dateLabel}`;
+                }).join(language === 'zh' ? '；' : '; ')}`;
                 return (
-                  <p
-                    className="forecast-ticker mt-0.5 inline-flex max-w-full items-center rounded-full border border-emerald-200/25 bg-white/12 px-1.5 sm:px-2 py-0.5 text-[10px] sm:text-xs leading-tight text-slate-100 shadow-sm backdrop-blur-sm"
+                  <button
+                    type="button"
+                    onClick={() => setBirthdayCalendarOpen(true)}
+                    className="forecast-ticker koala-bite-inset mt-0.5 inline-flex max-w-full items-center rounded-full border border-emerald-200/25 bg-white/12 px-1.5 py-0.5 text-[10px] leading-tight text-slate-100 shadow-sm backdrop-blur-sm transition-colors hover:bg-white/20 focus:outline-none focus:ring-2 focus:ring-emerald-300 sm:px-2 sm:text-xs"
                     aria-label={forecastText}
+                    title={t('birthdayCalendarOpen', language)}
                   >
                     <span className="forecast-ticker-track">
                       <span className="forecast-ticker-item">{forecastText}</span>
                       <span className="forecast-ticker-item" aria-hidden="true">{forecastText}</span>
                     </span>
-                  </p>
+                  </button>
                 );
               })()}
             </div>
@@ -550,6 +572,13 @@ function App() {
         isOpen={dataBoardOpen}
         onClose={() => setDataBoardOpen(false)}
         onKoalaClick={handleFilterKoalaClick}
+      />
+
+      <BirthdayCalendar
+        koalas={koalas}
+        isOpen={birthdayCalendarOpen}
+        onClose={() => setBirthdayCalendarOpen(false)}
+        onKoalaClick={handleBirthdayKoalaClick}
       />
 
       {/* Koala Detail Modal */}

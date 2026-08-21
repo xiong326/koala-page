@@ -4,6 +4,14 @@ export const translations = {
     title: "Koala Family Tree",
     subtitle: "Explore koala relationships and family connections",
     birthdayForecast: "Birthday forecast",
+    birthdayToday: "Today",
+    birthdayCalendarTitle: "Birthday Calendar",
+    birthdayCalendarSubtitle: "Every birthday deserves a little celebration!",
+    birthdayCalendarToday: "Today: {{date}}",
+    birthdayCalendarAge: "{{age}} yrs",
+    birthdayCalendarOpen: "Open birthday calendar",
+    birthdayCalendarPreviousMonth: "Previous month",
+    birthdayCalendarNextMonth: "Next month",
 
     // Search
     searchPlaceholder: "Search by name, tag, or ID...",
@@ -254,6 +262,14 @@ export const translations = {
     title: "考拉的毛茸茸族谱",
     subtitle: "探索考拉关系和家族联系",  // REPLACE WITH CHINESE
     birthdayForecast: "生日预告",
+    birthdayToday: "今天",
+    birthdayCalendarTitle: "生日月历",
+    birthdayCalendarSubtitle: "每一岁，都值得小小庆祝！",
+    birthdayCalendarToday: "今天：{{date}}",
+    birthdayCalendarAge: "{{age}}岁",
+    birthdayCalendarOpen: "打开生日月历",
+    birthdayCalendarPreviousMonth: "上个月",
+    birthdayCalendarNextMonth: "下个月",
 
     // Search - ADD CHINESE HERE
     searchPlaceholder: "按名字、标签或ID搜索...",  // REPLACE WITH CHINESE

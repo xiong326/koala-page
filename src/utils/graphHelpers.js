@@ -288,8 +288,9 @@ export function calculateGeneration(koalaId, koalas) {
 /**
  * Get upcoming birthdays within the next N days
  */
-export function getUpcomingBirthdays(koalas, daysAhead = 60) {
-  const today = new Date();
+export function getUpcomingBirthdays(koalas, daysAhead = 366) {
+  const now = new Date();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
   const upcomingBirthdays = [];
 
   koalas.forEach(koala => {
@@ -299,7 +300,7 @@ export function getUpcomingBirthdays(koalas, daysAhead = 60) {
     // Only process koalas with full birth dates (YYYY-MM-DD)
     if (!koala.birthDate || koala.birthDate.split('-').length !== 3) return;
 
-    const [year, month, day] = koala.birthDate.split('-').map(Number);
+    const [, month, day] = koala.birthDate.split('-').map(Number);
 
     // Calculate next birthday
     const currentYear = today.getFullYear();
