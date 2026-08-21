@@ -79,16 +79,16 @@ export default function RelationshipSidebar({ koalas, onKoalaClick, isOpen, onTo
 
   const getRelationshipColor = (type) => {
     switch (type) {
-      case 'self': return 'text-gray-600';
-      case 'parent-child': return 'text-slate-600';
-      case 'siblings': return 'text-purple-600';
-      case 'grandparent': return 'text-stone-600';
-      case 'aunt-niece': return 'text-pink-600';
-      case 'cousins': return 'text-green-600';
-      case 'related': return 'text-teal-600';
-      case 'ancestor': return 'text-violet-600';
-      case 'unrelated': return 'text-gray-500';
-      default: return 'text-gray-600';
+      case 'self': return 'text-[#687568]';
+      case 'parent-child': return 'text-[#587487]';
+      case 'siblings': return 'text-[#765a91]';
+      case 'grandparent': return 'text-[#856a49]';
+      case 'aunt-niece': return 'text-[#a65e76]';
+      case 'cousins': return 'text-[#4e8259]';
+      case 'related': return 'text-[#3f8177]';
+      case 'ancestor': return 'text-[#6e5889]';
+      case 'unrelated': return 'text-[#718073]';
+      default: return 'text-[#687568]';
     }
   };
 
@@ -120,7 +120,7 @@ export default function RelationshipSidebar({ koalas, onKoalaClick, isOpen, onTo
       {!isOpen && (
         <button
           onClick={onToggle}
-          className="koala-bite-inset absolute top-2 right-2 z-20 px-2 py-1 sm:px-3 sm:py-1.5 text-xs sm:text-sm rounded-md bg-white/90 border border-gray-300 shadow hover:bg-white flex items-center gap-1 sm:gap-2"
+          className="forest-action koala-bite-inset absolute top-2 right-2 z-20 px-2 py-1 sm:px-3 sm:py-1.5 text-xs sm:text-sm flex items-center gap-1 sm:gap-2"
         >
           <svg
             className="w-3 h-3 sm:w-4 sm:h-4"
@@ -136,8 +136,10 @@ export default function RelationshipSidebar({ koalas, onKoalaClick, isOpen, onTo
 
       {/* Sidebar */}
       <div
-        className={`absolute top-0 right-0 h-full bg-white border-l border-gray-300 shadow-lg transition-all duration-300 z-10 flex flex-col ${
-          isOpen ? 'w-52 sm:w-64 md:w-72' : 'w-0'
+        className={`absolute top-0 right-0 h-full transition-all duration-300 z-10 flex flex-col ${
+          isOpen
+            ? 'forest-panel w-52 rounded-[18px] border bg-white shadow-lg sm:w-64 md:w-72'
+            : 'w-0 border-0 bg-transparent shadow-none'
         } overflow-hidden`}
       >
         <div className="p-2 sm:p-3 md:p-4 border-b border-gray-200 flex justify-between items-center gap-2">

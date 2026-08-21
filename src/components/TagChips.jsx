@@ -1,14 +1,14 @@
 import { getKoalaTags } from '../utils/tagUtils';
 
 const TAG_STYLES = [
-  'bg-slate-50 text-slate-700 ring-slate-200',
-  'bg-emerald-50 text-emerald-700 ring-emerald-200',
-  'bg-sky-50 text-sky-700 ring-sky-200',
-  'bg-amber-50 text-amber-800 ring-amber-200',
-  'bg-rose-50 text-rose-700 ring-rose-200',
-  'bg-violet-50 text-violet-700 ring-violet-200',
-  'bg-teal-50 text-teal-700 ring-teal-200',
-  'bg-stone-50 text-stone-700 ring-stone-200',
+  'bg-[#d9e5ea] text-[#3f687a] ring-[#9fb9c5]',
+  'bg-[#d4e8d5] text-[#3f7049] ring-[#91b397]',
+  'bg-[#d2e8f1] text-[#386e85] ring-[#8fb9ca]',
+  'bg-[#f2dfbd] text-[#805923] ring-[#d0a667]',
+  'bg-[#f0d2d8] text-[#8a4051] ring-[#cf8b98]',
+  'bg-[#e2d5eb] text-[#684b7c] ring-[#ac8ebd]',
+  'bg-[#cfe8e2] text-[#356f67] ring-[#86b8ac]',
+  'bg-[#ead8cb] text-[#76513c] ring-[#bd9880]',
 ];
 
 export default function TagChips({ tags, koala, size = 'sm', className = '' }) {

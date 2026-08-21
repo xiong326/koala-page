@@ -17,10 +17,12 @@ import {
   computeBirthsPerYear,
 } from '../utils/statsHelpers';
 import { formatAgeForDisplay } from '../utils/ageUtils';
+import { useGeneration } from '../contexts/GenerationContext';
+import ForestSegmentedControl from './ForestSegmentedControl';
 
-const PIE_COLORS = ['#3b82f6', '#ec4899'];
-const BAR_COLOR = '#64748b';
-const BAR_COLOR_ALT = '#f59e0b';
+const PIE_COLORS = ['#4c7f97', '#c7818d'];
+const BAR_COLOR = '#6f8a70';
+const BAR_COLOR_ALT = '#b68a58';
 
 const MONTH_KEYS = [
   'dbJan', 'dbFeb', 'dbMar', 'dbApr', 'dbMay', 'dbJun',
@@ -32,7 +34,7 @@ function KoalaLink({ name, koalaId, onClick }) {
     <button
       type="button"
       onClick={() => onClick(koalaId)}
-      className="inline-flex items-center gap-1 rounded-md border border-slate-200 bg-slate-50 px-1.5 py-0.5 text-left font-semibold text-slate-700 shadow-sm hover:border-slate-300 hover:bg-slate-100 hover:text-slate-950 focus:outline-none focus:ring-2 focus:ring-slate-400"
+      className="forest-link-chip inline-flex items-center gap-1 border px-1.5 py-0.5 text-left font-semibold focus:outline-none focus:ring-2 focus:ring-[#91aa83]"
     >
       {name}
       <span aria-hidden="true" className="text-[10px] leading-none text-slate-400">›</span>
@@ -54,23 +56,12 @@ function SegmentedFilter({ label, value, options, onChange }) {
   return (
     <div className="flex items-center gap-1">
       <span className="text-[11px] font-semibold text-gray-500 sm:text-xs">{label}</span>
-      <div className="flex overflow-visible rounded-md border border-gray-300 bg-gray-100 p-0.5">
-        {options.map(option => (
-          <button
-            key={option.value}
-            type="button"
-            onClick={() => onChange(option.value)}
-            className={`px-2 py-1 text-xs font-medium transition-colors sm:text-sm ${
-              value === option.value
-                ? 'rounded bg-white text-gray-900 shadow-sm'
-                : 'text-gray-600 hover:bg-white/70'
-            }`}
-            aria-pressed={value === option.value}
-          >
-            {option.label}
-          </button>
-        ))}
-      </div>
+      <ForestSegmentedControl
+        value={value}
+        options={options}
+        onChange={onChange}
+        ariaLabel={label}
+      />
     </div>
   );
 }
@@ -133,6 +124,7 @@ function GenerationMultiSelect({ generations, selected, onChange, language }) {
 
 export default function DataBoard({ koalas, isOpen, onClose, onKoalaClick }) {
   const { language } = useLanguage();
+  const { generationMethod } = useGeneration();
 
   const [filters, setFilters] = useState({
     sex: 'all',
@@ -142,7 +134,10 @@ export default function DataBoard({ koalas, isOpen, onClose, onKoalaClick }) {
     birthYearMax: '',
   });
 
-  const enriched = useMemo(() => enrichAll(koalas), [koalas]);
+  const enriched = useMemo(
+    () => enrichAll(koalas, generationMethod),
+    [koalas, generationMethod],
+  );
 
   const generations = useMemo(
     () => [...new Set(enriched.map(k => k.generation))].sort((a, b) => a - b),
@@ -247,8 +242,8 @@ export default function DataBoard({ koalas, isOpen, onClose, onKoalaClick }) {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-      <div className="bg-gray-50 w-[95vw] max-w-5xl max-h-[90vh] rounded-xl shadow-2xl flex flex-col overflow-hidden">
+    <div className="forest-skin fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-2 sm:p-5">
+      <div className="forest-modal bg-gray-50 w-[95vw] max-w-5xl max-h-[90vh] shadow-2xl flex flex-col overflow-hidden">
         {/* Header */}
         <div className="flex items-center justify-between p-4 sm:p-5 border-b border-gray-200 bg-white">
           <h2 className="text-lg sm:text-xl font-bold text-gray-800">{t('dataBoard', language)}</h2>
@@ -331,7 +326,7 @@ export default function DataBoard({ koalas, isOpen, onClose, onKoalaClick }) {
             <>
               {/* Row 1: Population overview */}
               <section>
-                <h3 className="text-sm font-semibold text-gray-600 uppercase tracking-wider mb-3">{t('dbPopulation', language)}</h3>
+                <h3 className="forest-section-title text-sm font-semibold text-gray-600 uppercase tracking-wider mb-3">{t('dbPopulation', language)}</h3>
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                   <StatCard label={t('dbTotal', language)} value={pop.total} />
                   <StatCard
@@ -361,7 +356,7 @@ export default function DataBoard({ koalas, isOpen, onClose, onKoalaClick }) {
 
               {/* Row 2: Age analytics */}
               <section>
-                <h3 className="text-sm font-semibold text-gray-600 uppercase tracking-wider mb-3">{t('dbAgeAnalytics', language)}</h3>
+                <h3 className="forest-section-title text-sm font-semibold text-gray-600 uppercase tracking-wider mb-3">{t('dbAgeAnalytics', language)}</h3>
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                   <StatCard
                     label={t('dbAverageAge', language)}
@@ -425,7 +420,7 @@ export default function DataBoard({ koalas, isOpen, onClose, onKoalaClick }) {
 
               {/* Row 4: Family / lineage */}
               <section>
-                <h3 className="text-sm font-semibold text-gray-600 uppercase tracking-wider mb-3">{t('dbFamily', language)}</h3>
+                <h3 className="forest-section-title text-sm font-semibold text-gray-600 uppercase tracking-wider mb-3">{t('dbFamily', language)}</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="bg-white rounded-lg border border-gray-200 p-3 sm:p-4">
                     <p className="text-xs sm:text-sm text-gray-500 mb-3 font-semibold">{t('dbTopParents', language)}</p>
@@ -452,7 +447,7 @@ export default function DataBoard({ koalas, isOpen, onClose, onKoalaClick }) {
                         <XAxis dataKey="label" tick={{ fontSize: 11 }} />
                         <YAxis allowDecimals={false} tick={{ fontSize: 11 }} />
                         <Tooltip />
-                        <Bar dataKey="count" fill="#10b981" name={t('dbCount', language)} radius={[4, 4, 0, 0]} />
+                        <Bar dataKey="count" fill="#77946f" name={t('dbCount', language)} radius={[4, 4, 0, 0]} />
                       </BarChart>
                     </ResponsiveContainer>
                     <div className="flex gap-4 mt-2 text-xs text-gray-500">
@@ -473,7 +468,7 @@ export default function DataBoard({ koalas, isOpen, onClose, onKoalaClick }) {
                       <XAxis dataKey="year" tick={{ fontSize: 11 }} />
                       <YAxis allowDecimals={false} tick={{ fontSize: 11 }} />
                       <Tooltip />
-                      <Bar dataKey="count" fill="#8b5cf6" name={t('dbCount', language)} radius={[4, 4, 0, 0]} />
+                      <Bar dataKey="count" fill="#8a7b92" name={t('dbCount', language)} radius={[4, 4, 0, 0]} />
                     </BarChart>
                   </ResponsiveContainer>
                 </div>
