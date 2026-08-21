@@ -12,6 +12,17 @@ export const translations = {
     birthdayCalendarOpen: "Open birthday calendar",
     birthdayCalendarPreviousMonth: "Previous month",
     birthdayCalendarNextMonth: "Next month",
+    generationMethodLabel: "Generation method:",
+    generationMethodMaternal: "Maternal +1",
+    generationMethodParentsMax: "Parents max +1",
+    generationMethodHint: "Choose how koala generations are calculated",
+    generationMethodMaternalDescription: "Generation follows the maternal line; koalas without a recorded mother are Generation 1.",
+    generationMethodParentsMaxDescription: "Legacy method: one more than the higher generation of the two parents.",
+    settingsTitle: "Settings",
+    settingsSubtitle: "Personalize how the family tree works",
+    settingsLanguage: "Language",
+    settingsGeneration: "Generation calculation",
+    settingsBack: "Back to settings",
 
     // Search
     searchPlaceholder: "Search by name, tag, or ID...",
@@ -270,6 +281,17 @@ export const translations = {
     birthdayCalendarOpen: "打开生日月历",
     birthdayCalendarPreviousMonth: "上个月",
     birthdayCalendarNextMonth: "下个月",
+    generationMethodLabel: "代数算法：",
+    generationMethodMaternal: "母系 +1",
+    generationMethodParentsMax: "父母最高 +1",
+    generationMethodHint: "选择考拉代数的计算方式",
+    generationMethodMaternalDescription: "沿母系计算；没有母亲记录的考拉视为第1代。",
+    generationMethodParentsMaxDescription: "原有算法：父母双方较高的代数加1。",
+    settingsTitle: "设置",
+    settingsSubtitle: "调整族谱的显示与计算方式",
+    settingsLanguage: "语言",
+    settingsGeneration: "代数计算",
+    settingsBack: "返回设置",
 
     // Search - ADD CHINESE HERE
     searchPlaceholder: "按名字、标签或ID搜索...",  // REPLACE WITH CHINESE

@@ -17,6 +17,7 @@ import {
   computeBirthsPerYear,
 } from '../utils/statsHelpers';
 import { formatAgeForDisplay } from '../utils/ageUtils';
+import { useGeneration } from '../contexts/GenerationContext';
 
 const PIE_COLORS = ['#3b82f6', '#ec4899'];
 const BAR_COLOR = '#64748b';
@@ -133,6 +134,7 @@ function GenerationMultiSelect({ generations, selected, onChange, language }) {
 
 export default function DataBoard({ koalas, isOpen, onClose, onKoalaClick }) {
   const { language } = useLanguage();
+  const { generationMethod } = useGeneration();
 
   const [filters, setFilters] = useState({
     sex: 'all',
@@ -142,7 +144,10 @@ export default function DataBoard({ koalas, isOpen, onClose, onKoalaClick }) {
     birthYearMax: '',
   });
 
-  const enriched = useMemo(() => enrichAll(koalas), [koalas]);
+  const enriched = useMemo(
+    () => enrichAll(koalas, generationMethod),
+    [koalas, generationMethod],
+  );
 
   const generations = useMemo(
     () => [...new Set(enriched.map(k => k.generation))].sort((a, b) => a - b),

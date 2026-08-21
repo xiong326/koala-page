@@ -1,5 +1,15 @@
 # Changelog
 
+## Recent Updates (2026-08-20)
+
+### Generation Calculation
+- Changed the default generation method to maternal lineage (`mother generation + 1`)
+- Preserved the legacy calculation (`max(mother, father) + 1`) as a selectable option
+- Added a bilingual settings center with second-level pages for language and generation calculation
+- Kept family-board switching directly accessible in the top-level header
+- Applied the selected method consistently to filters, koala details, generation distributions, founder counts, and deepest-generation statistics
+- Improved the responsive header and settings layout for desktop and mobile screens
+
 ## Recent Updates (2026-02-10)
 
 ### New Features

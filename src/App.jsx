@@ -2,7 +2,6 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import KoalaGraph from './components/KoalaGraph';
 import KoalaCard from './components/KoalaCard';
 import SearchDropdown from './components/SearchDropdown';
-import LanguageToggle from './components/LanguageToggle';
 import BoardSelector from './components/BoardSelector';
 import FilterSidebar from './components/FilterSidebar';
 import RelationshipSidebar from './components/RelationshipSidebar';
@@ -14,6 +13,7 @@ import LoginModal from './components/LoginModal';
 import AdminPanel from './components/AdminPanel';
 import KoalaEditForm from './components/KoalaEditForm';
 import BirthdayCalendar from './components/BirthdayCalendar';
+import SettingsMenu from './components/SettingsMenu';
 import koalasDataBoard1 from './data/koalas.json';
 import koalasDataBoard2 from './data/koalas-board2.json';
 import contributionData from './data/contribution.json';
@@ -326,7 +326,7 @@ function App() {
       <header className="relative overflow-hidden bg-gradient-to-r from-slate-800 via-zinc-700 to-stone-600 text-white px-3 sm:px-4 py-1.5 shadow-lg ring-1 ring-black/10">
         <div className="absolute inset-0 opacity-35 bg-[radial-gradient(circle_at_14%_20%,rgba(255,255,255,0.24),transparent_24%),radial-gradient(circle_at_86%_0%,rgba(134,239,172,0.2),transparent_28%)]" />
         <div className="container relative mx-auto flex flex-wrap justify-between items-center gap-x-3 gap-y-1.5">
-          <div className="flex flex-1 min-w-0 basis-0 items-center gap-2">
+          <div className="flex w-full min-w-0 items-center gap-2 sm:w-auto sm:flex-1 sm:basis-0">
             <img
               src="/images/koala-badge.png"
               alt=""
@@ -371,7 +371,7 @@ function App() {
               })()}
             </div>
           </div>
-          <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+          <div className="flex w-full shrink-0 items-center justify-end gap-1.5 sm:w-auto sm:gap-2">
             {isAuthenticated && (
               <div className="hidden sm:flex items-center gap-2">
                 <span className="text-xs bg-emerald-400/90 text-slate-900 px-1.5 py-0.5 rounded hidden sm:inline font-semibold">
@@ -420,7 +420,7 @@ function App() {
               onBoardChange={handleBoardChange}
               boards={availableBoards}
             />
-            <LanguageToggle />
+            <SettingsMenu />
           </div>
           {isAuthenticated && (
             <div className="w-full flex sm:hidden items-center justify-end gap-1.5">

@@ -5,9 +5,11 @@ import { calculateGeneration } from '../utils/graphHelpers';
 import { calculateAgeInYears, calculateAgeParts, formatAgeForDisplay, getAgeForDisplay } from '../utils/ageUtils';
 import { parseKoalaDateString } from '../utils/dateUtils';
 import { getPhotoUrl } from '../utils/imageUtils';
+import { useGeneration } from '../contexts/GenerationContext';
 
 export default function FilterSidebar({ koalas, onKoalaClick, isOpen, onToggle }) {
   const { language } = useLanguage();
+  const { generationMethod } = useGeneration();
   const [filters, setFilters] = useState({
     sex: 'all',
     ageRange: 'all',
@@ -25,7 +27,7 @@ export default function FilterSidebar({ koalas, onKoalaClick, isOpen, onToggle }
   const koalasWithGeneration = koalas.map(koala => {
     const ageUnknown = !!koala.deceased && !koala.dateOfDeath;
     const endDate = koala.deceased ? koala.dateOfDeath : null;
-    const generation = calculateGeneration(koala.id, koalas);
+    const generation = calculateGeneration(koala.id, koalas, generationMethod);
 
     if (ageUnknown) {
       return {
@@ -111,7 +113,7 @@ export default function FilterSidebar({ koalas, onKoalaClick, isOpen, onToggle }
     });
 
     setFilteredKoalas(result);
-  }, [filters, koalas, customAgeRange]);
+  }, [filters, koalas, customAgeRange, generationMethod]);
 
   const handleFilterChange = (filterType, value) => {
     setFilters(prev => ({ ...prev, [filterType]: value }));

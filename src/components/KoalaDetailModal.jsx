@@ -8,6 +8,7 @@ import { getPhotoUrl } from '../utils/imageUtils';
 import KoalaEditForm from './KoalaEditForm';
 import TagChips from './TagChips';
 import * as api from '../api/koalaApi';
+import { useGeneration } from '../contexts/GenerationContext';
 
 function KoalaLink({ name, koalaId, onClick }) {
   return (
@@ -39,6 +40,7 @@ function InfoRow({ label, children }) {
 
 export default function KoalaDetailModal({ koala, allKoalas, onClose, onKoalaClick, isAuthenticated, onKoalaUpdated, onKoalaDeleted, currentBoard }) {
   const { language } = useLanguage();
+  const { generationMethod } = useGeneration();
   const [editing, setEditing] = useState(false);
   const [deleting, setDeleting] = useState(false);
 
@@ -83,8 +85,8 @@ export default function KoalaDetailModal({ koala, allKoalas, onClose, onKoalaCli
   };
 
   const generation = useMemo(
-    () => calculateGeneration(koala.id, allKoalas),
-    [koala.id, allKoalas],
+    () => calculateGeneration(koala.id, allKoalas, generationMethod),
+    [koala.id, allKoalas, generationMethod],
   );
 
   const offspring = useMemo(
@@ -139,7 +141,7 @@ export default function KoalaDetailModal({ koala, allKoalas, onClose, onKoalaCli
     let deepestDescGen = 0;
     if (descendants.length > 0) {
       descendants.forEach(dId => {
-        const g = calculateGeneration(dId, allKoalas);
+        const g = calculateGeneration(dId, allKoalas, generationMethod);
         if (g > deepestDescGen) deepestDescGen = g;
       });
     }
@@ -148,7 +150,7 @@ export default function KoalaDetailModal({ koala, allKoalas, onClose, onKoalaCli
       ancestorCount: ancestors.length,
       deepestDescGen,
     };
-  }, [koala.id, allKoalas]);
+  }, [koala.id, allKoalas, generationMethod]);
 
   const timelineEvents = useMemo(() => {
     const events = [{
