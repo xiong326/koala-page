@@ -1,0 +1,4 @@
+core_codepoints=725
+complete_codepoints=27183
+fallback_shards=247
+shard_span=256

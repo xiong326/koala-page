@@ -52,20 +52,20 @@ export default function KoalaCard({ koala, onClose, allKoalas = [], onKoalaClick
     return formatAgeForDisplay(age, t, language);
   };
 
-  const sexAccent = koala.sex === 'female'
-    ? 'from-pink-500 to-rose-400'
+  const sexAccentSolid = koala.sex === 'female'
+    ? 'bg-[#c7818d]'
     : koala.sex === 'male'
-      ? 'from-blue-500 to-sky-400'
-      : 'from-gray-500 to-gray-400';
+      ? 'bg-[#4c7f97]'
+      : 'bg-[#8b8b7a]';
   const sexPillClass = koala.sex === 'female'
     ? 'bg-pink-50 text-pink-700 ring-pink-100'
     : koala.sex === 'male'
-      ? 'bg-blue-50 text-blue-700 ring-blue-100'
+      ? 'bg-[#d6e5eb] text-[#2f667f] ring-[#8fb2c2]'
       : 'bg-gray-50 text-gray-700 ring-gray-100';
 
   return (
-    <div className="w-[86vw] max-w-[260px] overflow-hidden rounded-xl border border-gray-200 bg-gray-50 shadow-2xl sm:w-full sm:max-w-md md:max-w-lg">
-      <div className={`h-1 bg-gradient-to-r ${sexAccent}`} />
+    <div className="forest-panel w-[86vw] max-w-[260px] overflow-hidden rounded-[18px] border-2 border-gray-200 bg-gray-50 shadow-2xl sm:w-full sm:max-w-md md:max-w-lg">
+      <div className={`h-1.5 ${sexAccentSolid}`} />
 
       {/* Header */}
       <div className="flex items-center justify-between border-b border-gray-200 bg-white px-2.5 py-1.5 sm:px-3 sm:py-2">
@@ -157,7 +157,7 @@ export default function KoalaCard({ koala, onClose, allKoalas = [], onKoalaClick
                 {koala.mother ? (
                   <button
                     onClick={() => onKoalaClick && onKoalaClick(koala.mother)}
-                    className="ml-1 inline-flex min-w-0 items-center gap-0.5 truncate rounded border border-slate-200 bg-slate-50 px-1 py-0.5 font-semibold text-slate-700 shadow-sm hover:border-slate-300 hover:bg-slate-100 hover:text-slate-950 focus:outline-none focus:ring-1 focus:ring-slate-400"
+                    className="forest-link-chip ml-1 inline-flex min-w-0 items-center gap-0.5 truncate border px-1 py-0.5 font-semibold focus:outline-none focus:ring-1 focus:ring-[#91aa83]"
                   >
                     <span className="truncate">{getKoalaName(koala.mother)}</span>
                     <span aria-hidden="true" className="text-[9px] leading-none text-slate-400">›</span>
@@ -171,7 +171,7 @@ export default function KoalaCard({ koala, onClose, allKoalas = [], onKoalaClick
                 {koala.father ? (
                   <button
                     onClick={() => onKoalaClick && onKoalaClick(koala.father)}
-                    className="ml-1 inline-flex min-w-0 items-center gap-0.5 truncate rounded border border-slate-200 bg-slate-50 px-1 py-0.5 font-semibold text-slate-700 shadow-sm hover:border-slate-300 hover:bg-slate-100 hover:text-slate-950 focus:outline-none focus:ring-1 focus:ring-slate-400"
+                    className="forest-link-chip ml-1 inline-flex min-w-0 items-center gap-0.5 truncate border px-1 py-0.5 font-semibold focus:outline-none focus:ring-1 focus:ring-[#91aa83]"
                   >
                     <span className="truncate">{getKoalaName(koala.father)}</span>
                     <span aria-hidden="true" className="text-[9px] leading-none text-slate-400">›</span>
@@ -187,7 +187,7 @@ export default function KoalaCard({ koala, onClose, allKoalas = [], onKoalaClick
         <button
           type="button"
           onClick={() => onOpenDetail && onOpenDetail(koala)}
-          className={`mt-1.5 flex w-full items-center justify-center gap-1.5 rounded-md bg-gradient-to-r px-2 py-1 text-[11px] font-bold text-white shadow-sm transition-opacity hover:opacity-90 sm:mt-2 sm:py-1.5 sm:text-xs ${sexAccent}`}
+          className={`mt-1.5 flex w-full items-center justify-center gap-1.5 rounded-xl border border-black/10 px-2 py-1 text-[11px] font-bold text-white shadow-sm transition-opacity hover:opacity-90 sm:mt-2 sm:py-1.5 sm:text-xs ${sexAccentSolid}`}
         >
           {t('viewFullProfile', language)}
           <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

@@ -5,9 +5,14 @@ import { calculateGeneration } from '../utils/graphHelpers';
 import { calculateAgeInYears, calculateAgeParts, formatAgeForDisplay, getAgeForDisplay } from '../utils/ageUtils';
 import { parseKoalaDateString } from '../utils/dateUtils';
 import { getPhotoUrl } from '../utils/imageUtils';
+import { useGeneration } from '../contexts/GenerationContext';
+import ForestSelect from './ForestSelect';
+import ForestSegmentedControl from './ForestSegmentedControl';
+import { EarthServiceIcon, KoalaStarIcon } from './KoalaStatusIcons';
 
 export default function FilterSidebar({ koalas, onKoalaClick, isOpen, onToggle }) {
   const { language } = useLanguage();
+  const { generationMethod } = useGeneration();
   const [filters, setFilters] = useState({
     sex: 'all',
     ageRange: 'all',
@@ -25,7 +30,7 @@ export default function FilterSidebar({ koalas, onKoalaClick, isOpen, onToggle }
   const koalasWithGeneration = koalas.map(koala => {
     const ageUnknown = !!koala.deceased && !koala.dateOfDeath;
     const endDate = koala.deceased ? koala.dateOfDeath : null;
-    const generation = calculateGeneration(koala.id, koalas);
+    const generation = calculateGeneration(koala.id, koalas, generationMethod);
 
     if (ageUnknown) {
       return {
@@ -111,7 +116,7 @@ export default function FilterSidebar({ koalas, onKoalaClick, isOpen, onToggle }
     });
 
     setFilteredKoalas(result);
-  }, [filters, koalas, customAgeRange]);
+  }, [filters, koalas, customAgeRange, generationMethod]);
 
   const handleFilterChange = (filterType, value) => {
     setFilters(prev => ({ ...prev, [filterType]: value }));
@@ -153,7 +158,7 @@ export default function FilterSidebar({ koalas, onKoalaClick, isOpen, onToggle }
       {!isOpen && (
         <button
           onClick={onToggle}
-          className="koala-bite-inset absolute top-2 left-2 z-20 px-2 py-1 sm:px-3 sm:py-1.5 text-xs sm:text-sm rounded-md bg-white/90 border border-gray-300 shadow hover:bg-white flex items-center gap-1 sm:gap-2"
+          className="forest-action koala-bite-inset absolute top-2 left-2 z-20 px-2 py-1 sm:px-3 sm:py-1.5 text-xs sm:text-sm flex items-center gap-1 sm:gap-2"
         >
           <svg
             className="w-3 h-3 sm:w-4 sm:h-4"
@@ -174,11 +179,13 @@ export default function FilterSidebar({ koalas, onKoalaClick, isOpen, onToggle }
 
       {/* Sidebar */}
       <div
-        className={`absolute top-0 left-0 h-full bg-white border-r border-gray-300 shadow-lg transition-all duration-300 z-10 flex flex-col ${
-          isOpen ? 'w-48 sm:w-56 md:w-64' : 'w-0'
+        className={`absolute top-0 left-0 h-full transition-all duration-300 z-10 flex flex-col ${
+          isOpen
+            ? 'forest-panel w-48 rounded-[18px] border bg-white shadow-lg sm:w-56 md:w-64'
+            : 'w-0 border-0 bg-transparent shadow-none'
         } overflow-hidden`}
       >
-        <div className="p-2 sm:p-3 md:p-4 border-b border-gray-200 flex justify-between items-center gap-2">
+        <div className="border-b border-gray-200 flex items-center justify-between gap-2 px-3 py-2">
           <button
             onClick={onToggle}
             className="text-gray-600 hover:text-gray-800 font-bold text-lg leading-none"
@@ -201,10 +208,10 @@ export default function FilterSidebar({ koalas, onKoalaClick, isOpen, onToggle }
           <button
             type="button"
             onClick={() => setFiltersExpanded(prev => !prev)}
-            className="w-full px-2 py-2 sm:px-3 md:px-4 flex items-center justify-between text-left hover:bg-gray-50"
+            className="w-full px-3 py-1.5 flex items-center justify-between text-left hover:bg-gray-50"
             aria-expanded={filtersExpanded}
           >
-            <span className="text-xs sm:text-sm font-semibold text-gray-700">
+            <span className="text-xs font-semibold text-gray-700">
               {t('filterConditions', language)}
             </span>
             <span className="flex items-center gap-2 text-xs text-gray-500">
@@ -220,40 +227,43 @@ export default function FilterSidebar({ koalas, onKoalaClick, isOpen, onToggle }
 
         {/* Filters */}
         {filtersExpanded && (
-          <div className="p-2 sm:p-3 md:p-4 space-y-3 sm:space-y-4 overflow-y-auto shrink-0 max-h-[48%]">
+          <div className="max-h-[39%] shrink-0 space-y-2 overflow-y-auto px-3 py-2">
             {/* Sex Filter */}
             <div>
-              <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-1 sm:mb-2">
+              <label className="mb-1 block text-xs font-semibold text-gray-700">
                 {t('filterBySex', language)}
               </label>
-              <select
+              <ForestSegmentedControl
                 value={filters.sex}
-                onChange={(e) => handleFilterChange('sex', e.target.value)}
-                className="w-full px-2 py-1.5 sm:px-3 sm:py-2 text-xs sm:text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-slate-500 focus:border-transparent"
-              >
-                <option value="all">{t('all', language)}</option>
-                <option value="male">{t('male', language)}</option>
-                <option value="female">{t('female', language)}</option>
-              </select>
+                onChange={(value) => handleFilterChange('sex', value)}
+                ariaLabel={t('filterBySex', language)}
+                className="w-full"
+                options={[
+                  { value: 'all', label: t('all', language) },
+                  { value: 'male', label: t('male', language), tone: 'male' },
+                  { value: 'female', label: t('female', language), tone: 'female' },
+                ]}
+              />
             </div>
 
             {/* Age Range Filter */}
             <div>
-              <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-1 sm:mb-2">
+              <label className="mb-1 block text-xs font-semibold text-gray-700">
                 {t('filterByAge', language)}
               </label>
-              <select
+              <ForestSelect
                 value={filters.ageRange}
-                onChange={(e) => handleFilterChange('ageRange', e.target.value)}
-                className="w-full px-2 py-1.5 sm:px-3 sm:py-2 text-xs sm:text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-slate-500 focus:border-transparent"
-              >
-                <option value="all">{t('all', language)}</option>
-                <option value="infant">{t('ageInfant', language)} (&lt; 1 {t('years', language)})</option>
-                <option value="young">{t('ageYoung', language)} (1-3 {t('years', language)})</option>
-                <option value="adult">{t('ageAdult', language)} (3-10 {t('years', language)})</option>
-                <option value="senior">{t('ageSenior', language)} (10+ {t('years', language)})</option>
-                <option value="custom">{t('ageCustom', language)}</option>
-              </select>
+                onChange={(value) => handleFilterChange('ageRange', value)}
+                ariaLabel={t('filterByAge', language)}
+                options={[
+                  { value: 'all', label: t('all', language) },
+                  { value: 'infant', label: `${t('ageInfant', language)} (< 1 ${t('years', language)})` },
+                  { value: 'young', label: `${t('ageYoung', language)} (1-3 ${t('years', language)})` },
+                  { value: 'adult', label: `${t('ageAdult', language)} (3-10 ${t('years', language)})` },
+                  { value: 'senior', label: `${t('ageSenior', language)} (10+ ${t('years', language)})` },
+                  { value: 'custom', label: t('ageCustom', language) },
+                ]}
+              />
 
               {/* Custom Age Range Inputs */}
               {filters.ageRange === 'custom' && (
@@ -288,43 +298,55 @@ export default function FilterSidebar({ koalas, onKoalaClick, isOpen, onToggle }
 
             {/* Generation Filter */}
             <div>
-              <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-1 sm:mb-2">
+              <label className="mb-1 block text-xs font-semibold text-gray-700">
                 {t('filterByGeneration', language)}
               </label>
-              <select
+              <ForestSelect
                 value={filters.generation}
-                onChange={(e) => handleFilterChange('generation', e.target.value)}
-                className="w-full px-2 py-1.5 sm:px-3 sm:py-2 text-xs sm:text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-slate-500 focus:border-transparent"
-              >
-                <option value="all">{t('all', language)}</option>
-                {generations.map(gen => (
-                  <option key={gen} value={gen}>
-                    {t('generationFormat', language, { gen })}
-                  </option>
-                ))}
-              </select>
+                onChange={(value) => handleFilterChange('generation', value)}
+                ariaLabel={t('filterByGeneration', language)}
+                options={[
+                  { value: 'all', label: t('all', language) },
+                  ...generations.map((gen) => ({
+                    value: String(gen),
+                    label: t('generationFormat', language, { gen }),
+                  })),
+                ]}
+              />
             </div>
 
             {/* Deceased Filter */}
             <div>
-              <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-1 sm:mb-2">
+              <label className="mb-1 block text-xs font-semibold text-gray-700">
                 {t('filterByDeceased', language)}
               </label>
-              <select
+              <ForestSegmentedControl
                 value={filters.deceased}
-                onChange={(e) => handleFilterChange('deceased', e.target.value)}
-                className="w-full px-2 py-1.5 sm:px-3 sm:py-2 text-xs sm:text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-slate-500 focus:border-transparent"
-              >
-                <option value="all">{t('all', language)}</option>
-                <option value="no">{t('alive', language)}</option>
-                <option value="yes">{t('deceased', language)}</option>
-              </select>
+                onChange={(value) => handleFilterChange('deceased', value)}
+                ariaLabel={t('filterByDeceased', language)}
+                className="w-full"
+                options={[
+                  { value: 'all', label: t('all', language) },
+                  {
+                    value: 'no',
+                    label: t('alive', language),
+                    tone: 'alive',
+                    icon: <EarthServiceIcon className="size-6" />,
+                  },
+                  {
+                    value: 'yes',
+                    label: t('deceased', language),
+                    tone: 'deceased',
+                    icon: <KoalaStarIcon className="size-6" />,
+                  },
+                ]}
+              />
             </div>
           </div>
         )}
 
         {/* Results Count */}
-        <div className="px-2 py-2 sm:px-3 md:px-4 border-b border-gray-200">
+        <div className="border-b border-gray-200 px-3 py-1.5">
             <p className="text-xs sm:text-sm text-gray-600">
               {t('showingCount', language, { filtered: filteredKoalas.length, total: koalas.length })}
             </p>
@@ -361,7 +383,7 @@ export default function FilterSidebar({ koalas, onKoalaClick, isOpen, onToggle }
                           {koala.name}
                         </div>
                         <div className="text-[10px] sm:text-xs text-gray-500 flex items-center gap-1 sm:gap-2 whitespace-nowrap">
-                          <span className={koala.sex === 'female' ? 'text-pink-600' : 'text-blue-600'}>
+                          <span className={koala.sex === 'female' ? 'text-[#a6536b]' : 'text-[#2f667f]'}>
                             {t(koala.sex, language)}
                           </span>
                           <span>•</span>

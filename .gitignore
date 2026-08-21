@@ -11,6 +11,10 @@ node_modules
 dist
 dist-ssr
 *.local
+scripts/__pycache__/
+
+# Legacy fixed-path font subsets (replaced by Vite-managed Unicode shards)
+public/fonts/*.woff2
 
 # Generated optimized images
 public/images/koalas/thumb

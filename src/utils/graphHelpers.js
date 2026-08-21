@@ -7,17 +7,17 @@ import { tagMatches } from './tagUtils';
 export { calculateAgeInYears } from './ageUtils';
 
 const FATHER_GROUP_COLORS = [
-  '#0ea5e9',
-  '#22c55e',
-  '#a855f7',
-  '#14b8a6',
-  '#f59e0b',
-  '#84cc16',
-  '#06b6d4',
-  '#8b5cf6',
-  '#10b981',
-  '#3b82f6',
-  '#ec4899',
+  '#4f8eaa',
+  '#559060',
+  '#81649a',
+  '#4b8f84',
+  '#b1783e',
+  '#7e914c',
+  '#4e8f98',
+  '#765a91',
+  '#468464',
+  '#537ca4',
+  '#af6077',
 ];
 
 function buildKoalaLabel(koala) {
@@ -264,32 +264,59 @@ export function searchKoalas(koalas, searchTerm) {
 }
 
 /**
- * Calculate the generation of a koala (1 = founder, 2 = second generation, etc.)
+ * Calculate the generation of a koala (1 = founder, 2 = second generation, etc.).
+ * Maternal lineage is the default; the legacy parents-max method remains selectable.
  */
-export function calculateGeneration(koalaId, koalas) {
+export const GENERATION_METHODS = Object.freeze({
+  MATERNAL: 'maternal',
+  PARENTS_MAX: 'parentsMax',
+});
+
+export function calculateGeneration(
+  koalaId,
+  koalas,
+  method = GENERATION_METHODS.MATERNAL,
+  memo = new Map(),
+  visiting = new Set(),
+) {
+  if (memo.has(koalaId)) return memo.get(koalaId);
+  if (visiting.has(koalaId)) return 1;
+
   const koala = koalas.find(k => k.id === koalaId);
   if (!koala) return 1;
 
-  // If no mother and no father, this is a founder (generation 1)
-  if (!koala.mother && !koala.father) return 1;
+  visiting.add(koalaId);
+  let generation;
 
-  let motherGeneration = 0;
-  let fatherGeneration = 0;
-  if (koala.mother) {
-    motherGeneration = calculateGeneration(koala.mother, koalas);
-  }
-  if (koala.father) {
-    fatherGeneration = calculateGeneration(koala.father, koalas);
+  if (method === GENERATION_METHODS.PARENTS_MAX) {
+    if (!koala.mother && !koala.father) {
+      generation = 1;
+    } else {
+      const motherGeneration = koala.mother
+        ? calculateGeneration(koala.mother, koalas, method, memo, visiting)
+        : 0;
+      const fatherGeneration = koala.father
+        ? calculateGeneration(koala.father, koalas, method, memo, visiting)
+        : 0;
+      generation = 1 + Math.max(motherGeneration, fatherGeneration);
+    }
+  } else {
+    generation = koala.mother
+      ? 1 + calculateGeneration(koala.mother, koalas, method, memo, visiting)
+      : 1;
   }
 
-  return 1 + Math.max(motherGeneration, fatherGeneration);
+  visiting.delete(koalaId);
+  memo.set(koalaId, generation);
+  return generation;
 }
 
 /**
  * Get upcoming birthdays within the next N days
  */
-export function getUpcomingBirthdays(koalas, daysAhead = 60) {
-  const today = new Date();
+export function getUpcomingBirthdays(koalas, daysAhead = 366) {
+  const now = new Date();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
   const upcomingBirthdays = [];
 
   koalas.forEach(koala => {
@@ -299,7 +326,7 @@ export function getUpcomingBirthdays(koalas, daysAhead = 60) {
     // Only process koalas with full birth dates (YYYY-MM-DD)
     if (!koala.birthDate || koala.birthDate.split('-').length !== 3) return;
 
-    const [year, month, day] = koala.birthDate.split('-').map(Number);
+    const [, month, day] = koala.birthDate.split('-').map(Number);
 
     // Calculate next birthday
     const currentYear = today.getFullYear();

@@ -1,10 +1,10 @@
 import { calculateAgeInYears, calculateAgeParts, getAgeForDisplay } from './ageUtils';
 import { calculateGeneration } from './graphHelpers';
 
-export function enrichKoala(koala, allKoalas) {
+export function enrichKoala(koala, allKoalas, generationMethod) {
   const ageUnknown = !!koala.deceased && !koala.dateOfDeath;
   const endDate = koala.deceased ? koala.dateOfDeath : null;
-  const generation = calculateGeneration(koala.id, allKoalas);
+  const generation = calculateGeneration(koala.id, allKoalas, generationMethod);
 
   if (ageUnknown) {
     return {
@@ -31,8 +31,8 @@ export function enrichKoala(koala, allKoalas) {
   };
 }
 
-export function enrichAll(koalas) {
-  return koalas.map(k => enrichKoala(k, koalas));
+export function enrichAll(koalas, generationMethod) {
+  return koalas.map(k => enrichKoala(k, koalas, generationMethod));
 }
 
 export function computePopulationStats(koalas) {
@@ -141,7 +141,7 @@ export function computeGenerationDistribution(koalas) {
 }
 
 export function computeFounderStats(koalas) {
-  const founders = koalas.filter(k => !k.mother && !k.father);
+  const founders = koalas.filter(k => k.generation === 1);
   const maxGen = koalas.reduce((max, k) => Math.max(max, k.generation), 0);
   return { founderCount: founders.length, deepestGeneration: maxGen };
 }
